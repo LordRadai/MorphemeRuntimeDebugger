@@ -36,7 +36,9 @@ public:
 
 	uint64_t target_character;
 	std::vector<ImU64> anim_assets;
+	std::vector<Morpheme::NodeDef*> nodes;
 	bool filter_events;
+	bool get_anim_assets;
 
 	ImU64 event_track_node;
 

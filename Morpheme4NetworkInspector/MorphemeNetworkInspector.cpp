@@ -91,8 +91,6 @@ void MorphemeNetworkInspectorGUI::GUIStyle()
 
 void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 {
-	ProcessVariables();
-
 	ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y));
 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
 	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
@@ -114,10 +112,11 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::Begin("Resources");
+	ImGui::Begin("Network");
 	{
 		ImGui::PushItemWidth(200);
 		ImGui::InputPtr("Target", &target_character, ImGuiInputTextFlags_CharsHexadecimal);
+		ImGui::PopItemWidth();
 
 		if (ImGui::Button("Player"))
 			target_character = FRPG2::getPlayerCtrl();
@@ -126,53 +125,6 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		if (ImGui::Button("Locked Target"))
 			target_character = FRPG2::getLockedTargetCharacterCtrl();
 
-		ImGui::BeginTabBar("resources tab bar");
-		if (ImGui::BeginTabItem("Assets"))
-		{
-			std::vector<Morpheme::NodeDef*> nodes;
-			if (ImGui::Button("Get Animations"))
-			{
-				anim_assets.clear();
-				nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
-
-				if (nodes.size() == 0)
-					printf_s("[INFO] There are no nodes with the specified type\n");
-
-				for (size_t i = 0; i < nodes.size(); i++)
-					anim_assets.push_back((ImU64)nodes[i]);
-			}
-			ImGui::SameLine(); ImGui::Checkbox("Filter", &filter_events);
-
-			//Assets Window
-			ImGui::BeginChild("Assets");
-			ImGui::BeginMenuBar();
-			ImGui::EndMenuBar();
-			if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
-			{
-				for (size_t i = 0; i < anim_assets.size(); i++)
-				{
-					ImGui::PushID(i);
-					char label[32];
-					sprintf(label, "Pull Tracks");
-					ImGui::Text(Morpheme::getAnimNameFromAnimNode((Morpheme::NodeDef*)anim_assets[i]));
-					ImGui::TableNextColumn();
-					if (ImGui::Button(label)) { event_track_node = anim_assets[i]; pull_tracks = true; }
-					ImGui::TableNextColumn();
-					ImGui::PopID();
-				}
-
-				ImGui::EndTable();
-			}
-			ImGui::EndChild();
-
-			ImGui::EndTabItem();
-		}
-		ImGui::EndTabBar();
-	}
-	ImGui::End();
-
-	ImGui::Begin("Network");
-	{
 		ImGui::BeginTabBar("network tab bar");
 		if (ImGui::BeginTabItem("EventTrack"))
 		{
@@ -184,6 +136,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 			ImGui::PushItemWidth(200);
 			ImGui::InputPtr("Node Pointer", &event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
+			ImGui::PopItemWidth();
 
 			if (ImGui::Button("Pull Tracks"))
 				pull_tracks = true;
@@ -399,6 +352,42 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 	}
 	ImGui::End();
 
+	ImGui::Begin("Resources");
+	{
+		ImGui::BeginTabBar("resources tab bar");
+		if (ImGui::BeginTabItem("Assets"))
+		{
+			if (ImGui::Button("Get Animations"))
+				get_anim_assets = true;
+
+			ImGui::SameLine(); ImGui::Checkbox("Filter", &filter_events);
+
+			//Assets Window
+			ImGui::BeginChild("Assets");
+			{
+				if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+				{
+					for (size_t i = 0; i < anim_assets.size(); i++)
+					{
+						ImGui::PushID(i);
+						ImGui::Text(Morpheme::getAnimNameFromAnimNode((Morpheme::NodeDef*)anim_assets[i]));
+						ImGui::TableNextColumn();
+						if (ImGui::Button("Load Tracks")) { event_track_node = anim_assets[i]; pull_tracks = true; }
+						ImGui::TableNextColumn();
+						ImGui::PopID();
+					}
+
+					ImGui::EndTable();
+				}
+			}
+			ImGui::EndChild();
+
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+	ImGui::End();
+
 	ImGui::Begin("Network Interfaces");
 	{
 		ImGui::BeginTabBar("interfaces tab bar");
@@ -413,6 +402,8 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		ImGui::EndTabBar();
 	}
 	ImGui::End();
+
+	ProcessVariables();
 }
 
 void MorphemeNetworkInspectorGUI::ProcessVariables()
@@ -427,6 +418,20 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 	if (show_demo_window)
 	{
 		ImGui::ShowDemoWindow(&show_demo_window);
+	}
+
+	if (get_anim_assets)
+	{
+		anim_assets.clear();
+		nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
+
+		if (nodes.size() == 0)
+			printf_s("[INFO] There are no nodes with the specified type\n");
+
+		for (size_t i = 0; i < nodes.size(); i++)
+			anim_assets.push_back((ImU64)nodes[i]);
+
+		get_anim_assets = false;
 	}
 }
 
