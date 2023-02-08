@@ -41,6 +41,7 @@ public:
 	bool eventTrackConfig_scaleToAnim = true;
 
 	ImU64 event_track_node;
+	const char* asset_name;
 
 	bool pull_tracks;
 	bool clear_tracks;
