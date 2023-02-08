@@ -325,12 +325,9 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					ImGui::Text(valueInfo);
 				}
 
-				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f");
-				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f");
+				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 				ImGui::PopItemWidth();
-			
-				item.mFrameStart = Math::timeToFrame(startTime, 60);
-				item.mFrameEnd = Math::timeToFrame(duration, 60);
 
 				//printf_s("Selected: %d\n", selectedEntry);
 
