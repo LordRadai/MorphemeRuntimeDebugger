@@ -374,20 +374,21 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 			static ImGuiTextFilter filter;
 			ImGui::Text("Filter:");
-			filter.Draw("##searchbar", 340.f);
+			filter.Draw("##asset searchbar", 340.f);
 			//Assets Window
 			ImGui::BeginChild("Assets");
 			{
 				for (size_t i = 0; i < nodes.size(); i++)
 				{
-					asset_name = Morpheme::getAnimNameFromAnimNode(nodes[i]);
+					const char* anim_name = Morpheme::getAnimNameFromAnimNode(nodes[i]);
 
-					if (filter.PassFilter(asset_name))
+					if (filter.PassFilter(anim_name))
 					{
 						ImGui::PushID(i);
 						//if (ImGui::Button("Load Tracks")) { event_track_node = (ImU64)nodes[i]; pull_tracks = true; }
-						if (ImGui::Selectable(asset_name))
+						if (ImGui::Selectable(anim_name))
 						{
+							asset_name = anim_name;
 							event_track_node = (ImU64)nodes[i];
 							pull_tracks = true;
 						}
