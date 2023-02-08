@@ -30,18 +30,47 @@ public:
 	void RenderGUI(const char* title);
 	void ProcessVariables();
 	void Dockspace(ImGuiID dockSpace);
+	void NetworkCleanup();
 
 	bool style_editor = false;
 	bool show_demo_window = false;
 
 	uint64_t target_character;
-	std::vector<Morpheme::NodeDef*> nodes;
-	bool filter_events = true;
-	bool get_anim_assets;
-	bool eventTrackConfig_scaleToAnim = true;
+	bool get_network;
+	Morpheme::Network* network;
 
-	ImU64 event_track_node;
-	const char* asset_name;
+	struct ControlParameters
+	{
+		std::vector<Morpheme::NodeDef*> cp_nodes;
+		std::vector<Morpheme::NodeBin*> cp_bins;
+		std::vector<const char*> cp_names;
+	};
+
+	struct GetNetworkTask
+	{
+		bool get_anim_assets;
+		bool get_control_params;
+		bool get_messages;
+	};
+
+	struct NetworkData
+	{
+		ControlParameters control_params;
+		std::vector<Morpheme::NodeDef*> nodes;
+		ImU64 event_track_node;
+		const char* asset_name;
+		const char* message_names;
+	};
+
+	struct NetworkSettings
+	{
+		bool filter_events = true;
+		bool eventTrackConfig_scaleToAnim = true;
+	};
+
+	GetNetworkTask network_tasks;
+	NetworkData network_data;
+	NetworkSettings network_config;
 
 	bool pull_tracks;
 	bool clear_tracks;

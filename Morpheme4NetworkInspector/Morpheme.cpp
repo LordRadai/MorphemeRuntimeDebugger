@@ -590,7 +590,7 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkAllNodesType(uint64_t charac
 
 	for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
 	{
-		if (node_type == NodeType::NodeAnimSyncEvents && network_inspector.filter_events)
+		if (node_type == NodeType::NodeAnimSyncEvents && network_inspector.network_config.filter_events)
 		{
 			if (network->m_networkDef->m_nodes[i]->m_nodeTypeID == node_type)
 			{
@@ -624,4 +624,44 @@ const char* Morpheme::getAnimNameFromAnimNode(NodeDef* node)
 	const char* animFileName = (const char*)(*(uint64_t*)(nsa_file - 0x8) + 0xD);
 
 	return animFileName;
+}
+
+std::vector<Morpheme::NodeDef*> Morpheme::getNetworkControlParameterNodes(uint64_t character_ctrl)
+{
+	std::vector<Morpheme::NodeDef*> cp_nodes;
+
+	for (size_t i = 0; i < network_inspector.network->m_networkDef->m_numNodes; i++)
+		if (network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterFloat || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterInt || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameter_21 || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameter_23)
+			cp_nodes.push_back(network_inspector.network->m_networkDef->m_nodes[i]);
+
+	return cp_nodes;
+}
+
+const char* Morpheme::stringTableLookup(StringTable* table, short id)
+{
+	const char* names = table->m_Data;
+	return names + table->m_Offsets[id];
+}
+
+const char* Morpheme::getNodeName(uint64_t character_ctrl, short node_id)
+{
+	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+
+	StringTable* string_table = network->m_networkDef->m_nodeIDNamesTable;
+	return stringTableLookup(string_table, node_id);
+}
+
+const char* Morpheme::getMessageName(uint64_t character_ctrl, short message_id)
+{
+	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+
+	StringTable* string_table = network->m_networkDef->m_requestIDNamesTable;
+	return stringTableLookup(string_table, message_id);
+}
+
+Morpheme::NodeBin* Morpheme::getNodeBin(uint64_t character_ctrl, short node_id)
+{
+	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+
+	return &network->m_nodeBins[node_id];
 }

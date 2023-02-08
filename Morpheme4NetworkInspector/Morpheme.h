@@ -13,6 +13,8 @@ public:
         StateMachine_Node = 10,
         ControlParameterFloat = 20,
         ControlParameterInt = 24,
+        ControlParameter_21 = 21,
+        ControlParameter_23 = 23,
         NodeAnimSyncEvents = 104,
         Blend2SyncEvents = 107,
         Blend2Additive = 108,
@@ -39,6 +41,12 @@ public:
 
     enum TaskID
     {};
+
+    enum ControlParam_ValueType
+    {
+        Int = 2,
+        Float = 3
+    };
 
     struct sSmStateList {
         uint32_t m_numStateMachinesNodes;
@@ -426,6 +434,15 @@ public:
         byte field262_0x147;
     };
 
+    struct sControlParamContainerValue
+    {
+        uint64_t m_allocator;
+        short field8_0x2;
+        short m_dataType;
+        int field10_0xC;
+        DWORD m_value;
+    };
+
     struct sControlParamContainer {
         byte field0_0x0;
         byte field1_0x1;
@@ -435,7 +452,7 @@ public:
         byte field5_0x5;
         byte field6_0x6;
         byte field7_0x7;
-        struct sControlParamContainerValue* m_controlParamContainer;
+        sControlParamContainerValue* m_controlParamData;
         byte field9_0x10;
         byte field10_0x11;
         byte field11_0x12;
@@ -728,4 +745,14 @@ public:
     static std::vector<NodeDef*> getNetworkAllNodesType(uint64_t character_ctrl, NodeType node_type);
 
     static const char* getAnimNameFromAnimNode(NodeDef* node);
+
+    static std::vector<NodeDef*> getNetworkControlParameterNodes(uint64_t character_ctrl);
+
+    static const char* stringTableLookup(StringTable* table, short id);
+
+    static const char* getNodeName(uint64_t character_ctrl, short node_id);
+
+    static const char* getMessageName(uint64_t character_ctrl, short message_id);
+
+    static NodeBin* getNodeBin(uint64_t character_ctrl, short node_id);
 };
