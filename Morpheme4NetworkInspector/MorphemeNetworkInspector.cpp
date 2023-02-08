@@ -144,7 +144,6 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			float trackLenght;
 			float animLenght;
 			float multiplier = 1;
-			const char* animFileName = "";
 
 			ImGui::PushItemWidth(200);
 			ImGui::InputPtr("Node Pointer", &event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
@@ -183,7 +182,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 							event_track_editor.mFrameMax = Math::timeToFrame(animLenght, 60);
 						}
 
-						animFileName = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
+						asset_name = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
 
 						uint32_t event_track_count = node_data->m_eventTrackData->m_eventTracks[0].m_trackCount + node_data->m_eventTrackData->m_eventTracks[1].m_trackCount + node_data->m_eventTrackData->m_eventTracks[2].m_trackCount;
 
@@ -294,7 +293,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				currentFrame = event_track_editor.mFrameMin;
 
 			if (event_track_editor.GetItemCount())
-				ImGui::Text(animFileName);
+				ImGui::Text(asset_name);
 
 			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
 
@@ -371,25 +370,31 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			if (ImGui::Button("Get Animations"))
 				get_anim_assets = true;
 
-			ImGui::SameLine(); ImGui::Checkbox("Filter", &filter_events);
+			ImGui::SameLine(); ImGui::Checkbox("Only Anims with Events", &filter_events);
 
+			static ImGuiTextFilter filter;
+			ImGui::Text("Filter:");
+			filter.Draw("##searchbar", 340.f);
 			//Assets Window
 			ImGui::BeginChild("Assets");
 			{
-				if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+				for (size_t i = 0; i < nodes.size(); i++)
 				{
-					for (size_t i = 0; i < nodes.size(); i++)
+					asset_name = Morpheme::getAnimNameFromAnimNode(nodes[i]);
+
+					if (filter.PassFilter(asset_name))
 					{
 						ImGui::PushID(i);
-						ImGui::TableNextColumn();
-						if (ImGui::Button("Load Tracks")) { event_track_node = (ImU64)nodes[i]; pull_tracks = true; }
-						ImGui::TableNextColumn();
-						ImGui::Text(Morpheme::getAnimNameFromAnimNode(nodes[i]));
+						//if (ImGui::Button("Load Tracks")) { event_track_node = (ImU64)nodes[i]; pull_tracks = true; }
+						if (ImGui::Selectable(asset_name))
+						{
+							event_track_node = (ImU64)nodes[i];
+							pull_tracks = true;
+						}
 						ImGui::PopID();
 					}
-
-					ImGui::EndTable();
 				}
+
 			}
 			ImGui::EndChild();
 
