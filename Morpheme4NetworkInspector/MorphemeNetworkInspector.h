@@ -35,22 +35,14 @@ public:
 	bool show_demo_window = false;
 
 	uint64_t target_character;
-	std::vector<ImU64> anim_assets;
 	std::vector<Morpheme::NodeDef*> nodes;
-	bool filter_events;
+	bool filter_events = true;
 	bool get_anim_assets;
+	bool eventTrackConfig_scaleToAnim = true;
 
 	ImU64 event_track_node;
 
 	bool pull_tracks;
 	bool clear_tracks;
 	bool save_tracks;
-
-	float animLenght;
-	float trackLenght;
-	float multiplier;
-	const char* animFileName = "";
-
-	MorphemeEventTrackList track_list;
-	EventTrackEditor event_track_editor;
 };

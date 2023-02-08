@@ -1,5 +1,6 @@
 #include "includes.h"
 #include "common.h"
+#include "Timeline.h"
 
 HINSTANCE hinst_dll = 0;
 std::thread begin_thread;
@@ -28,6 +29,8 @@ void CleanupRenderTarget();
 LRESULT WINAPI WndProc_Alt(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 MorphemeNetworkInspectorGUI network_inspector;
+MorphemeEventTrackList track_list;
+EventTrackEditor event_track_editor;
 
 void initImGui(HWND hwnd)
 {

@@ -101,6 +101,13 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 	if (ImGui::BeginMenuBar())
 	{
+		if (ImGui::BeginMenu("Options"))
+		{
+			if (ImGui::MenuItem("Scale Track Lenght", NULL, &eventTrackConfig_scaleToAnim)) { eventTrackConfig_scaleToAnim != eventTrackConfig_scaleToAnim; }
+
+			ImGui::EndMenu();
+		}
+
 		if (ImGui::BeginMenu("Edit"))
 		{
 			if (ImGui::MenuItem("Style Editor", NULL, &style_editor)) { style_editor != style_editor; }
@@ -134,6 +141,11 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			static bool expanded = true;
 			static int currentFrame = 0;
 
+			float trackLenght;
+			float animLenght;
+			float multiplier = 1;
+			const char* animFileName = "";
+
 			ImGui::PushItemWidth(200);
 			ImGui::InputPtr("Node Pointer", &event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
 			ImGui::PopItemWidth();
@@ -158,26 +170,25 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					{
 						uint64_t nsaFile = node_data->m_animData;
 
-						trackLenght = *(float*)(nsaFile + 0x84);
-						animLenght = *(float*)(nsaFile + 0x88);
+						float trackLenght = *(float*)(nsaFile + 0x84);
+						float animLenght = *(float*)(nsaFile + 0x88);
 
-						multiplier = 1;
+						float multiplier = 1;
 						event_track_editor.mFrameMin = 0;
 						event_track_editor.mFrameMax = Math::timeToFrame(trackLenght, 60);
 
-						/*if (morpheme_scaleTracks)
+						if (eventTrackConfig_scaleToAnim)
 						{
 							multiplier = animLenght / trackLenght;
 							event_track_editor.mFrameMax = Math::timeToFrame(animLenght, 60);
-						}*/
+						}
 
 						animFileName = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
-						printf_s("%s\n", animFileName);
 
 						uint32_t event_track_count = node_data->m_eventTrackData->m_eventTracks[0].m_trackCount + node_data->m_eventTrackData->m_eventTracks[1].m_trackCount + node_data->m_eventTrackData->m_eventTracks[2].m_trackCount;
 
 						if (event_track_count == 0)
-							printf_s("Animation does not have any EventTrack associated with it\n");
+							MessageBoxA(NULL, "Animation does not have any EventTrack associated with it", "Morpheme Network Inspector", MB_ICONINFORMATION);
 
 						if (event_track_count > 0 && Morpheme::LoadEventTracks(node_data->m_eventTrackData, &track_list) != 0)
 						{
@@ -252,7 +263,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					}
 				}
 				else
-					printf_s("[ERROR, MorphemeSystem] Provided node is not of the right type (NodeType: %d)\n", anim_sync_node->m_nodeTypeID);
+					MessageBoxA(NULL, "Provided node is not of the right type\n", "Morpheme Network Inspector", MB_ICONERROR);
 			}
 
 			ImGui::SameLine();
@@ -367,13 +378,13 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			{
 				if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
 				{
-					for (size_t i = 0; i < anim_assets.size(); i++)
+					for (size_t i = 0; i < nodes.size(); i++)
 					{
 						ImGui::PushID(i);
-						ImGui::Text(Morpheme::getAnimNameFromAnimNode((Morpheme::NodeDef*)anim_assets[i]));
 						ImGui::TableNextColumn();
-						if (ImGui::Button("Load Tracks")) { event_track_node = anim_assets[i]; pull_tracks = true; }
+						if (ImGui::Button("Load Tracks")) { event_track_node = (ImU64)nodes[i]; pull_tracks = true; }
 						ImGui::TableNextColumn();
+						ImGui::Text(Morpheme::getAnimNameFromAnimNode(nodes[i]));
 						ImGui::PopID();
 					}
 
@@ -422,14 +433,11 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 
 	if (get_anim_assets)
 	{
-		anim_assets.clear();
+		nodes.clear();
 		nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
 
 		if (nodes.size() == 0)
-			printf_s("[INFO] There are no nodes with the specified type\n");
-
-		for (size_t i = 0; i < nodes.size(); i++)
-			anim_assets.push_back((ImU64)nodes[i]);
+			MessageBoxA(NULL, "There are no nodes of the specified type\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
 
 		get_anim_assets = false;
 	}
