@@ -289,8 +289,8 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				Morpheme::SaveEventTracks(&track_list);
 			}
 
-			if (currentFrame < event_track_editor.mFrameMin)
-				currentFrame = event_track_editor.mFrameMin;
+			/*if (currentFrame < event_track_editor.mFrameMin)
+				currentFrame = event_track_editor.mFrameMin;*/
 
 			if (event_track_editor.GetItemCount())
 				ImGui::Text(asset_name);
@@ -328,7 +328,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f");
 				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f");
 				ImGui::PopItemWidth();
-
+			
 				item.mFrameStart = Math::timeToFrame(startTime, 60);
 				item.mFrameEnd = Math::timeToFrame(duration, 60);
 

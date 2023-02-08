@@ -28,6 +28,7 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc_Alt(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+bool create_network_inspector = false;
 MorphemeNetworkInspectorGUI network_inspector;
 MorphemeEventTrackList track_list;
 EventTrackEditor event_track_editor;
@@ -77,6 +78,9 @@ bool Begin(uint64_t qModuleHandle) {
         return false;
     }
 
+//#ifdef _DEBUG
+    //MessageBoxA(NULL, "Software running in Debug mode", "Morpheme Network Inspector", MB_ICONINFORMATION);
+
     AllocConsole();
 
     FILE* fDummy;
@@ -87,83 +91,102 @@ bool Begin(uint64_t qModuleHandle) {
     std::clog.clear();
     std::cerr.clear();
     std::cin.clear();
+//#endif
 
     return true;
 };
 
 bool MainLoop(uint64_t qModuleHandle)
 {
-    //ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc_Alt, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
-    ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Morpheme Network Inspector", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
-
-    // Initialize Direct3D
-    if (!CreateDeviceD3D(hwnd))
+    do
     {
-        CleanupDeviceD3D();
-        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-        return 1;
-    }
-
-    // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(hwnd);
-
-    initImGui(hwnd);
-
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    bool done = false;
-    while (!done)
-    {
-        if (ModuleAddr)
+        if ((GetAsyncKeyState(VK_INSERT) & 1) && !create_network_inspector)
+            create_network_inspector = true;
+        
+        if (create_network_inspector)
         {
-            GameManagerImp = *(uint64_t*)((uint64_t)ModuleAddr + 0x16148F0);
-            BaseB = *(uint64_t*)((uint64_t)ModuleAddr + 0x1616CF8);
-            KatanaMainApp = *(uint64_t*)((uint64_t)ModuleAddr + 0x16751F8);
-        }
+            create_network_inspector = false;
 
-        MSG msg;
-        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
-        {
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-            if (msg.message == WM_QUIT)
-                done = true;
-        }
-        if (done)
-            break;
+            //ImGui_ImplWin32_EnableDpiAwareness();
+            WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc_Alt, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+            ::RegisterClassExW(&wc);
+            HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Morpheme Network Inspector", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
-        // Start the Dear ImGui frame
-        ImGui_ImplDX11_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
+            // Initialize Direct3D
+            if (!CreateDeviceD3D(hwnd))
+            {
+                CleanupDeviceD3D();
+                ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+                return 1;
+            }
 
-        network_inspector.RenderGUI("Morpheme Network Inspector");
+            // Show the window
+            ::ShowWindow(hwnd, SW_SHOWDEFAULT);
+            ::UpdateWindow(hwnd);
+            SetForegroundWindow(hwnd);
 
-        ImGui::Render();
-        const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-        pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
-        pContext->ClearRenderTargetView(mainRenderTargetView, clear_color_with_alpha);
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+            initImGui(hwnd);
 
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-        }
+            ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-        g_pSwapChain->Present(1, 0); // Present with vsync
-    }
+            bool done = false;
+            while (!done)
+            {
+                if ((GetAsyncKeyState(VK_INSERT) & 1))
+                {
+                    SetForegroundWindow(hwnd);
+                    MessageBoxA(hwnd, "Morpheme Network Inspector already running", "Network Inspector", MB_ICONINFORMATION);
+                }
 
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+                if (ModuleAddr)
+                {
+                    GameManagerImp = *(uint64_t*)((uint64_t)ModuleAddr + 0x16148F0);
+                    BaseB = *(uint64_t*)((uint64_t)ModuleAddr + 0x1616CF8);
+                    KatanaMainApp = *(uint64_t*)((uint64_t)ModuleAddr + 0x16751F8);
+                }
 
-    CleanupDeviceD3D();
-    ::DestroyWindow(hwnd);
-    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+                MSG msg;
+                while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+                {
+                    ::TranslateMessage(&msg);
+                    ::DispatchMessage(&msg);
+                    if (msg.message == WM_QUIT)
+                        done = true;
+                }
+                if (done)
+                    break;
+
+                // Start the Dear ImGui frame
+                ImGui_ImplDX11_NewFrame();
+                ImGui_ImplWin32_NewFrame();
+                ImGui::NewFrame();
+
+                network_inspector.RenderGUI("Morpheme Network Inspector");
+
+                ImGui::Render();
+                const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+                pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
+                pContext->ClearRenderTargetView(mainRenderTargetView, clear_color_with_alpha);
+                ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+                if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+                {
+                    ImGui::UpdatePlatformWindows();
+                    ImGui::RenderPlatformWindowsDefault();
+                }
+
+                g_pSwapChain->Present(1, 0); // Present with vsync
+            }
+
+            ImGui_ImplDX11_Shutdown();
+            ImGui_ImplWin32_Shutdown();
+            ImGui::DestroyContext();
+
+            CleanupDeviceD3D();
+            ::DestroyWindow(hwnd);
+            ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+        }       
+    } while (true);
 
     return true;
 }
@@ -180,6 +203,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
         };
         case (DLL_PROCESS_DETACH): {
             begin_thread.detach();
+            main_loop.detach();
             FreeLibrary(hinst_dll);
             break;
         };
