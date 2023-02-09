@@ -468,9 +468,9 @@ public:
     };
 
     struct sMessageDef {
-        uint32_t message_id;
-        uint32_t field1_0x4;
-        uint32_t node_count;
+        int message_id;
+        int field1_0x4;
+        int node_count;
         int field3_0xc;
         short* node_array;
     };
@@ -704,6 +704,26 @@ public:
         uint32_t field77_0x12c;
     };
 
+    struct sMorphemeMessage
+    {
+        sMorphemeMessage(uint32_t msg_id)
+        {
+            field0_0x0 = 0;
+            field1_0x4 = 0;
+            field2_0x8 = 0;
+            message_id = msg_id;
+            field5_0x10 = 10;
+            field6_0x14 = 1;
+        }
+
+        int field0_0x0;
+        int field1_0x4;
+        int field2_0x8;
+        int message_id;
+        int field5_0x10;
+        int field6_0x14;
+    };
+
 	static void loadControlParameters();
 
     static int LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackList* track_list);
@@ -755,4 +775,8 @@ public:
     static const char* getMessageName(uint64_t character_ctrl, short message_id);
 
     static NodeBin* getNodeBin(uint64_t character_ctrl, short node_id);
+
+    static std::vector<sMessageDef*> getMessageDefs(uint64_t character_ctrl);
+
+    static bool isNodeActive(Network* network, short node_id);
 };

@@ -46,6 +46,20 @@ public:
 		std::vector<const char*> cp_names;
 	};
 
+	struct AnimEventTrack
+	{
+		std::vector<Morpheme::NodeDef*> anim_nodes;
+		ImU64 event_track_node;
+		const char* asset_name;
+	};
+
+	struct Messages
+	{
+		std::vector<int> message_ids;
+		std::vector<const char*> message_names;
+		std::vector<Morpheme::sMessageDef*> message_defs;
+	};
+
 	struct GetNetworkTask
 	{
 		bool get_anim_assets;
@@ -56,10 +70,8 @@ public:
 	struct NetworkData
 	{
 		ControlParameters control_params;
-		std::vector<Morpheme::NodeDef*> nodes;
-		ImU64 event_track_node;
-		const char* asset_name;
-		const char* message_names;
+		AnimEventTrack anim_events;
+		Messages messages;
 	};
 
 	struct NetworkSettings

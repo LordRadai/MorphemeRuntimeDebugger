@@ -10,9 +10,12 @@ int Math::timeToFrame(float time, int frameRate)
 	return (time * frameRate);
 }
 
-/*
 bool Math::getBit(void* var, byte n)
 {
-	return ((*var & pow(2, n)) >> n);
+	int power = pow(2, n);
+	if (((int)var & power) >> n)
+	{
+
+	}
+	return false;
 }
-*/

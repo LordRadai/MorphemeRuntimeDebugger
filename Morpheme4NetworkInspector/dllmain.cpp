@@ -15,6 +15,8 @@ uint64_t GameManagerImp;
 uint64_t BaseB;
 uint64_t KatanaMainApp;
 
+oSendMessage sendMessage;
+
 HWND window = NULL;
 
 static ID3D11Device* pDevice = NULL;
@@ -106,6 +108,7 @@ bool MainLoop(uint64_t qModuleHandle)
         if (create_network_inspector)
         {
             create_network_inspector = false;
+            FRPG2::assignFunctionAddr();
 
             //ImGui_ImplWin32_EnableDpiAwareness();
             WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc_Alt, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };

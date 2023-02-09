@@ -153,20 +153,20 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			float multiplier = 1;
 
 			ImGui::PushItemWidth(200);
-			ImGui::InputPtr("Node Pointer", &network_data.event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
+			ImGui::InputPtr("Node Pointer", &network_data.anim_events.event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
 			ImGui::PopItemWidth();
 
 			if (ImGui::Button("Pull Tracks"))
 				pull_tracks = true;
 
-			if (pull_tracks && network_data.event_track_node)
+			if (pull_tracks && network_data.anim_events.event_track_node)
 			{
 				pull_tracks = false;
 
 				selectedEntry = -1;
 				event_track_editor.Clear();
 
-				Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.event_track_node);
+				Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.anim_events.event_track_node);
 
 				if (anim_sync_node->m_nodeTypeID == Morpheme::NodeType::NodeAnimSyncEvents)
 				{
@@ -189,7 +189,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 							event_track_editor.mFrameMax = Math::timeToFrame(animLenght, 60);
 						}
 
-						network_data.asset_name = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
+						network_data.anim_events.asset_name = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
 
 						uint32_t event_track_count = node_data->m_eventTrackData->m_eventTracks[0].m_trackCount + node_data->m_eventTrackData->m_eventTracks[1].m_trackCount + node_data->m_eventTrackData->m_eventTracks[2].m_trackCount;
 
@@ -300,7 +300,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				currentFrame = event_track_editor.mFrameMin;*/
 
 			if (event_track_editor.GetItemCount())
-				ImGui::Text(network_data.asset_name);
+				ImGui::Text(network_data.anim_events.asset_name);
 
 			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
 
@@ -379,9 +379,9 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			//Assets Window
 			ImGui::BeginChild("Assets");
 			{
-				for (size_t i = 0; i < network_data.nodes.size(); i++)
+				for (size_t i = 0; i < network_data.anim_events.anim_nodes.size(); i++)
 				{
-					const char* anim_name = Morpheme::getAnimNameFromAnimNode(network_data.nodes[i]);
+					const char* anim_name = Morpheme::getAnimNameFromAnimNode(network_data.anim_events.anim_nodes[i]);
 
 					if (filter.PassFilter(anim_name))
 					{
@@ -389,8 +389,8 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 						//if (ImGui::Button("Load Tracks")) { event_track_node = (ImU64)nodes[i]; pull_tracks = true; }
 						if (ImGui::Selectable(anim_name))
 						{
-							network_data.asset_name = anim_name;
-							network_data.event_track_node = (ImU64)network_data.nodes[i];
+							network_data.anim_events.asset_name = anim_name;
+							network_data.anim_events.event_track_node = (ImU64)network_data.anim_events.anim_nodes[i];
 							pull_tracks = true;
 						}
 						ImGui::PopID();
@@ -415,6 +415,33 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 	ImGui::Begin("Controls");
 	{
 		ImGui::BeginTabBar("controls tab");
+		if (ImGui::BeginTabItem("Parameters"))
+		{
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Messages"))
+		{
+			for (size_t i = 0; i < network_data.messages.message_defs.size(); i++)
+			{
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader(network_data.messages.message_names[i]))
+				{
+					ImGui::InputInt("Message ID", &network_data.messages.message_defs[i]->message_id, 0, 0, ImGuiInputTextFlags_ReadOnly);
+					ImGui::InputInt("Node Count", &network_data.messages.message_defs[i]->node_count, 0, 0, ImGuiInputTextFlags_ReadOnly);
+
+					if (network_data.messages.message_defs[i]->node_count > 0 && ImGui::TreeNode("Nodes"))
+					{
+						for (size_t j = 0; j < network_data.messages.message_defs[i]->node_count; j++)
+							ImGui::InputShort("Node ID", &network_data.messages.message_defs[i]->node_array[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+						ImGui::TreePop();
+					}
+				}			
+				ImGui::PopID();
+			}
+			ImGui::EndTabItem();
+		}
+
 		if (ImGui::BeginTabItem("Preview"))
 		{
 			static const ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
@@ -439,7 +466,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					{
 					case 2:
 						ImGui::PushID(slider_id);
-						ImGui::SliderInt("", (int*)value, 0, 10);
+						ImGui::SliderInt("", (int*)value, -10, 10);
 						ImGui::PopID();
 
 						ImGui::SameLine();
@@ -456,7 +483,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 						ImGui::SameLine();
 
 						ImGui::PushID(input_id);
-						ImGui::InputFloat("", (float*)value, 0, 0, "%.3f");
+						ImGui::InputFloat("", (float*)value, 0, 0);
 						ImGui::PopID();
 						break;
 					default:
@@ -468,6 +495,26 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			ImGui::End();
 
 			ImGui::Begin("Messages");
+			{
+				for (size_t i = 0; i < network_data.messages.message_names.size(); i++)
+				{
+					ImVec4 text_col = ImVec4(1, 1, 1, 1);
+
+					for (size_t j = 0; j < network_data.messages.message_defs[i]->node_count; j++)
+						if (Morpheme::isNodeActive(network, network_data.messages.message_defs[i]->node_array[j]))
+							text_col = ImVec4(1.0f, 0.7f, 0.0f, 1.0f);
+
+					ImGui::PushStyleColor(ImGuiCol_Text, text_col);
+					if (ImGui::Button(network_data.messages.message_names[i], ImVec2(ImGui::GetWindowWidth(), 0.0f)))
+					{
+						Morpheme::sMorphemeMessage message_data = Morpheme::sMorphemeMessage::sMorphemeMessage(network_data.messages.message_ids[i]);
+
+						sendMessage(network, message_data);
+					}
+
+					ImGui::PopStyleColor(1);
+				}
+			}
 			ImGui::End();
 
 			ImGui::EndTabItem();
@@ -504,6 +551,7 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 		get_network = false;
 		network_tasks.get_anim_assets = true;
 		network_tasks.get_control_params = true;
+		network_tasks.get_messages = true;
 
 		network = Morpheme::getNetwork(target_character);
 		if (network == NULL)
@@ -512,11 +560,11 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 
 	if (network_tasks.get_anim_assets && network)
 	{
-		network_data.nodes.clear();
-		network_data.nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
+		network_data.anim_events.anim_nodes.clear();
+		network_data.anim_events.anim_nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
 
-		if (network_data.nodes.size() == 0)
-			MessageBoxA(NULL, "There are no nodes of the specified type\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
+		if (network_data.anim_events.anim_nodes.size() == 0)
+			MessageBoxA(NULL, "There are no of the specified type\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
 
 		network_tasks.get_anim_assets = false;
 	}
@@ -541,6 +589,18 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 	if (network_tasks.get_messages && network)
 	{
 		network_tasks.get_messages = false;
+
+		network_data.messages.message_ids.clear();
+		network_data.messages.message_names.clear();
+		network_data.messages.message_defs.clear();
+
+		network_data.messages.message_defs = Morpheme::getMessageDefs(target_character);
+
+		for (size_t i = 0; i < network->m_networkDef->m_requestIDNamesTable->m_NumEntrys; i++)
+		{
+			network_data.messages.message_ids.push_back(network->m_networkDef->m_requestIDNamesTable->m_IDs[i]);
+			network_data.messages.message_names.push_back(Morpheme::getMessageName(target_character, network->m_networkDef->m_requestIDNamesTable->m_IDs[i]));
+		}
 	}
 }
 
@@ -550,9 +610,13 @@ void MorphemeNetworkInspectorGUI::Dockspace(ImGuiID dockSpace)
 
 void MorphemeNetworkInspectorGUI::NetworkCleanup()
 {
-	network_data.nodes.clear();
+	network_data.anim_events.anim_nodes.clear();
 
 	network_data.control_params.cp_nodes.clear();
 	network_data.control_params.cp_bins.clear();
 	network_data.control_params.cp_names.clear();
+
+	network_data.messages.message_ids.clear();
+	network_data.messages.message_names.clear();
+	network_data.messages.message_defs.clear();
 }

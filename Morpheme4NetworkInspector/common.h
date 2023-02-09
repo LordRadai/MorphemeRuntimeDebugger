@@ -2,6 +2,7 @@
 #include "MorphemeNetworkInspector.h"
 #include "Timeline.h"
 
+extern HMODULE ModuleAddr;
 extern uint64_t GameManagerImp;
 extern uint64_t BaseB;
 extern uint64_t KatanaMainApp;

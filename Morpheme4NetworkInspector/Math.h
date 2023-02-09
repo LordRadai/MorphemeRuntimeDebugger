@@ -1,4 +1,6 @@
 #pragma once
+#include <math.h>
+#include <Windows.h>
 
 namespace Math
 {
@@ -6,5 +8,5 @@ namespace Math
 
 	int timeToFrame(float time, int frameRate);
 
-	//bool getBit(void* var, byte n);
+	bool getBit(void* var, byte n);
 }

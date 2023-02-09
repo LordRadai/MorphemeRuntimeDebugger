@@ -665,3 +665,22 @@ Morpheme::NodeBin* Morpheme::getNodeBin(uint64_t character_ctrl, short node_id)
 
 	return &network->m_nodeBins[node_id];
 }
+
+std::vector<Morpheme::sMessageDef*> Morpheme::getMessageDefs(uint64_t character_ctrl)
+{
+	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+	std::vector<sMessageDef*> message_defs;
+
+	for (size_t i = 0; i < network->m_networkDef->message_count; i++)
+		message_defs.push_back(network->m_networkDef->message_def[i]);
+
+	return message_defs;
+}
+
+bool Morpheme::isNodeActive(Network* network, short node_id)
+{
+	if ((network->m_nodeConnections[node_id]->flags_1 & 2) >> 1)
+		return true;
+
+	return false;
+}
