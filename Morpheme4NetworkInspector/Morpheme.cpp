@@ -631,7 +631,7 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkControlParameterNodes(uint64
 	std::vector<Morpheme::NodeDef*> cp_nodes;
 
 	for (size_t i = 0; i < network_inspector.network->m_networkDef->m_numNodes; i++)
-		if (network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterFloat || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterInt || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameter_21 || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameter_23)
+		if (network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterFloat || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterInt || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterVector3 || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterBool)
 			cp_nodes.push_back(network_inspector.network->m_networkDef->m_nodes[i]);
 
 	return cp_nodes;

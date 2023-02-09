@@ -13,8 +13,8 @@ public:
         StateMachine_Node = 10,
         ControlParameterFloat = 20,
         ControlParameterInt = 24,
-        ControlParameter_21 = 21,
-        ControlParameter_23 = 23,
+        ControlParameterVector3 = 21,
+        ControlParameterBool = 23,
         NodeAnimSyncEvents = 104,
         Blend2SyncEvents = 107,
         Blend2Additive = 108,
@@ -45,7 +45,8 @@ public:
     enum ControlParam_ValueType
     {
         Int = 2,
-        Float = 3
+        Float = 3,
+        Vector3 = 4,
     };
 
     struct sSmStateList {
@@ -440,7 +441,7 @@ public:
         short field8_0x2;
         short m_dataType;
         int field10_0xC;
-        DWORD m_value;
+        DWORD m_value[4];
     };
 
     struct sControlParamContainer {

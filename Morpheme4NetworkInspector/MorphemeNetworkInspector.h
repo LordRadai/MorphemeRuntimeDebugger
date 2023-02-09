@@ -62,6 +62,7 @@ public:
 
 	struct GetNetworkTask
 	{
+		bool get_nodes;
 		bool get_anim_assets;
 		bool get_control_params;
 		bool get_messages;
@@ -72,6 +73,8 @@ public:
 		ControlParameters control_params;
 		AnimEventTrack anim_events;
 		Messages messages;
+		std::vector<const char*> node_names;
+		std::vector<Morpheme::NodeDef*> nodes;
 	};
 
 	struct NetworkSettings

@@ -137,6 +137,10 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		if (ImGui::Button("Get Network"))
 			get_network = true;
 
+		ImGui::SameLine();
+		if (ImGui::Button("Clear Network"))
+			NetworkCleanup();
+
 		ImGui::Separator();
 
 		ImGui::BeginTabBar("network tab bar");
@@ -454,40 +458,42 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				for (size_t i = 0; i < network_data.control_params.cp_nodes.size(); i++)
 				{
 					char input_id[255];
-					char slider_id[255];
+					//char slider_id[255];
 
 					sprintf_s(input_id, "input %d", i);
-					sprintf_s(slider_id, "slider %d", i);
+					//sprintf_s(slider_id, "slider %d", i);
 
 					ImGui::Text(network_data.control_params.cp_names[i]);
-					DWORD* value = &network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value;
+					DWORD* value = network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value;
 
 					switch (network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_dataType)
 					{
-					case 2:
-						ImGui::PushID(slider_id);
-						ImGui::SliderInt("", (int*)value, -10, 10);
-						ImGui::PopID();
-
-						ImGui::SameLine();
-
+					case 0:
 						ImGui::PushID(input_id);
-						ImGui::InputInt("", (int*)value, 0, 0);
+						ImGui::InputByte("", (char*)(value), 0, 0, ImGuiInputTextFlags_None);
+						ImGui::PopID();
+						break;
+					case 2:
+						ImGui::PushID(input_id);
+						ImGui::InputInt("", (int*)(value), 0, 0);
 						ImGui::PopID();
 						break;
 					case 3:
-						ImGui::PushID(slider_id);
-						ImGui::SliderFloat("", (float*)value, -360, 360);
-						ImGui::PopID();
-
-						ImGui::SameLine();
-
 						ImGui::PushID(input_id);
-						ImGui::InputFloat("", (float*)value, 0, 0);
+						ImGui::InputFloat("", (float*)(value), 0, 0);
+						ImGui::PopID();
+						break;
+					case 4:
+						ImGui::PushID(input_id);
+						ImGui::InputFloat("X", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[0], 0, 0);
+						ImGui::InputFloat("Y", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[1], 0, 0);
+						ImGui::InputFloat("Z", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[2], 0, 0);
 						ImGui::PopID();
 						break;
 					default:
-						ImGui::Button("Unknown Data Type");
+						char buf[50];
+						sprintf_s(buf, "Unknown CP type %d (%d)\n", network_data.control_params.cp_nodes[i]->m_nodeTypeID, network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_dataType);
+						ImGui::Text(buf);
 						break;
 					}
 				}
@@ -549,6 +555,7 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 		NetworkCleanup();
 
 		get_network = false;
+		network_tasks.get_nodes = true;
 		network_tasks.get_anim_assets = true;
 		network_tasks.get_control_params = true;
 		network_tasks.get_messages = true;
@@ -558,48 +565,63 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 			MessageBoxA(NULL, "Network not found\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
 	}
 
-	if (network_tasks.get_anim_assets && network)
+	if (network)
 	{
-		network_data.anim_events.anim_nodes.clear();
-		network_data.anim_events.anim_nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
-
-		if (network_data.anim_events.anim_nodes.size() == 0)
-			MessageBoxA(NULL, "There are no of the specified type\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
-
-		network_tasks.get_anim_assets = false;
-	}
-
-	if (network_tasks.get_control_params && network)
-	{
-		network_tasks.get_control_params = false;
-
-		network_data.control_params.cp_nodes.clear();
-		network_data.control_params.cp_bins.clear();
-		network_data.control_params.cp_names.clear();
-
-		network_data.control_params.cp_nodes = Morpheme::getNetworkControlParameterNodes(target_character);
-
-		for (size_t i = 0; i < network_data.control_params.cp_nodes.size(); i++)
+		if (network_tasks.get_nodes)
 		{
-			network_data.control_params.cp_bins.push_back(Morpheme::getNodeBin(target_character, network_data.control_params.cp_nodes[i]->m_nodeID));
-			network_data.control_params.cp_names.push_back(Morpheme::getNodeName(target_character, network_data.control_params.cp_nodes[i]->m_nodeID));
+			network_data.node_names.clear();
+			network_data.nodes.clear();
+
+			for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
+			{
+				network_data.nodes.push_back(Morpheme::getNetworkNode(network, network->m_networkDef->m_nodes[i]->m_nodeID));
+				network_data.node_names.push_back(Morpheme::getNodeName(target_character, network->m_networkDef->m_nodes[i]->m_nodeID));
+			}
 		}
-	}
 
-	if (network_tasks.get_messages && network)
-	{
-		network_tasks.get_messages = false;
-
-		network_data.messages.message_ids.clear();
-		network_data.messages.message_names.clear();
-		network_data.messages.message_defs.clear();
-
-		network_data.messages.message_defs = Morpheme::getMessageDefs(target_character);
-
-		for (size_t i = 0; i < network->m_networkDef->m_requestIDNamesTable->m_NumEntrys; i++)
+		if (network_tasks.get_anim_assets)
 		{
-			network_data.messages.message_ids.push_back(network->m_networkDef->m_requestIDNamesTable->m_IDs[i]);
-			network_data.messages.message_names.push_back(Morpheme::getMessageName(target_character, network->m_networkDef->m_requestIDNamesTable->m_IDs[i]));
+			network_data.anim_events.anim_nodes.clear();
+			network_data.anim_events.anim_nodes = Morpheme::getNetworkAllNodesType(target_character, Morpheme::NodeType::NodeAnimSyncEvents);
+
+			if (network_data.anim_events.anim_nodes.size() == 0)
+				MessageBoxA(NULL, "There are no of the specified type\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
+
+			network_tasks.get_anim_assets = false;
+		}
+
+		if (network_tasks.get_control_params)
+		{
+			network_tasks.get_control_params = false;
+
+			network_data.control_params.cp_nodes.clear();
+			network_data.control_params.cp_bins.clear();
+			network_data.control_params.cp_names.clear();
+
+			network_data.control_params.cp_nodes = Morpheme::getNetworkControlParameterNodes(target_character);
+
+			for (size_t i = 0; i < network_data.control_params.cp_nodes.size(); i++)
+			{
+				network_data.control_params.cp_bins.push_back(Morpheme::getNodeBin(target_character, network_data.control_params.cp_nodes[i]->m_nodeID));
+				network_data.control_params.cp_names.push_back(Morpheme::getNodeName(target_character, network_data.control_params.cp_nodes[i]->m_nodeID));
+			}
+		}
+
+		if (network_tasks.get_messages)
+		{
+			network_tasks.get_messages = false;
+
+			network_data.messages.message_ids.clear();
+			network_data.messages.message_names.clear();
+			network_data.messages.message_defs.clear();
+
+			network_data.messages.message_defs = Morpheme::getMessageDefs(target_character);
+
+			for (size_t i = 0; i < network->m_networkDef->m_requestIDNamesTable->m_NumEntrys; i++)
+			{
+				network_data.messages.message_ids.push_back(network->m_networkDef->m_requestIDNamesTable->m_IDs[i]);
+				network_data.messages.message_names.push_back(Morpheme::getMessageName(target_character, network->m_networkDef->m_requestIDNamesTable->m_IDs[i]));
+			}
 		}
 	}
 }
@@ -610,6 +632,9 @@ void MorphemeNetworkInspectorGUI::Dockspace(ImGuiID dockSpace)
 
 void MorphemeNetworkInspectorGUI::NetworkCleanup()
 {
+	network_data.node_names.clear();
+	network_data.nodes.clear();
+
 	network_data.anim_events.anim_nodes.clear();
 
 	network_data.control_params.cp_nodes.clear();
