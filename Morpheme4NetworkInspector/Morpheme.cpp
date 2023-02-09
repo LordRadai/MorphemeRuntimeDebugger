@@ -744,8 +744,10 @@ const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node
 			return "Blend2Additive_108";
 		case 109:
 			return "Share1Child1InputCP_109";
+		case 110:
+			return "ShareCreateFloatOutputAttribute_110";
 		case 112:
-			return "ShareCreateFloatOutputAttribute";
+			return "ShareCreateFloatOutputAttribute_112";
 		case 114:
 			return "Blend2Additive_114";
 		case 120:
@@ -772,8 +774,14 @@ const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node
 			return "PredictiveUnevenTerrain";
 		case 142:
 			return "OperatorSmoothDamp";
+		case 144:
+			return "ShareCreateVector3OutputAttribute";
+		case 146:
+			return "OperatorRandomFloat";
 		case 151:
 			return "ShareChild1InputCP_151";
+		case 153:
+			return "ShareChildren_153";
 		case 170:
 			return "SubtractiveBlend";
 		case 400:
