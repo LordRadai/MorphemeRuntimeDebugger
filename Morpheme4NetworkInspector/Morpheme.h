@@ -80,7 +80,7 @@ public:
         int padding;
         struct NetworkDef* m_owningNetworkDef;
         short* m_childNodeIDs;
-        short* m_controlParamAndOpNodeIDs;
+        int* m_controlParamAndOpNodeIDs;
         struct NodeDataBase* node_data;
         short field16_0x38;
         short field17_0x3a;

@@ -459,7 +459,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 							sprintf_s(id, "child %d", j);
 
 							char child_name[255];
-							sprintf_s(child_name, "[%d] %s (%s)", network_data.nodes[i]->m_childNodeIDs[j], Morpheme::getNodeName(target_character, network_data.nodes[i]->m_childNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_childNodeIDs[j]));
+							sprintf_s(child_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.nodes[i]->m_childNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_childNodeIDs[j]));
 							ImGui::PushID(id);
 							ImGui::InputShort(child_name, (short*)&network_data.nodes[i]->m_childNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
 							ImGui::PopID();
@@ -472,7 +472,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				{
 					if (ImGui::TreeNode("Inputs"))
 					{
-						for (size_t j = 0; j < network_data.nodes[i]->field7_0xe; j++)
+						for (byte j = 0; j < network_data.nodes[i]->field7_0xe; j++)
 						{
 							ImVec4 input_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 
@@ -483,10 +483,10 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 							char id[255];
 							sprintf_s(id, "input %d", j);
 
-							char input_name[255];
-							sprintf_s(input_name, "[%d] %s (%s)", network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], Morpheme::getNodeName(target_character, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]));
+							char input_name[255] = "";
+							sprintf_s(input_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]));
 							ImGui::PushID(id);
-							ImGui::InputShort(input_name, (short*)&network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+							ImGui::InputInt(input_name, &network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
 							ImGui::PopID();
 							ImGui::PopStyleColor(1);
 						}
@@ -522,12 +522,20 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					ImGui::InputInt("Message ID", &network_data.messages.message_defs[i]->message_id, 0, 0, ImGuiInputTextFlags_ReadOnly);
 					ImGui::InputInt("Node Count", &network_data.messages.message_defs[i]->node_count, 0, 0, ImGuiInputTextFlags_ReadOnly);
 
+					ImGui::PushItemWidth(100);
 					if (network_data.messages.message_defs[i]->node_count > 0 && ImGui::TreeNode("Nodes"))
 					{
 						for (size_t j = 0; j < network_data.messages.message_defs[i]->node_count; j++)
-							ImGui::InputShort("Node ID", &network_data.messages.message_defs[i]->node_array[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+						{
+							char label[255];
+
+							sprintf_s(label, "%s (%s)", Morpheme::getNodeName(target_character, network_data.messages.message_defs[i]->node_array[j]), Morpheme::getNodeTypeName_Alt(network, network_data.messages.message_defs[i]->node_array[j]));
+
+							ImGui::InputShort(label, &network_data.messages.message_defs[i]->node_array[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+						}
 						ImGui::TreePop();
 					}
+					ImGui::PopItemWidth();
 				}			
 				ImGui::PopID();
 			}

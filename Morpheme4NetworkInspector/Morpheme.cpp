@@ -574,7 +574,7 @@ Morpheme::Network* Morpheme::getNetwork(uint64_t character_ctrl)
 
 Morpheme::NodeDef* Morpheme::getNetworkNode(Network* network, short node_id)
 {
-	if (!network)
+	if (!network || node_id == -1)
 		return NULL;
 
 	return network->m_networkDef->m_nodes[node_id];
@@ -639,31 +639,50 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkControlParameterNodes(uint64
 
 const char* Morpheme::stringTableLookup(StringTable* table, short id)
 {
-	const char* names = table->m_Data;
-	return names + table->m_Offsets[id];
+	if (id != -1)
+	{
+		const char* names = table->m_Data;
+		return names + table->m_Offsets[id];
+	}
+	return "";
 }
 
 const char* Morpheme::getNodeName(uint64_t character_ctrl, short node_id)
 {
-	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+	if (node_id != -1)
+	{
+		Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
 
-	StringTable* string_table = network->m_networkDef->m_nodeIDNamesTable;
-	return stringTableLookup(string_table, node_id);
+		StringTable* string_table = network->m_networkDef->m_nodeIDNamesTable;
+		return stringTableLookup(string_table, node_id);
+	}
+
+	return "";
 }
 
 const char* Morpheme::getMessageName(uint64_t character_ctrl, short message_id)
 {
-	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+	if (message_id != -1)
+	{
+		Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
 
-	StringTable* string_table = network->m_networkDef->m_requestIDNamesTable;
-	return stringTableLookup(string_table, message_id);
+		StringTable* string_table = network->m_networkDef->m_requestIDNamesTable;
+		return stringTableLookup(string_table, message_id);
+	}
+
+	return "";
 }
 
 Morpheme::NodeBin* Morpheme::getNodeBin(uint64_t character_ctrl, short node_id)
 {
-	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+	if (node_id != -1)
+	{
+		Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
 
-	return &network->m_nodeBins[node_id];
+		return &network->m_nodeBins[node_id];
+	}
+	
+	return NULL;
 }
 
 std::vector<Morpheme::sMessageDef*> Morpheme::getMessageDefs(uint64_t character_ctrl)
@@ -679,83 +698,98 @@ std::vector<Morpheme::sMessageDef*> Morpheme::getMessageDefs(uint64_t character_
 
 bool Morpheme::isNodeActive(Network* network, short node_id)
 {
-	if ((network->m_nodeConnections[node_id]->flags_1 & 2) >> 1)
-		return true;
+	if (node_id != -1)
+		if ((network->m_nodeConnections[node_id]->flags_1 & 2) >> 1)
+			return true;
 
 	return false;
 }
 
 bool Morpheme::isNodeContainer(Network* network, short node_id)
 {
-	if ((network->m_networkDef->m_nodes[node_id]->m_flags2 & 1) >> 0)
-		return true;
+	if (node_id != -1)
+		if ((network->m_networkDef->m_nodes[node_id]->m_flags2 & 1) >> 0)
+			return true;
 
 	return false;
 }
 
 const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node_id)
 {
-	int node_type = network->m_networkDef->m_nodes[node_id]->m_nodeTypeID;
-
-	switch (node_type)
+	if (node_id != -1)
 	{
-	case 9:
-		return "Network";
-	case 10:
-		return "StateMachine";
-	case 20:
-		return "CP_Float";
-	case 21:
-		return "CP_Vector3";
-	case 23:
-		return "CP_Bool";
-	case 24:
-		return "CP_Int";
-	case 104:
-		return "AnimSyncEvents";
-	case 105:
-		return "ShareUpdateConnectionsChildren_105";
-	case 107:
-		return "Blend2SyncEvents";
-	case 108:
-		return "Blend2Additive_108";
-	case 112:
-		return "ShareInitInstanceCreateFloatOutputAttribute";
-	case 114:
-		return "Blend2Additive_114";
-	case 120:
-		return "TwoBoneIKUpdateConnections";
-	case 125:
-		return "ShareUpdateConnections1Child1InputCP";
-	case 126:
-		return "Freeze";
-	case 129:
-		return "ShareUpdateConnectionsChildrenOptionalInputCPs";
-	case 131:
-		return "Switch";
-	case 134:
-		return "ShareUpdateConnectionsChildren_134";
-	case 135:
-		return "ShareUpdateConnectionsChildren_135";
-	case 136:
-		return "ShareUpdateConnections1Child2OptionalInputCP";
-	case 138:
-		return "PredictiveUnevenTerrain";
-	case 142:
-		return "OperatorSmoothDamp";
-	case 170:
-		return "SubtractiveBlend";
-	case 400:
-		return "TransitSyncEvents";
-	case 402:
-		return "Transit";
-	case 500:
-		return "ShareUpdateConnections1Child1OptionalInputCP";
-	default:
-		char name[255];
-		sprintf_s(name, "NodeType_%d", node_type);
-		return name;
+		int node_type = network->m_networkDef->m_nodes[node_id]->m_nodeTypeID;
+
+		switch (node_type)
+		{
+		case 9:
+			return "Network";
+		case 10:
+			return "StateMachine";
+		case 20:
+			return "CP_Float";
+		case 21:
+			return "CP_Vector3";
+		case 23:
+			return "CP_Bool";
+		case 24:
+			return "CP_Int";
+		case 104:
+			return "AnimSyncEvents";
+		case 105:
+			return "ShareChildren_105";
+		case 107:
+			return "Blend2SyncEvents";
+		case 108:
+			return "Blend2Additive_108";
+		case 109:
+			return "Share1Child1InputCP_109";
+		case 112:
+			return "ShareCreateFloatOutputAttribute";
+		case 114:
+			return "Blend2Additive_114";
+		case 120:
+			return "TwoBoneIK";
+		case 121:
+			return "LockFoot";
+		case 122:
+			return "ShareChildren1CompulsoryManyOptionalInputCPs";
+		case 125:
+			return "Share1Child1InputCP_125";
+		case 126:
+			return "Freeze";
+		case 129:
+			return "ShareChildrenOptionalInputCPs";
+		case 131:
+			return "Switch";
+		case 134:
+			return "ShareChildren_134";
+		case 135:
+			return "ShareChildren_135";
+		case 136:
+			return "Share1Child2OptionalInputCP";
+		case 138:
+			return "PredictiveUnevenTerrain";
+		case 142:
+			return "OperatorSmoothDamp";
+		case 151:
+			return "ShareChild1InputCP_151";
+		case 170:
+			return "SubtractiveBlend";
+		case 400:
+			return "TransitSyncEvents";
+		case 402:
+			return "Transit";
+		case 500:
+			return "Share1Child1OptionalInputCP";
+		default:
+			char name[255];
+			sprintf_s(name, "NodeType_%d", node_type);
+			return name;
+		}
 	}
+
+	return "";
 }
 
 const char* Morpheme::getNodeTypeName(Morpheme::Network* network, short node_id)
