@@ -43,6 +43,12 @@
     <Filter Include="Source Files\imsequencer">
       <UniqueIdentifier>{abf17fcb-b80c-4e0a-ba17-2a0cfc360ce2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\inih">
+      <UniqueIdentifier>{de4939a9-bd73-47f5-8085-362cabf1bfd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inih">
+      <UniqueIdentifier>{71bf4f6c-267f-4739-957a-c0a5dfd6cef8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -107,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="MorphemeNetworkInspector.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inih\ini.c">
+      <Filter>Source Files\inih</Filter>
+    </ClCompile>
+    <ClCompile Include="inih\INIReader.cpp">
+      <Filter>Source Files\inih</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +196,12 @@
     </ClInclude>
     <ClInclude Include="FRPG2.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inih\INIReader.h">
+      <Filter>Header Files\inih</Filter>
+    </ClInclude>
+    <ClInclude Include="inih\ini.h">
+      <Filter>Header Files\inih</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

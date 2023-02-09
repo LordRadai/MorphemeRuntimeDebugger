@@ -2500,6 +2500,16 @@ bool ImGui::DragInt(const char* label, int* v, float v_speed, int v_min, int v_m
     return DragScalar(label, ImGuiDataType_S32, v, v_speed, &v_min, &v_max, format, flags);
 }
 
+bool ImGui::DragByte(const char* label, char* v, float v_speed, char v_min, char v_max, const char* format, ImGuiSliderFlags flags)
+{
+    return DragScalar(label, ImGuiDataType_S8, v, v_speed, &v_min, &v_max, format, flags);
+}
+
+bool ImGui::DragShort(const char* label, short* v, float v_speed, short v_min, short v_max, const char* format, ImGuiSliderFlags flags)
+{
+    return DragScalar(label, ImGuiDataType_S16, v, v_speed, &v_min, &v_max, format, flags);
+}
+
 bool ImGui::DragInt2(const char* label, int v[2], float v_speed, int v_min, int v_max, const char* format, ImGuiSliderFlags flags)
 {
     return DragScalarN(label, ImGuiDataType_S32, v, 2, v_speed, &v_min, &v_max, format, flags);

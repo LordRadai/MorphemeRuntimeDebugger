@@ -684,3 +684,96 @@ bool Morpheme::isNodeActive(Network* network, short node_id)
 
 	return false;
 }
+
+bool Morpheme::isNodeContainer(Network* network, short node_id)
+{
+	if ((network->m_networkDef->m_nodes[node_id]->m_flags2 & 1) >> 0)
+		return true;
+
+	return false;
+}
+
+const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node_id)
+{
+	int node_type = network->m_networkDef->m_nodes[node_id]->m_nodeTypeID;
+
+	switch (node_type)
+	{
+	case 9:
+		return "Network";
+	case 10:
+		return "StateMachine";
+	case 20:
+		return "CP_Float";
+	case 21:
+		return "CP_Vector3";
+	case 23:
+		return "CP_Bool";
+	case 24:
+		return "CP_Int";
+	case 104:
+		return "AnimSyncEvents";
+	case 105:
+		return "ShareUpdateConnectionsChildren_105";
+	case 107:
+		return "Blend2SyncEvents";
+	case 108:
+		return "Blend2Additive_108";
+	case 112:
+		return "ShareInitInstanceCreateFloatOutputAttribute";
+	case 114:
+		return "Blend2Additive_114";
+	case 120:
+		return "TwoBoneIKUpdateConnections";
+	case 125:
+		return "ShareUpdateConnections1Child1InputCP";
+	case 126:
+		return "Freeze";
+	case 129:
+		return "ShareUpdateConnectionsChildrenOptionalInputCPs";
+	case 131:
+		return "Switch";
+	case 134:
+		return "ShareUpdateConnectionsChildren_134";
+	case 135:
+		return "ShareUpdateConnectionsChildren_135";
+	case 136:
+		return "ShareUpdateConnections1Child2OptionalInputCP";
+	case 138:
+		return "PredictiveUnevenTerrain";
+	case 142:
+		return "OperatorSmoothDamp";
+	case 170:
+		return "SubtractiveBlend";
+	case 400:
+		return "TransitSyncEvents";
+	case 402:
+		return "Transit";
+	case 500:
+		return "ShareUpdateConnections1Child1OptionalInputCP";
+	default:
+		char name[255];
+		sprintf_s(name, "NodeType_%d", node_type);
+		return name;
+	}
+}
+
+const char* Morpheme::getNodeTypeName(Morpheme::Network* network, short node_id)
+{
+	INIReader node_type(".//MorphemeNetworkInspector//res//NodeType.ini");
+
+	if (node_type.ParseError() < 0)
+	{
+		MessageBoxA(NULL, "Failed to load NodeType.ini", "MorphemeNetworkInspector", MB_ICONERROR);
+
+		return "";
+	}
+	char typeID_unk[32];
+	char typeID[4];
+	sprintf_s(typeID, "%d", network->m_networkDef->m_nodes[node_id]->m_nodeTypeID);
+	sprintf_s(typeID_unk, "NodeType_%d", network->m_networkDef->m_nodes[node_id]->m_nodeTypeID);
+
+	std::string typeName = node_type.GetString("NodeType", typeID, typeID_unk);
+
+	return typeName.c_str();
+}

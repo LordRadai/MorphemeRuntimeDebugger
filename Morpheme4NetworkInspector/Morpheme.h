@@ -1,6 +1,8 @@
 #pragma once
 //#include "includes.h" //Include your stuff here
 #include "Timeline.h"
+#include "inih/ini.h"
+#include "inih/INIReader.h"
 #include <windows.h>
 
 static class Morpheme
@@ -71,34 +73,35 @@ public:
         uint16_t m_parentNodeID;
         uint16_t m_numChildNodeIDs;
         uint16_t m_numControlParamAndOpNodeIDs;
-        uint16_t field7_0xe;
-        uint16_t field8_0x10;
-        uint16_t field9_0x12;
+        byte field7_0xe;
+        byte field8_0xf;
+        uint16_t field9_0x10;
+        uint16_t field10_0x12;
         int padding;
         struct NetworkDef* m_owningNetworkDef;
         short* m_childNodeIDs;
         short* m_controlParamAndOpNodeIDs;
         struct NodeDataBase* node_data;
-        short field15_0x38;
-        short field16_0x3a;
-        int field17_0x3c;
-        uint64_t field18_0x40;
-        uint64_t field19_0x48;
+        short field16_0x38;
+        short field17_0x3a;
+        int field18_0x3c;
+        uint64_t field19_0x40;
+        uint64_t field20_0x48;
         void* deleteFn;
         void* updateFn;
         void* unknownFn;
         void* initFn;
         void* transitFn;
         struct sMorphemeNodeDef* node_def;
-        byte field26_0x80;
-        byte field27_0x81;
-        byte field28_0x82;
-        byte field29_0x83;
-        byte field30_0x84;
-        byte field31_0x85;
-        byte field32_0x86;
-        byte field33_0x87;
-        uint64_t field34_0x88;
+        byte field27_0x80;
+        byte field28_0x81;
+        byte field29_0x82;
+        byte field30_0x83;
+        byte field31_0x84;
+        byte field32_0x85;
+        byte field33_0x86;
+        byte field34_0x87;
+        uint64_t field35_0x88;
     };
 
     struct NodeDataBase {
@@ -780,4 +783,10 @@ public:
     static std::vector<sMessageDef*> getMessageDefs(uint64_t character_ctrl);
 
     static bool isNodeActive(Network* network, short node_id);
+
+    static bool isNodeContainer(Network* network, short node_id);
+
+    static const char* getNodeTypeName_Alt(Morpheme::Network* network, short node_id);
+
+    static const char* getNodeTypeName(Morpheme::Network* network, short node_id);
 };

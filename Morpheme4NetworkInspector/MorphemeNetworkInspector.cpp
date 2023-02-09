@@ -412,7 +412,95 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 	ImGui::Begin("Nodes");
 	{
+		for (size_t i = 0; i < network_data.nodes.size(); i++)
+		{
+			ImVec4 node_col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
+			ImVec4 node_col_active = ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive);
+			ImVec4 node_col_hovered = ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered);
 
+			if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_nodeID))
+			{
+				node_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
+				node_col_active = ImVec4(0.39f, 0.39f, 1.0f, 1.0f);
+				node_col_hovered = ImVec4(0.27f, 0.27f, 1.0f, 1.0f);
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Header, node_col);
+			ImGui::PushStyleColor(ImGuiCol_HeaderActive, node_col_active);
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, node_col_hovered);
+
+			char buf[255];
+			sprintf_s(buf, "[%d] %s (%s)", network_data.nodes[i]->m_nodeID, network_data.node_names[i], Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_nodeID));
+
+			if (ImGui::CollapsingHeader(buf))
+			{
+				ImGui::PushItemWidth(100);
+				ImGui::PushID(i);
+				ImGui::InputInt("Node Type", (int*)& network_data.nodes[i]->m_nodeTypeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Flag 1", (char*)&network_data.nodes[i]->m_flags1, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Flag 2", (char*)&network_data.nodes[i]->m_flags2, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputShort("Node ID", (short*)&network_data.nodes[i]->m_nodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputShort("Parent Node ID", (short*)&network_data.nodes[i]->m_parentNodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputShort("Child Count", (short*)&network_data.nodes[i]->m_numChildNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Input Count", (char*)&network_data.nodes[i]->field7_0xe, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				if (network_data.nodes[i]->m_numChildNodeIDs > 0)
+				{
+					if (ImGui::TreeNode("Child Nodes"))
+					{
+						for (size_t j = 0; j < network_data.nodes[i]->m_numChildNodeIDs; j++)
+						{
+							ImVec4 child_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+
+							if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_childNodeIDs[j]))
+								child_col = ImVec4(0.39f, 0.58f, 1.0f, 1.0f);
+
+							ImGui::PushStyleColor(ImGuiCol_Text, child_col);
+							char id[255];
+							sprintf_s(id, "child %d", j);
+
+							char child_name[255];
+							sprintf_s(child_name, "[%d] %s (%s)", network_data.nodes[i]->m_childNodeIDs[j], Morpheme::getNodeName(target_character, network_data.nodes[i]->m_childNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_childNodeIDs[j]));
+							ImGui::PushID(id);
+							ImGui::InputShort(child_name, (short*)&network_data.nodes[i]->m_childNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+							ImGui::PopID();
+							ImGui::PopStyleColor(1);
+						}
+						ImGui::TreePop();
+					}
+				}
+				if (network_data.nodes[i]->field7_0xe > 0)
+				{
+					if (ImGui::TreeNode("Inputs"))
+					{
+						for (size_t j = 0; j < network_data.nodes[i]->field7_0xe; j++)
+						{
+							ImVec4 input_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+
+							if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]))
+								input_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
+
+							ImGui::PushStyleColor(ImGuiCol_Text, input_col);
+							char id[255];
+							sprintf_s(id, "input %d", j);
+
+							char input_name[255];
+							sprintf_s(input_name, "[%d] %s (%s)", network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], Morpheme::getNodeName(target_character, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]));
+							ImGui::PushID(id);
+							ImGui::InputShort(input_name, (short*)&network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+							ImGui::PopID();
+							ImGui::PopStyleColor(1);
+						}
+						ImGui::TreePop();
+					}
+				}
+				
+				ImGui::PopItemWidth();
+				ImGui::InputPtr("Node Data", (uint64_t*)&network_data.nodes[i]->node_data, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_CharsHexadecimal);
+				ImGui::PopID();
+			}
+
+			ImGui::PopStyleColor(3);
+		}
 	}
 	ImGui::End();
 
@@ -470,24 +558,24 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					{
 					case 0:
 						ImGui::PushID(input_id);
-						ImGui::InputByte("", (char*)(value), 0, 0, ImGuiInputTextFlags_None);
+						ImGui::DragByte("", (char*)(value), 0, 0, 1,"%d");
 						ImGui::PopID();
 						break;
 					case 2:
 						ImGui::PushID(input_id);
-						ImGui::InputInt("", (int*)(value), 0, 0);
+						ImGui::DragInt("", (int*)(value), 0, -10000, 10000, "%d");
 						ImGui::PopID();
 						break;
 					case 3:
 						ImGui::PushID(input_id);
-						ImGui::InputFloat("", (float*)(value), 0, 0);
+						ImGui::DragFloat("", (float*)(value), 0, -10000, 10000, "%.3f");
 						ImGui::PopID();
 						break;
 					case 4:
 						ImGui::PushID(input_id);
-						ImGui::InputFloat("X", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[0], 0, 0);
-						ImGui::InputFloat("Y", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[1], 0, 0);
-						ImGui::InputFloat("Z", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[2], 0, 0);
+						ImGui::DragFloat("X", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[0], 0, -10000, 1000, "%.3f");
+						ImGui::DragFloat("Y", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[1], 0, -10000, 1000, "%.3f");
+						ImGui::DragFloat("Z", (float*)&network_data.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[2], 0, -10000, 1000, "%.3f");
 						ImGui::PopID();
 						break;
 					default:

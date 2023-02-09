@@ -16,6 +16,8 @@
 
 #include "kiero/minhook/include/MinHook.h"
 #include "kiero/kiero.h"
+#include "inih/ini.h"
+#include "inih/INIReader.h"
 
 #include "FRPG2.h"
 #include "MorphemeNetworkInspector.h"

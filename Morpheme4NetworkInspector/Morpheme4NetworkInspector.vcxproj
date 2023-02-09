@@ -154,6 +154,8 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="imsequencer\ImCurveEdit.cpp" />
     <ClCompile Include="imsequencer\ImSequencer.cpp" />
+    <ClCompile Include="inih\ini.c" />
+    <ClCompile Include="inih\INIReader.cpp" />
     <ClCompile Include="kiero\kiero.cpp" />
     <ClCompile Include="kiero\minhook\src\buffer.c" />
     <ClCompile Include="kiero\minhook\src\hde\hde32.c" />
@@ -179,6 +181,8 @@
     <ClInclude Include="imsequencer\ImCurveEdit.h" />
     <ClInclude Include="imsequencer\ImSequencer.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="inih\ini.h" />
+    <ClInclude Include="inih\INIReader.h" />
     <ClInclude Include="kiero\minhook\include\MinHook.h" />
     <ClInclude Include="kiero\minhook\src\buffer.h" />
     <ClInclude Include="kiero\minhook\src\hde\hde32.h" />
