@@ -39,6 +39,8 @@ void initImGui(HWND hwnd)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImNodes::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGuiStyle& style = ImGui::GetStyle();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -183,6 +185,7 @@ bool MainLoop(uint64_t qModuleHandle)
 
             ImGui_ImplDX11_Shutdown();
             ImGui_ImplWin32_Shutdown();
+            ImNodes::DestroyContext();
             ImGui::DestroyContext();
 
             CleanupDeviceD3D();

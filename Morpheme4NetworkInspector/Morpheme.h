@@ -72,8 +72,8 @@ public:
         uint16_t m_nodeID;
         uint16_t m_parentNodeID;
         uint16_t m_numChildNodeIDs;
-        uint16_t m_numControlParamAndOpNodeIDs;
-        byte field7_0xe;
+        uint16_t m_field6_0xc;
+        byte m_numControlParamAndOpNodeIDs;
         byte field8_0xf;
         uint16_t field9_0x10;
         uint16_t field10_0x12;
@@ -535,7 +535,7 @@ public:
     };
 
     struct NetworkDef {
-        struct NodeDef network_node_def;
+        NodeDef network_node_def;
         uint32_t m_numNodes;
         uint32_t field2_0x94;
         struct NodeDef** m_nodes;
@@ -606,7 +606,7 @@ public:
         byte field4_0xb;
         byte field5_0xc;
         byte field6_0xd;
-        byte field7_0xe;
+        byte m_numControlParamAndOpNodeIDs;
         byte field8_0xf;
         uint64_t field9_0x10;
         byte field10_0x30;

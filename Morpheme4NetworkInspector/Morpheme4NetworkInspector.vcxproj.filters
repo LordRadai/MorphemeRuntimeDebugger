@@ -16,17 +16,11 @@
     <Filter Include="Header Files\imgui">
       <UniqueIdentifier>{705c7a72-4804-48d3-a1bb-608de9135c31}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\imnodes">
-      <UniqueIdentifier>{b750ce96-a854-4763-a826-490f65ce7f1a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\kiero">
       <UniqueIdentifier>{f8e2f007-6b4e-443b-8a81-b350414ed71f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\imgui">
       <UniqueIdentifier>{2477786e-fa6f-431b-81c3-fb4d3247c537}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\imnodes">
-      <UniqueIdentifier>{9de1fc46-0560-45aa-8314-9237f979d377}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\kiero">
       <UniqueIdentifier>{496b526b-d480-4449-8876-cb26661f0188}</UniqueIdentifier>
@@ -48,6 +42,12 @@
     </Filter>
     <Filter Include="Source Files\inih">
       <UniqueIdentifier>{71bf4f6c-267f-4739-957a-c0a5dfd6cef8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\imnodes">
+      <UniqueIdentifier>{888193a0-bfb5-4719-98a9-ba9b8fe63182}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imnodes">
+      <UniqueIdentifier>{f83d2a96-a6f5-4705-a4c9-7bf5b7a28538}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +119,12 @@
     </ClCompile>
     <ClCompile Include="inih\INIReader.cpp">
       <Filter>Source Files\inih</Filter>
+    </ClCompile>
+    <ClCompile Include="imnodes\imnodes.cpp">
+      <Filter>Source Files\imnodes</Filter>
+    </ClCompile>
+    <ClCompile Include="ImNodesInterface.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +208,15 @@
     </ClInclude>
     <ClInclude Include="inih\ini.h">
       <Filter>Header Files\inih</Filter>
+    </ClInclude>
+    <ClInclude Include="imnodes\imnodes.h">
+      <Filter>Header Files\imnodes</Filter>
+    </ClInclude>
+    <ClInclude Include="imnodes\imnodes_internal.h">
+      <Filter>Header Files\imnodes</Filter>
+    </ClInclude>
+    <ClInclude Include="ImNodesInterface.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

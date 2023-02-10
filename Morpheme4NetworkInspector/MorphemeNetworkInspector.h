@@ -18,6 +18,8 @@
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_internal.h"
+#include "imnodes/imnodes.h"
+#include "imnodes/imnodes_internal.h"
 #include "Timeline.h"
 #include "Morpheme.h"
 
@@ -83,9 +85,21 @@ public:
 		bool eventTrackConfig_scaleToAnim = true;
 	};
 
+	struct ImNodesData
+	{
+		std::vector<ImVec2> occupied_positions;
+		std::vector<int> node_ids;
+		std::vector<ImVec2> node_position;
+		short node_to_inspect;
+		bool is_inspect;
+		Morpheme::NodeDef* node_def;
+	};
+
 	GetNetworkTask network_tasks;
 	NetworkData network_data;
 	NetworkSettings network_config;
+
+	ImNodesData imnodes_data;
 
 	bool pull_tracks;
 	bool clear_tracks;

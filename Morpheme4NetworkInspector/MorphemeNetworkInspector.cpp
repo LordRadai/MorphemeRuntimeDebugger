@@ -1,6 +1,7 @@
 #include "MorphemeNetworkInspector.h"
 #include "FRPG2.h"
 #include "Morpheme.h"
+#include "ImNodesInterface.h"
 
 MorphemeNetworkInspectorGUI::MorphemeNetworkInspectorGUI()
 {
@@ -144,6 +145,58 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		ImGui::Separator();
 
 		ImGui::BeginTabBar("network tab bar");
+		if (ImGui::BeginTabItem("Network"))
+		{
+			ImGui::BeginTabBar("node editor tab bar");
+			if (ImGui::BeginTabItem("Main"))
+			{
+				ImNodes::BeginNodeEditor();
+				ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
+
+				if (network)
+				{
+					for (size_t i = 0; i < network->m_networkDef->network_node_def.m_numChildNodeIDs; i++)
+					{
+						ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, network->m_networkDef->network_node_def.m_childNodeIDs[i]));
+					}
+				}
+				ImNodes::EndNodeEditor();
+
+				ImGui::EndTabItem();			
+			}
+			if (ImGui::BeginTabItem("Node Inspector"))
+			{
+				ImGui::InputShort("Node ID", &imnodes_data.node_to_inspect, 0, 0, ImGuiInputTextFlags_None);
+				if (ImGui::Button("Get Node")) { imnodes_data.is_inspect = true; }
+
+				ImNodes::BeginNodeEditor();
+				ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
+
+				if (imnodes_data.is_inspect)
+				{
+					imnodes_data.is_inspect = false;
+
+					imnodes_data.node_def = Morpheme::getNetworkNode(network, imnodes_data.node_to_inspect);
+				}
+
+				if (imnodes_data.node_def && imnodes_data.node_def->m_numChildNodeIDs > 0)
+				{
+					for (size_t i = 0; i < imnodes_data.node_def->m_numChildNodeIDs; i++)
+					{
+						//if (network_data.nodes[i]->m_nodeTypeID != 402)
+						ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, imnodes_data.node_def->m_childNodeIDs[i]));
+						//else
+							//ImNodesInterface::linkMorphemeNodes(network_data.nodes[i]->m_childNodeIDs[0], network_data.nodes[i]->m_childNodeIDs[1]);
+					}
+				}
+				ImNodes::EndNodeEditor();
+
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
+			
+			ImGui::EndTabItem();
+		}
 		if (ImGui::BeginTabItem("EventTrack"))
 		{
 			static char categoryInfo[100], valueInfo[255];
@@ -442,7 +495,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				ImGui::InputShort("Node ID", (short*)&network_data.nodes[i]->m_nodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
 				ImGui::InputShort("Parent Node ID", (short*)&network_data.nodes[i]->m_parentNodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
 				ImGui::InputShort("Child Count", (short*)&network_data.nodes[i]->m_numChildNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
-				ImGui::InputByte("Input Count", (char*)&network_data.nodes[i]->field7_0xe, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Input Count", (char*)&network_data.nodes[i]->m_numControlParamAndOpNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
 				if (network_data.nodes[i]->m_numChildNodeIDs > 0)
 				{
 					if (ImGui::TreeNode("Child Nodes"))
@@ -468,11 +521,11 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 						ImGui::TreePop();
 					}
 				}
-				if (network_data.nodes[i]->field7_0xe > 0)
+				if (network_data.nodes[i]->m_numControlParamAndOpNodeIDs > 0)
 				{
 					if (ImGui::TreeNode("Inputs"))
 					{
-						for (byte j = 0; j < network_data.nodes[i]->field7_0xe; j++)
+						for (byte j = 0; j < network_data.nodes[i]->m_numControlParamAndOpNodeIDs; j++)
 						{
 							ImVec4 input_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 
