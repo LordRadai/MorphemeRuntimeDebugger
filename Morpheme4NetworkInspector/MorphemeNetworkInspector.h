@@ -70,15 +70,6 @@ public:
 		bool get_messages;
 	};
 
-	struct NetworkData
-	{
-		ControlParameters control_params;
-		AnimEventTrack anim_events;
-		Messages messages;
-		std::vector<const char*> node_names;
-		std::vector<Morpheme::NodeDef*> nodes;
-	};
-
 	struct NetworkSettings
 	{
 		bool filter_events = true;
@@ -95,11 +86,19 @@ public:
 		Morpheme::NodeDef* node_def;
 	};
 
+	struct NetworkData
+	{
+		ControlParameters control_params;
+		AnimEventTrack anim_events;
+		Messages messages;
+		ImNodesData imnodes_data;
+		std::vector<const char*> node_names;
+		std::vector<Morpheme::NodeDef*> nodes;
+	};
+
 	GetNetworkTask network_tasks;
 	NetworkData network_data;
 	NetworkSettings network_config;
-
-	ImNodesData imnodes_data;
 
 	bool pull_tracks;
 	bool clear_tracks;
