@@ -74,9 +74,9 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 		ImGui::Text("");
 		ImNodes::EndInputAttribute();
 
-		if (node->m_sourcePinCount > 0)
+		if (node->m_numChildNodeIDs > 0)
 		{
-			for (size_t i = 0; i < node->m_sourcePinCount; i++)
+			for (size_t i = 0; i < node->m_numChildNodeIDs; i++)
 			{
 				ImNodes::BeginInputAttribute(source_id + i + 1);
 				ImGui::Text("Source %d", i + 1);
