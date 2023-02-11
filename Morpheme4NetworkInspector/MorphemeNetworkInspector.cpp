@@ -147,41 +147,18 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		ImGui::BeginTabBar("network tab bar");
 		if (ImGui::BeginTabItem("Network"))
 		{
-			ImGui::BeginTabBar("node editor tab bar");
-			if (ImGui::BeginTabItem("Main"))
+			ImGui::InputShort("Node ID", &network_data.imnodes_data.node_to_inspect, 0, 0, ImGuiInputTextFlags_None);
+			if (ImGui::Button("Get Node")) { network_data.imnodes_data.is_inspect = true; }
+
+			ImNodes::BeginNodeEditor();
+			ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
+
+			if (network_data.imnodes_data.node_def && network_data.imnodes_data.node_def->m_numChildNodeIDs > 0)
 			{
-				ImNodes::BeginNodeEditor();
-				ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
-
-				if (network && network_tasks.get_nodes)
-				{
-					for (size_t i = 0; i < network->m_networkDef->network_node_def.m_numChildNodeIDs; i++)
-					{
-						ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, network->m_networkDef->network_node_def.m_childNodeIDs[i]));
-					}
-				}
-				ImNodes::EndNodeEditor();
-
-				ImGui::EndTabItem();			
+				for (size_t i = 0; i < network_data.imnodes_data.node_def->m_numChildNodeIDs; i++)
+					ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, network_data.imnodes_data.node_def->m_childNodeIDs[i]));
 			}
-			if (ImGui::BeginTabItem("Node Inspector"))
-			{
-				ImGui::InputShort("Node ID", &network_data.imnodes_data.node_to_inspect, 0, 0, ImGuiInputTextFlags_None);
-				if (ImGui::Button("Get Node")) { network_data.imnodes_data.is_inspect = true; }
-
-				ImNodes::BeginNodeEditor();
-				ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
-
-				if (network_data.imnodes_data.node_def && network_data.imnodes_data.node_def->m_numChildNodeIDs > 0)
-				{
-					for (size_t i = 0; i < network_data.imnodes_data.node_def->m_numChildNodeIDs; i++)
-						ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, network_data.imnodes_data.node_def->m_childNodeIDs[i]));
-				}
-				ImNodes::EndNodeEditor();
-
-				ImGui::EndTabItem();
-			}
-			ImGui::EndTabBar();
+			ImNodes::EndNodeEditor();
 			
 			ImGui::EndTabItem();
 		}
@@ -453,9 +430,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 	ImGui::Begin("Nodes");
 	{
-		if (network && target_character)
-		{
-			for (size_t i = 0; i < network_data.nodes.size(); i++)
+		for (size_t i = 0; i < network_data.nodes.size(); i++)
 			{
 				ImVec4 node_col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
 				ImVec4 node_col_active = ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive);
@@ -544,8 +519,6 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 				ImGui::PopStyleColor(3);
 			}
-
-		}
 	}
 	ImGui::End();
 
@@ -717,8 +690,8 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 		if (network_tasks.get_nodes)
 		{
 			network_tasks.get_nodes = false;
-			network_data.node_names.clear();
 			network_data.nodes.clear();
+			network_data.node_names.clear();
 
 			for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
 			{
