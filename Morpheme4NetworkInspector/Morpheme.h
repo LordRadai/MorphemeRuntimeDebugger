@@ -72,7 +72,7 @@ public:
         uint16_t m_nodeID;
         uint16_t m_parentNodeID;
         uint16_t m_numChildNodeIDs;
-        uint16_t m_field6_0xc;
+        uint16_t m_sourcePinCount;
         byte m_numControlParamAndOpNodeIDs;
         byte field8_0xf;
         uint16_t field9_0x10;

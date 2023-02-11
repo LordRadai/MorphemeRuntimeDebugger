@@ -182,12 +182,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				if (imnodes_data.node_def && imnodes_data.node_def->m_numChildNodeIDs > 0)
 				{
 					for (size_t i = 0; i < imnodes_data.node_def->m_numChildNodeIDs; i++)
-					{
-						//if (network_data.nodes[i]->m_nodeTypeID != 402)
 						ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, imnodes_data.node_def->m_childNodeIDs[i]));
-						//else
-							//ImNodesInterface::linkMorphemeNodes(network_data.nodes[i]->m_childNodeIDs[0], network_data.nodes[i]->m_childNodeIDs[1]);
-					}
 				}
 				ImNodes::EndNodeEditor();
 
