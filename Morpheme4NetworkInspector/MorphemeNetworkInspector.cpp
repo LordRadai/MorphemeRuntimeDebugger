@@ -764,13 +764,9 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 		if (network_data.imnodes_data.is_inspect)
 		{
 			network_data.imnodes_data.is_inspect = false;
-			network_data.imnodes_data.node_def = NULL;
 			network_data.imnodes_data.node_ids.clear();
 			network_data.imnodes_data.node_position.clear();
-			network_data.imnodes_data.node_to_inspect = 0;
 			network_data.imnodes_data.occupied_positions.clear();
-
-			network_data.imnodes_data.is_inspect = false;
 
 			network_data.imnodes_data.node_def = Morpheme::getNetworkNode(network, network_data.imnodes_data.node_to_inspect);
 		}
