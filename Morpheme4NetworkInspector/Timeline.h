@@ -176,7 +176,7 @@ struct EventTrackEditor : public ImSequencer::SequenceInterface
     virtual void Del(int index) { myItems.erase(myItems.begin() + index); }
     virtual void Duplicate(int index) { myItems.push_back(myItems[index]); }
 
-    void AddMorphemeEventTrack(int id, MorphemeEventTrack event_track, float multiplier);
+    void AddMorphemeEventTrack(int id, MorphemeEventTrack* event_track, float multiplier);
     void Clear();
     void LoadTrackName(int id, MorphemeEventTrack event_track);
 
@@ -196,6 +196,7 @@ struct EventTrackEditor : public ImSequencer::SequenceInterface
         const char* trackName;
         bool isDiscrete;
         bool mExpanded;
+        MorphemeEventTrack* morpheme_track;
 
         void SaveTrackData(MorphemeEventTrack* event_track, float multiplier);
     };

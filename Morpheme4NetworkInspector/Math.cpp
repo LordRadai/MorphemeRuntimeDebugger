@@ -7,7 +7,9 @@ float Math::frameToTime(int frame, int frameRate)
 
 int Math::timeToFrame(float time, int frameRate)
 {
-	return (time * frameRate);
+	float frame = (time * frameRate);
+
+	return (frame + 0.9);
 }
 
 bool Math::getBit(void* var, byte n)

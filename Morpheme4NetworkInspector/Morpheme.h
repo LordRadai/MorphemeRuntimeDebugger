@@ -786,6 +786,8 @@ public:
 
     static bool isNodeContainer(Network* network, short node_id);
 
+    static bool isNodeConnectedToOutput(Network* network, short node_id);
+
     static const char* getNodeTypeName_Alt(Morpheme::Network* network, short node_id);
 
     static const char* getNodeTypeName(Morpheme::Network* network, short node_id);

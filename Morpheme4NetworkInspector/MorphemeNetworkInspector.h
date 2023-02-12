@@ -53,6 +53,7 @@ public:
 		std::vector<Morpheme::NodeDef*> anim_nodes;
 		ImU64 event_track_node;
 		const char* asset_name;
+		float mult;
 	};
 
 	struct Messages

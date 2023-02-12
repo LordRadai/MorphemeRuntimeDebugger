@@ -708,11 +708,21 @@ bool Morpheme::isNodeActive(Network* network, short node_id)
 bool Morpheme::isNodeContainer(Network* network, short node_id)
 {
 	if (node_id != -1)
-		if ((network->m_networkDef->m_nodes[node_id]->m_flags2 & 1) >> 0)
+		if ((network->m_networkDef->m_nodes[node_id]->m_flags1 & 16) >> 4)
 			return true;
 
 	return false;
 }
+
+bool Morpheme::isNodeConnectedToOutput(Network* network, short node_id)
+{
+	if (node_id != -1)
+		if ((network->m_networkDef->m_nodes[node_id]->m_flags2 & 64) >> 6)
+			return true;
+
+	return false;
+}
+
 
 const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node_id)
 {
@@ -755,7 +765,7 @@ const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node
 		case 121:
 			return "LockFoot";
 		case 122:
-			return "ShareChildren1CompulsoryManyOptionalInputCPs";
+			return "ShareChildren1CompulsoryManyOptionalInputCPs_120";
 		case 125:
 			return "Share1Child1InputCP_125";
 		case 126:
@@ -778,6 +788,8 @@ const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node
 			return "ShareCreateVector3OutputAttribute";
 		case 146:
 			return "OperatorRandomFloat";
+		case 150:
+			return "ShareChildren1CompulsoryManyOptionalInputCPs_150";
 		case 151:
 			return "ShareChild1InputCP_151";
 		case 153:

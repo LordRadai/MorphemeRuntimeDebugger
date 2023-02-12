@@ -2,12 +2,12 @@
 
 const char* trackNames[50];
 
-void EventTrackEditor::AddMorphemeEventTrack(int id, MorphemeEventTrack event_track, float multiplier)
+void EventTrackEditor::AddMorphemeEventTrack(int id, MorphemeEventTrack* event_track, float multiplier)
 { 
-	if (event_track.is_discrete)
-		myItems.push_back(EventTrack{ id, event_track.eventId, Math::timeToFrame(event_track.startTime * multiplier, 60), Math::timeToFrame((event_track.startTime) * multiplier, 60), event_track.value, event_track.eventCount, event_track.trackName, event_track.is_discrete, false });
+	if (event_track->is_discrete)
+		myItems.push_back(EventTrack{ id, event_track->eventId, Math::timeToFrame(event_track->startTime * multiplier, 60), Math::timeToFrame((event_track->startTime) * multiplier, 60), event_track->value, event_track->eventCount, event_track->trackName, event_track->is_discrete, false, event_track });
 	else
-		myItems.push_back(EventTrack{ id, event_track.eventId, Math::timeToFrame(event_track.startTime * multiplier, 60), Math::timeToFrame((event_track.startTime + event_track.duration) * multiplier, 60), event_track.value, event_track.eventCount, event_track.trackName, event_track.is_discrete, false});
+		myItems.push_back(EventTrack{ id, event_track->eventId, Math::timeToFrame(event_track->startTime * multiplier, 60), Math::timeToFrame((event_track->startTime + event_track->duration) * multiplier, 60), event_track->value, event_track->eventCount, event_track->trackName, event_track->is_discrete, false, event_track });
 }
 
 void EventTrackEditor::Clear()
@@ -27,8 +27,9 @@ void EventTrackEditor::EventTrack::SaveTrackData(MorphemeEventTrack* event_track
 	event_track->eventId = eventId;
 	event_track->value = value;
 	event_track->startTime = Math::frameToTime(mFrameStart, 60) / multiplier;
+
 	if (event_track->is_discrete == false)
-		event_track->duration = Math::frameToTime((mFrameEnd - mFrameStart), 60) / multiplier;
+		event_track->duration = Math::frameToTime((mFrameEnd - mFrameStart), 60) / multiplier;	
 }
 
 int MorphemeEventTrackList::getSubTrackcount_discrete()

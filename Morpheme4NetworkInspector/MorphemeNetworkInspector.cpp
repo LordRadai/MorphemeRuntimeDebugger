@@ -121,6 +121,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 		ImGui::EndMenuBar();
 	}
+	ImGui::End();
 
 	ImGui::Begin("Network");
 	{
@@ -144,247 +145,20 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 		ImGui::Separator();
 
-		ImGui::BeginTabBar("network tab bar");
-		if (ImGui::BeginTabItem("Network"))
+		ImGui::InputShort("Node ID", &network_data.imnodes_data.node_to_inspect, 0, 0, ImGuiInputTextFlags_None);
+		if (ImGui::Button("Get Node")) { network_data.imnodes_data.is_inspect = true; }
+
+		ImNodes::BeginNodeEditor();
+		ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
+
+		if (network_data.imnodes_data.node_def && network_data.imnodes_data.node_def->m_numChildNodeIDs > 0)
 		{
-			ImGui::InputShort("Node ID", &network_data.imnodes_data.node_to_inspect, 0, 0, ImGuiInputTextFlags_None);
-			if (ImGui::Button("Get Node")) { network_data.imnodes_data.is_inspect = true; }
+			//ImNodesInterface::createOutputNode();
 
-			ImNodes::BeginNodeEditor();
-			ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
-
-			if (network_data.imnodes_data.node_def && network_data.imnodes_data.node_def->m_numChildNodeIDs > 0)
-			{
-				for (size_t i = 0; i < network_data.imnodes_data.node_def->m_numChildNodeIDs; i++)
-					ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, network_data.imnodes_data.node_def->m_childNodeIDs[i]));
-			}
-			ImNodes::EndNodeEditor();
-			
-			ImGui::EndTabItem();
+			for (size_t i = 0; i < network_data.imnodes_data.node_def->m_numChildNodeIDs; i++)
+				ImNodesInterface::createMorphemeNode(Morpheme::getNetworkNode(network, network_data.imnodes_data.node_def->m_childNodeIDs[i]));
 		}
-		if (ImGui::BeginTabItem("EventTrack"))
-		{
-			static char categoryInfo[100], valueInfo[255];
-			static int selectedEntry = -1;
-			static int firstFrame = 0;
-			static bool expanded = true;
-			static int currentFrame = 0;
-
-			float trackLenght;
-			float animLenght;
-			float multiplier = 1;
-
-			ImGui::PushItemWidth(200);
-			ImGui::InputPtr("Node Pointer", &network_data.anim_events.event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
-			ImGui::PopItemWidth();
-
-			if (ImGui::Button("Pull Tracks"))
-				pull_tracks = true;
-
-			if (pull_tracks && network_data.anim_events.event_track_node)
-			{
-				pull_tracks = false;
-
-				selectedEntry = -1;
-				event_track_editor.Clear();
-
-				Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.anim_events.event_track_node);
-
-				if (anim_sync_node->m_nodeTypeID == Morpheme::NodeType::NodeAnimSyncEvents)
-				{
-					Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)anim_sync_node->node_data;
-
-					if (node_data->m_animData && node_data->m_eventTrackData)
-					{
-						uint64_t nsaFile = node_data->m_animData;
-
-						float trackLenght = *(float*)(nsaFile + 0x84);
-						float animLenght = *(float*)(nsaFile + 0x88);
-
-						float multiplier = 1;
-						event_track_editor.mFrameMin = 0;
-						event_track_editor.mFrameMax = Math::timeToFrame(trackLenght, 60);
-
-						if (network_config.eventTrackConfig_scaleToAnim)
-						{
-							multiplier = animLenght / trackLenght;
-							event_track_editor.mFrameMax = Math::timeToFrame(animLenght, 60);
-						}
-
-						network_data.anim_events.asset_name = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
-
-						uint32_t event_track_count = node_data->m_eventTrackData->m_eventTracks[0].m_trackCount + node_data->m_eventTrackData->m_eventTracks[1].m_trackCount + node_data->m_eventTrackData->m_eventTracks[2].m_trackCount;
-
-						if (event_track_count == 0)
-							MessageBoxA(NULL, "Animation does not have any EventTrack associated with it", "Morpheme Network Inspector", MB_ICONINFORMATION);
-
-						if (event_track_count > 0 && Morpheme::LoadEventTracks(node_data->m_eventTrackData, &track_list) != 0)
-						{
-							int id = 0;
-
-							for (size_t i = 0; i < track_list.count_discrete; i++)
-							{
-								event_track_editor.LoadTrackName(id, track_list.tracks_discrete[i]);
-								event_track_editor.AddMorphemeEventTrack(id, track_list.tracks_discrete[i], multiplier);
-
-								if (track_list.tracks_discrete[i].eventCount > 1)
-								{
-									for (size_t j = 0; j < track_list.count_discreteSub; j++)
-									{
-										if (track_list.tracks_discreteSub[j].parentId == i)
-										{
-											event_track_editor.LoadTrackName(id, track_list.tracks_discreteSub[j]);
-											event_track_editor.AddMorphemeEventTrack(id, track_list.tracks_discreteSub[j], multiplier);
-
-											id++;
-										}
-									}
-								}
-								else
-									id++;
-							}
-
-							for (size_t i = 0; i < track_list.count_unk; i++)
-							{
-								event_track_editor.LoadTrackName(id, track_list.tracks_unk[i]);
-								event_track_editor.AddMorphemeEventTrack(id, track_list.tracks_unk[i], multiplier);
-
-								if (track_list.tracks_unk[i].eventCount > 1)
-								{
-									for (size_t j = 0; j < track_list.count_unkSub; j++)
-									{
-										if (track_list.tracks_unkSub[j].parentId == i)
-										{
-											event_track_editor.LoadTrackName(id, track_list.tracks_unkSub[j]);
-											event_track_editor.AddMorphemeEventTrack(id, track_list.tracks_unkSub[j], multiplier);
-
-											id++;
-										}
-									}
-								}
-								else
-									id++;
-							}
-
-							for (size_t i = 0; i < track_list.count_timed; i++)
-							{
-								event_track_editor.LoadTrackName(id, track_list.tracks_timed[i]);
-								event_track_editor.AddMorphemeEventTrack(id, track_list.tracks_timed[i], multiplier);
-
-								if (track_list.tracks_timed[i].eventCount > 1)
-								{
-									for (size_t j = 0; j < track_list.count_timedSub; j++)
-									{
-										if (track_list.tracks_timedSub[j].parentId == i)
-										{
-											event_track_editor.LoadTrackName(id, track_list.tracks_timedSub[j]);
-											event_track_editor.AddMorphemeEventTrack(id, track_list.tracks_timedSub[j], multiplier);
-
-											id++;
-										}
-									}
-								}
-								else
-									id++;
-							}
-						}
-					}
-				}
-				else
-					MessageBoxA(NULL, "Provided node is not of the right type\n", "Morpheme Network Inspector", MB_ICONERROR);
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Clear Tracks") && event_track_editor.GetItemCount())
-				clear_tracks = true;
-
-			if (clear_tracks)
-			{
-				selectedEntry = -1;
-				clear_tracks = false;
-
-				event_track_editor.Clear();
-				Morpheme::ClearTrackList(&track_list);
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Save Tracks") && event_track_editor.GetItemCount())
-				save_tracks = true;
-
-			if (save_tracks)
-			{
-				save_tracks = false;
-
-				Morpheme::SaveEventTracks(&track_list);
-			}
-
-			/*if (currentFrame < event_track_editor.mFrameMin)
-				currentFrame = event_track_editor.mFrameMin;*/
-
-			if (event_track_editor.GetItemCount())
-				ImGui::Text(network_data.anim_events.asset_name);
-
-			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
-
-			if (selectedEntry != -1)
-			{
-				EventTrackEditor::EventTrack& item = event_track_editor.myItems[selectedEntry];
-				float startTime = Math::frameToTime(item.mFrameStart, 60);
-				float duration = Math::frameToTime(item.mFrameEnd, 60);
-
-				ImGui::Text("%s", event_track_editor.trackNames[item.id]);
-				ImGui::PushItemWidth(100);
-				ImGui::InputInt("Event ID", &item.eventId, 1, 0);
-				if (ImGui::IsItemHovered())
-				{
-					//Morpheme::getCategoryInfo(item.eventId, categoryInfo);
-
-					//ImGui::Text("Event ID");
-					ImGui::Text(categoryInfo);
-				}
-
-				ImGui::InputInt("Event Value", &item.value, 1, 0);
-				if (ImGui::IsItemHovered())
-				{
-					//Morpheme::getValueInfo(item.eventId, item.value, valueInfo);
-
-					ImGui::Text("Info");
-					ImGui::Separator();
-
-					ImGui::Text(valueInfo);
-				}
-
-				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-				ImGui::PopItemWidth();
-
-				//printf_s("Selected: %d\n", selectedEntry);
-
-				if (selectedEntry < track_list.count_discrete)
-				{
-					//printf_s("Saving Blend Track %d\n", selectedEntry);
-					item.SaveTrackData(&track_list.tracks_discrete[selectedEntry], multiplier);
-				}
-				if (track_list.count_discrete <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub)
-				{
-					//printf_s("Saving Blend Sub Track %d\n", selectedEntry);
-					item.SaveTrackData(&track_list.tracks_discreteSub[selectedEntry - track_list.count_discrete], multiplier);
-				}
-				if (track_list.count_discrete + track_list.count_discreteSub <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed)
-				{
-					//printf_s("Saving Generic Track %d\n", selectedEntry);
-					item.SaveTrackData(&track_list.tracks_timed[selectedEntry - (track_list.count_discrete + track_list.count_discreteSub)], multiplier);
-				}
-				if (track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed + track_list.count_timedSub)
-				{
-					//printf_s("Saving Generic Sub Track %d\n", selectedEntry);
-					item.SaveTrackData(&track_list.tracks_timedSub[selectedEntry - (track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed)], multiplier);
-				}
-			}
-
-			ImGui::EndTabItem();
-		}
-		ImGui::EndTabBar();
+		ImNodes::EndNodeEditor();		
 	}
 	ImGui::End();
 
@@ -642,17 +416,238 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		ImGui::EndTabBar();
 	}
 	ImGui::End();
+
+	ImGui::SetNextWindowSize(ImVec2(200, 500));
+	ImGui::Begin("EventTrack");
+	{
+		static char categoryInfo[100], valueInfo[255];
+		static int selectedEntry = -1;
+		static int firstFrame = 0;
+		static bool expanded = true;
+		static int currentFrame = 0;
+
+		float trackLenght;
+		float animLenght;
+
+		ImGui::PushItemWidth(200);
+		ImGui::InputPtr("Node Pointer", &network_data.anim_events.event_track_node, ImGuiInputTextFlags_CharsHexadecimal);
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Pull Tracks"))
+			pull_tracks = true;
+
+		if (pull_tracks && network_data.anim_events.event_track_node)
+		{
+			pull_tracks = false;
+
+			selectedEntry = -1;
+			event_track_editor.Clear();
+
+			Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.anim_events.event_track_node);
+
+			if (anim_sync_node->m_nodeTypeID == Morpheme::NodeType::NodeAnimSyncEvents)
+			{
+				Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)anim_sync_node->node_data;
+
+				if (node_data->m_animData && node_data->m_eventTrackData)
+				{
+					uint64_t nsaFile = node_data->m_animData;
+
+					trackLenght = *(float*)(nsaFile + 0x84);
+					animLenght = *(float*)(nsaFile + 0x88);
+
+					network_data.anim_events.mult = 1;
+					event_track_editor.mFrameMin = 0;
+					event_track_editor.mFrameMax = Math::timeToFrame(trackLenght, 60);
+
+					if (network_config.eventTrackConfig_scaleToAnim)
+					{
+						network_data.anim_events.mult = animLenght / trackLenght;
+						event_track_editor.mFrameMax = Math::timeToFrame(animLenght, 60);
+					}
+
+					network_data.anim_events.asset_name = Morpheme::getAnimNameFromAnimNode(anim_sync_node);
+
+					uint32_t event_track_count = node_data->m_eventTrackData->m_eventTracks[0].m_trackCount + node_data->m_eventTrackData->m_eventTracks[1].m_trackCount + node_data->m_eventTrackData->m_eventTracks[2].m_trackCount;
+
+					if (event_track_count == 0)
+						MessageBoxA(NULL, "Animation does not have any EventTrack associated with it", "Morpheme Network Inspector", MB_ICONINFORMATION);
+
+					if (event_track_count > 0 && Morpheme::LoadEventTracks(node_data->m_eventTrackData, &track_list) != 0)
+					{
+						int id = 0;
+
+						for (size_t i = 0; i < track_list.count_discrete; i++)
+						{
+							event_track_editor.LoadTrackName(id, track_list.tracks_discrete[i]);
+							event_track_editor.AddMorphemeEventTrack(id, &track_list.tracks_discrete[i], network_data.anim_events.mult);
+
+							if (track_list.tracks_discrete[i].eventCount > 1)
+							{
+								for (size_t j = 0; j < track_list.count_discreteSub; j++)
+								{
+									if (track_list.tracks_discreteSub[j].parentId == i)
+									{
+										event_track_editor.LoadTrackName(id, track_list.tracks_discreteSub[j]);
+										event_track_editor.AddMorphemeEventTrack(id, &track_list.tracks_discreteSub[j], network_data.anim_events.mult);
+
+										id++;
+									}
+								}
+							}
+							else
+								id++;
+						}
+
+						for (size_t i = 0; i < track_list.count_unk; i++)
+						{
+							event_track_editor.LoadTrackName(id, track_list.tracks_unk[i]);
+							event_track_editor.AddMorphemeEventTrack(id, &track_list.tracks_unk[i], network_data.anim_events.mult);
+
+							if (track_list.tracks_unk[i].eventCount > 1)
+							{
+								for (size_t j = 0; j < track_list.count_unkSub; j++)
+								{
+									if (track_list.tracks_unkSub[j].parentId == i)
+									{
+										event_track_editor.LoadTrackName(id, track_list.tracks_unkSub[j]);
+										event_track_editor.AddMorphemeEventTrack(id, &track_list.tracks_unkSub[j], network_data.anim_events.mult);
+
+										id++;
+									}
+								}
+							}
+							else
+								id++;
+						}
+
+						for (size_t i = 0; i < track_list.count_timed; i++)
+						{
+							event_track_editor.LoadTrackName(id, track_list.tracks_timed[i]);
+							event_track_editor.AddMorphemeEventTrack(id, &track_list.tracks_timed[i], network_data.anim_events.mult);
+
+							if (track_list.tracks_timed[i].eventCount > 1)
+							{
+								for (size_t j = 0; j < track_list.count_timedSub; j++)
+								{
+									if (track_list.tracks_timedSub[j].parentId == i)
+									{
+										event_track_editor.LoadTrackName(id, track_list.tracks_timedSub[j]);
+										event_track_editor.AddMorphemeEventTrack(id, &track_list.tracks_timedSub[j], network_data.anim_events.mult);
+
+										id++;
+									}
+								}
+							}
+							else
+								id++;
+						}
+					}
+				}
+			}
+			else
+				MessageBoxA(NULL, "Provided node is not of the right type\n", "Morpheme Network Inspector", MB_ICONERROR);
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear Tracks") && event_track_editor.GetItemCount())
+			clear_tracks = true;
+
+		if (clear_tracks)
+		{
+			selectedEntry = -1;
+			clear_tracks = false;
+
+			event_track_editor.Clear();
+			Morpheme::ClearTrackList(&track_list);
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Save Tracks") && event_track_editor.GetItemCount())
+			save_tracks = true;
+
+		if (save_tracks)
+		{
+			save_tracks = false;
+
+			Morpheme::SaveEventTracks(&track_list);
+		}
+
+		/*if (currentFrame < event_track_editor.mFrameMin)
+			currentFrame = event_track_editor.mFrameMin;*/
+
+		if (event_track_editor.GetItemCount())
+			ImGui::Text(network_data.anim_events.asset_name);
+
+		ImGui::BeginChild("sequencer");
+		ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
+
+		ImGui::Begin("Event Data");
+		if (selectedEntry != -1)
+		{
+			EventTrackEditor::EventTrack& item = event_track_editor.myItems[selectedEntry];
+			float startTime = Math::frameToTime(item.mFrameStart, 60);
+			float duration = Math::frameToTime(item.mFrameEnd, 60);
+
+			ImGui::Text("%s", event_track_editor.trackNames[item.id]);
+			ImGui::PushItemWidth(100);
+			ImGui::InputInt("Event ID", &item.eventId, 1, 0);
+			if (ImGui::IsItemHovered())
+			{
+				//Morpheme::getCategoryInfo(item.eventId, categoryInfo);
+
+				//ImGui::Text("Event ID");
+				ImGui::Text(categoryInfo);
+			}
+
+			ImGui::InputInt("Event Value", &item.value, 1, 0);
+			if (ImGui::IsItemHovered())
+			{
+				//Morpheme::getValueInfo(item.eventId, item.value, valueInfo);
+
+				ImGui::Text("Info");
+				ImGui::Separator();
+
+				ImGui::Text(valueInfo);
+			}
+
+			ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+			ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+			ImGui::PopItemWidth();
+		
+			item.SaveTrackData((MorphemeEventTrack*)item.morpheme_track, network_data.anim_events.mult);
+		
+			/*
+			if (selectedEntry < track_list.count_discrete)
+			{
+				//printf_s("Saving Blend Track %d\n", selectedEntry);
+				item.SaveTrackData(&track_list.tracks_discrete[selectedEntry], multiplier);
+			}
+			if (track_list.count_discrete <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub)
+			{
+				//printf_s("Saving Blend Sub Track %d\n", selectedEntry);
+				item.SaveTrackData(&track_list.tracks_discreteSub[selectedEntry - track_list.count_discrete], multiplier);
+			}
+			if (track_list.count_discrete + track_list.count_discreteSub <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed)
+			{
+				//printf_s("Saving Generic Track %d\n", selectedEntry);
+				item.SaveTrackData(&track_list.tracks_timed[selectedEntry - (track_list.count_discrete + track_list.count_discreteSub)], multiplier);
+			}
+			if (track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed + track_list.count_timedSub)
+			{
+				//printf_s("Saving Generic Sub Track %d\n", selectedEntry);
+				item.SaveTrackData(&track_list.tracks_timedSub[selectedEntry - (track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed)], multiplier);
+			}*/
+		}
+		ImGui::End();
+		ImGui::EndChild();
+	}
+	ImGui::End();
 }
 
 void MorphemeNetworkInspectorGUI::ProcessVariables()
 {
 	if (target_character && (*(int*)(target_character + 0x8) != 1) && (*(int*)(target_character + 0x8) != 2))
-	{
-		target_character = NULL;
-		NetworkCleanup();
-	}
-
-	if (target_character && *(int*)(target_character + 0x168) < 0)
 	{
 		target_character = NULL;
 		NetworkCleanup();
