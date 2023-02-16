@@ -788,7 +788,11 @@ public:
 
     static bool isNodeConnectedToOutput(Network* network, short node_id);
 
+    static bool doesNodeExist(Network* network, short node_id);
+
     static const char* getNodeTypeName_Alt(Morpheme::Network* network, short node_id);
 
     static const char* getNodeTypeName(Morpheme::Network* network, short node_id);
+
+    static uint32_t getTimeActId(Morpheme::NodeDef* node_def);
 };

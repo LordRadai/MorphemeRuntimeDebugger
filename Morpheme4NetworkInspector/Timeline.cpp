@@ -2,12 +2,17 @@
 
 const char* trackNames[50];
 
+void EventTrackEditor::AddTimeActTrack(int id, TimeActTrack* time_act_track, float multiplier)
+{
+	myItems.push_back(EventTrack{ id, time_act_track->group_id, Math::timeToFrame(time_act_track->startTime * multiplier, 60), Math::timeToFrame((time_act_track->endTime) * multiplier, 60), time_act_track->tae_id, 1, time_act_track->trackName, false, false, NULL, time_act_track });
+}
+
 void EventTrackEditor::AddMorphemeEventTrack(int id, MorphemeEventTrack* event_track, float multiplier)
 { 
 	if (event_track->is_discrete)
-		myItems.push_back(EventTrack{ id, event_track->eventId, Math::timeToFrame(event_track->startTime * multiplier, 60), Math::timeToFrame((event_track->startTime) * multiplier, 60), event_track->value, event_track->eventCount, event_track->trackName, event_track->is_discrete, false, event_track });
+		myItems.push_back(EventTrack{ id, event_track->eventId, Math::timeToFrame(event_track->startTime * multiplier, 60), Math::timeToFrame((event_track->startTime) * multiplier, 60), event_track->value, event_track->eventCount, event_track->trackName, event_track->is_discrete, false, event_track, NULL });
 	else
-		myItems.push_back(EventTrack{ id, event_track->eventId, Math::timeToFrame(event_track->startTime * multiplier, 60), Math::timeToFrame((event_track->startTime + event_track->duration) * multiplier, 60), event_track->value, event_track->eventCount, event_track->trackName, event_track->is_discrete, false, event_track });
+		myItems.push_back(EventTrack{ id, event_track->eventId, Math::timeToFrame(event_track->startTime * multiplier, 60), Math::timeToFrame((event_track->startTime + event_track->duration) * multiplier, 60), event_track->value, event_track->eventCount, event_track->trackName, event_track->is_discrete, false, event_track, NULL });
 }
 
 void EventTrackEditor::Clear()
@@ -21,7 +26,7 @@ void EventTrackEditor::LoadTrackName(int id, MorphemeEventTrack event_track)
 	//printf_s("%s\n", trackNames[id]);
 }
 
-void EventTrackEditor::EventTrack::SaveTrackData(MorphemeEventTrack* event_track, float multiplier)
+void EventTrackEditor::EventTrack::SaveEventTrackData(MorphemeEventTrack* event_track, float multiplier)
 {
 	event_track->eventCount = eventCount;
 	event_track->eventId = eventId;
@@ -30,6 +35,15 @@ void EventTrackEditor::EventTrack::SaveTrackData(MorphemeEventTrack* event_track
 
 	if (event_track->is_discrete == false)
 		event_track->duration = Math::frameToTime((mFrameEnd - mFrameStart), 60) / multiplier;	
+}
+
+void EventTrackEditor::EventTrack::SaveTaeTrackData(TimeActTrack* tae_track, float multiplier)
+{
+	tae_track->tae_count = eventCount;
+	tae_track->group_id = eventId;
+	tae_track->tae_id = value;
+	tae_track->startTime = Math::frameToTime(mFrameStart, 60) / multiplier;
+	tae_track->endTime = Math::frameToTime(mFrameEnd, 60) / multiplier;
 }
 
 int MorphemeEventTrackList::getSubTrackcount_discrete()
@@ -62,6 +76,15 @@ int MorphemeEventTrackList::getSubTrackcount_unk()
 	return result;
 }
 
+int TimeActTrackList::getSubTrackcount()
+{
+	int result = 0;
+
+	for (size_t i = 0; i < count; i++)
+		result += (tracks[i].tae_count - 1);
+
+	return result;
+}
 
 void MorphemeEventTrackList::allocSubTracks()
 {

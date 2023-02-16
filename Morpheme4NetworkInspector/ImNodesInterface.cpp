@@ -52,6 +52,9 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 		ImNodes::PushColorStyle(ImNodesCol_NodeOutline, 0xFF0000FF);
 	}
 
+	if (ImNodes::IsNodeSelected(node->m_nodeID))
+		network_inspector.network_data.imnodes_data.selected_node = node;
+
 	switch (node->m_nodeTypeID)
 	{
 	case 10:
@@ -70,8 +73,6 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 		createBlend2Node(node);
 		break;
 	case 400:
-		createTransitNode(node);
-		break;
 	case 402:
 		createTransitNode(node);
 		break;
@@ -104,7 +105,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 			for (size_t i = 0; i < node->m_numChildNodeIDs; i++)
 			{
 				ImNodes::BeginInputAttribute(source_id + i);
-				ImGui::Text("Source %d", i + 1);
+				ImGui::Text("Source");
 				ImNodes::EndInputAttribute();
 			}
 		}
@@ -122,7 +123,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 			for (size_t i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
 			{
 				ImNodes::BeginInputAttribute(input_id + i);
-				ImGui::Text("Input %d", i+1);
+				ImGui::Text("Input");
 				ImNodes::EndInputAttribute();
 			}
 		}
@@ -282,7 +283,7 @@ void ImNodesInterface::createTransitNode(Morpheme::NodeDef* node)
 		//createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[0]));
 		//createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[1]));
 
-		ImNodes::Link(link_id, getNodeOutputPinId(node->m_childNodeIDs[0]), getNodeSourcePinId(node->m_childNodeIDs[1], 0));
+		ImNodes::LinkNodes(link_id, node->m_childNodeIDs[0], node->m_childNodeIDs[1]);
 		//ImNodes::Link(link_id + 1, output_id, getNodeSourcePinId(node->m_childNodeIDs[1], 0));
 
 		/*
@@ -434,7 +435,7 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 		for (size_t i = 0; i < node->m_numChildNodeIDs; i++)
 		{
 			ImNodes::BeginInputAttribute(source_id + i);
-			ImGui::Text("Source %d", i + 1);
+			ImGui::Text("Source");
 			ImNodes::EndInputAttribute();
 		}
 	}
@@ -452,7 +453,7 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 		for (size_t i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
 		{
 			ImNodes::BeginInputAttribute(input_id + i);
-			ImGui::Text("Input %d", i + 1);
+			ImGui::Text("Input");
 			ImNodes::EndInputAttribute();
 		}
 	}

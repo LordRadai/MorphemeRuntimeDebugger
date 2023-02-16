@@ -22,6 +22,7 @@
 #include "imnodes/imnodes_internal.h"
 #include "Timeline.h"
 #include "Morpheme.h"
+#include "TimeAct.h"
 
 class MorphemeNetworkInspectorGUI
 {
@@ -48,11 +49,21 @@ public:
 		std::vector<const char*> cp_names;
 	};
 
+	struct AnimTimeAct
+	{
+		uint64_t pl_tae;
+		uint64_t sfx_tae;
+		uint64_t snd_tae;
+
+		uint32_t current_tae;
+	};
+
 	struct AnimEventTrack
 	{
 		std::vector<Morpheme::NodeDef*> anim_nodes;
 		ImU64 event_track_node;
 		const char* asset_name;
+		AnimTimeAct anim_tae;
 		float mult;
 	};
 
@@ -85,6 +96,9 @@ public:
 		short node_to_inspect;
 		bool is_inspect;
 		Morpheme::NodeDef* node_def;
+		Morpheme::NodeDef* selected_node;
+		ImNodesEditorContext* current_editor;
+		std::vector<ImNodesEditorContext*> editors;
 	};
 
 	struct NetworkData

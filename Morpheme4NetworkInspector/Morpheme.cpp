@@ -1,23 +1,6 @@
 #include "Morpheme.h"
 #include "common.h"
 
-void Morpheme::loadControlParameters()
-{
-
-}
-
-void Morpheme::disableMorphemeUpdates(bool state)
-{
-	if (state)
-	{
-
-	}
-	else
-	{
-
-	}
-}
-
 int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackList* track_list)
 {
 	if (!track_base)
@@ -43,7 +26,8 @@ int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackLis
 			track_list->tracks_discrete[i].eventCount = track_base->m_eventTracks[0].m_tracks[i]->m_numEvents;
 			track_list->tracks_discrete[i].eventId = track_base->m_eventTracks[0].m_tracks[i]->m_eventId;
 
-			track_list->tracks_discrete[i].trackName = track_base->m_eventTracks[0].m_tracks[i]->m_trackName;
+			strcpy(track_list->tracks_discrete[i].trackName, track_base->m_eventTracks[0].m_tracks[i]->m_trackName);
+			//track_list->tracks_discrete[i].trackName = track_base->m_eventTracks[0].m_tracks[i]->m_trackName;
 
 			track_list->tracks_discrete[i].startTime = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_startTime;
 			track_list->tracks_discrete[i].duration = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_duration;
@@ -64,7 +48,8 @@ int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackLis
 					track_list->tracks_discreteSub[index_subBlend].childId = j;
 					track_list->tracks_discreteSub[index_subBlend].eventCount = 1;
 					track_list->tracks_discreteSub[index_subBlend].eventId = track_list->tracks_discrete[i].eventId;
-					track_list->tracks_discreteSub[index_subBlend].trackName = track_list->tracks_discrete[i].trackName;
+					strcpy(track_list->tracks_discreteSub[index_subBlend].trackName, track_base->m_eventTracks[0].m_tracks[i]->m_trackName);
+					//track_list->tracks_discreteSub[index_subBlend].trackName = track_list->tracks_discrete[i].trackName;
 
 					track_list->tracks_discreteSub[index_subBlend].startTime = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_startTime;
 					track_list->tracks_discreteSub[index_subBlend].duration = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_duration;
@@ -93,7 +78,8 @@ int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackLis
 			track_list->tracks_unk[i].eventCount = track_base->m_eventTracks[1].m_tracks[i]->m_numEvents;
 			track_list->tracks_unk[i].eventId = track_base->m_eventTracks[1].m_tracks[i]->m_eventId;
 
-			track_list->tracks_unk[i].trackName = track_base->m_eventTracks[1].m_tracks[i]->m_trackName;
+			strcpy(track_list->tracks_unk[i].trackName, track_base->m_eventTracks[1].m_tracks[i]->m_trackName);
+			//track_list->tracks_unk[i].trackName = track_base->m_eventTracks[1].m_tracks[i]->m_trackName;
 
 			track_list->tracks_unk[i].startTime = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[0].m_startTime;
 			track_list->tracks_unk[i].duration = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[0].m_duration;
@@ -114,7 +100,9 @@ int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackLis
 					track_list->tracks_unkSub[index_subUnk].childId = j;
 					track_list->tracks_unkSub[index_subUnk].eventCount = 1;
 					track_list->tracks_unkSub[index_subUnk].eventId = track_list->tracks_timed[i].eventId;
-					track_list->tracks_unkSub[index_subUnk].trackName = track_list->tracks_timed[i].trackName;
+
+					strcpy(track_list->tracks_unkSub[index_subUnk].trackName, track_list->tracks_timed[i].trackName);
+					//track_list->tracks_unkSub[index_subUnk].trackName = track_list->tracks_timed[i].trackName;
 
 					track_list->tracks_unkSub[index_subUnk].startTime = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[j].m_startTime;
 					track_list->tracks_unkSub[index_subUnk].duration = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[j].m_duration;
@@ -141,7 +129,8 @@ int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackLis
 			track_list->tracks_timed[i].eventCount = track_base->m_eventTracks[2].m_tracks[i]->m_numEvents;
 			track_list->tracks_timed[i].eventId = track_base->m_eventTracks[2].m_tracks[i]->m_eventId;
 
-			track_list->tracks_timed[i].trackName = track_base->m_eventTracks[2].m_tracks[i]->m_trackName;
+			strcpy(track_list->tracks_timed[i].trackName, track_base->m_eventTracks[2].m_tracks[i]->m_trackName);
+			//track_list->tracks_timed[i].trackName = track_base->m_eventTracks[2].m_tracks[i]->m_trackName;
 
 			track_list->tracks_timed[i].startTime = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_startTime;
 			track_list->tracks_timed[i].duration = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_duration;
@@ -162,7 +151,9 @@ int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackLis
 					track_list->tracks_timedSub[index_subGeneric].childId = j;
 					track_list->tracks_timedSub[index_subGeneric].eventCount = 1;
 					track_list->tracks_timedSub[index_subGeneric].eventId = track_list->tracks_timed[i].eventId;
-					track_list->tracks_timedSub[index_subGeneric].trackName = track_list->tracks_timed[i].trackName;
+
+					strcpy(track_list->tracks_timedSub[index_subGeneric].trackName, track_list->tracks_timed[i].trackName);
+					//track_list->tracks_timedSub[index_subGeneric].trackName = track_list->tracks_timed[i].trackName;
 
 					track_list->tracks_timedSub[index_subGeneric].startTime = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_startTime;
 					track_list->tracks_timedSub[index_subGeneric].duration = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_duration;
@@ -198,7 +189,7 @@ void Morpheme::SaveEventTracks(MorphemeEventTrackList* track_list)
 
 	if (!track_list)
 	{
-		printf_s("[ERROR, MorphemeSyste] EventTrack save task failed. Input is nullptr\n");
+		MessageBoxA(NULL, "EventTrack save task failed. Input is nullptr", "MorphemeNetworkInspector", MB_ICONERROR);
 		return;
 	}
 
@@ -830,4 +821,34 @@ const char* Morpheme::getNodeTypeName(Morpheme::Network* network, short node_id)
 	std::string typeName = node_type.GetString("NodeType", typeID, typeID_unk);
 
 	return typeName.c_str();
+}
+
+bool Morpheme::doesNodeExist(Network* network, short node_id)
+{
+	for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
+	{
+		if (network->m_networkDef->m_nodes[i]->m_nodeID == node_id)
+			return true;
+	}
+
+	return false;
+}
+
+uint32_t Morpheme::getTimeActId(Morpheme::NodeDef* node_def)
+{
+	if (node_def->m_nodeTypeID == NodeType::NodeAnimSyncEvents)
+	{
+		Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
+
+		for (size_t i = 0; i < node_data->m_eventTrackData->m_eventTracks[2].m_trackCount; i++)
+		{
+			if (node_data->m_eventTrackData->m_eventTracks[2].m_tracks[i]->m_eventId == 1000)
+				return node_data->m_eventTrackData->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_userData;
+		}	
+		MessageBoxA(NULL, "Animation has no TAE associated to it", "MorphemeNetworkInspector", MB_ICONINFORMATION);
+		return 0;
+	}
+	
+	MessageBoxA(NULL, "Node is not an animation node", "MorphemeNetworkInspector", MB_ICONERROR);
+	return 0;
 }

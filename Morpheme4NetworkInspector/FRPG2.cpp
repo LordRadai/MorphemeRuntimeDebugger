@@ -45,4 +45,5 @@ uint64_t FRPG2::getLockedTargetCharacterCtrl()
 void FRPG2::assignFunctionAddr()
 {
 	sendMessage = (oSendMessage)((uint64_t)ModuleAddr + 0x5EBE70);
+	taeLookup = (oTaeLookup)((uint64_t)ModuleAddr + 0xB3F3C0);
 }

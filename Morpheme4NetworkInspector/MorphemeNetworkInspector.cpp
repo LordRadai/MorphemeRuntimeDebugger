@@ -148,6 +148,8 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		ImGui::InputShort("Node ID", &network_data.imnodes_data.node_to_inspect, 0, 0, ImGuiInputTextFlags_None);
 		if (ImGui::Button("Get Node")) { network_data.imnodes_data.is_inspect = true; }
 
+		//ImNodes::LoadCurrentEditorStateFromIniFile();
+		//network_data.imnodes_data.current_editor = ImNodes::EditorContextCreate();
 		ImNodes::BeginNodeEditor();
 		ImNodes::MiniMap(0.2f, ImNodesMiniMapLocation_BottomRight);
 
@@ -202,97 +204,172 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 	}
 	ImGui::End();
 
+	ImGui::Begin("Attributes");
+	{
+		if (network_data.imnodes_data.selected_node != NULL)
+		{
+			char buf[255];
+			sprintf_s(buf, "[%d] %s (%s)", network_data.imnodes_data.selected_node->m_nodeID, Morpheme::getNodeName(target_character, network_data.imnodes_data.selected_node->m_nodeID), Morpheme::getNodeTypeName_Alt(network, network_data.imnodes_data.selected_node->m_nodeID));
+
+			ImGui::Text(buf);
+
+			ImGui::PushItemWidth(100);
+			ImGui::InputInt("Node Type", (int*)&network_data.imnodes_data.selected_node->m_nodeTypeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputByte("Flag 1", (char*)&network_data.imnodes_data.selected_node->m_flags1, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputByte("Flag 2", (char*)&network_data.imnodes_data.selected_node->m_flags2, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputShort("Node ID", (short*)&network_data.imnodes_data.selected_node->m_nodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputShort("Parent Node ID", (short*)&network_data.imnodes_data.selected_node->m_parentNodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputShort("Child Count", (short*)&network_data.imnodes_data.selected_node->m_numChildNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			ImGui::InputByte("Input Count", (char*)&network_data.imnodes_data.selected_node->m_numControlParamAndOpNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
+			if (network_data.imnodes_data.selected_node->m_numChildNodeIDs > 0)
+			{
+				if (ImGui::TreeNode("Child Nodes"))
+				{
+					for (size_t j = 0; j < network_data.imnodes_data.selected_node->m_numChildNodeIDs; j++)
+					{
+						ImVec4 child_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+
+						if (Morpheme::isNodeContainer(network, network_data.imnodes_data.selected_node->m_childNodeIDs[j]))
+							child_col = ImVec4(0.39f, 0.58f, 1.0f, 1.0f);
+
+						ImGui::PushStyleColor(ImGuiCol_Text, child_col);
+						char id[255];
+						sprintf_s(id, "child %d", j);
+
+						char child_name[255];
+						sprintf_s(child_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.imnodes_data.selected_node->m_childNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.imnodes_data.selected_node->m_childNodeIDs[j]));
+						ImGui::PushID(id);
+						ImGui::InputShort(child_name, (short*)&network_data.imnodes_data.selected_node->m_childNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+						ImGui::PopID();
+						ImGui::PopStyleColor(1);
+					}
+					ImGui::TreePop();
+				}
+			}
+			if (network_data.imnodes_data.selected_node->m_numControlParamAndOpNodeIDs > 0)
+			{
+				if (ImGui::TreeNode("Inputs"))
+				{
+					for (byte j = 0; j < network_data.imnodes_data.selected_node->m_numControlParamAndOpNodeIDs; j++)
+					{
+						ImVec4 input_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+
+						if (Morpheme::isNodeContainer(network, network_data.imnodes_data.selected_node->m_controlParamAndOpNodeIDs[j]))
+							input_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
+
+						ImGui::PushStyleColor(ImGuiCol_Text, input_col);
+						char id[255];
+						sprintf_s(id, "input %d", j);
+
+						char input_name[255] = "";
+						sprintf_s(input_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.imnodes_data.selected_node->m_controlParamAndOpNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.imnodes_data.selected_node->m_controlParamAndOpNodeIDs[j]));
+						ImGui::PushID(id);
+						ImGui::InputInt(input_name, &network_data.imnodes_data.selected_node->m_controlParamAndOpNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+						ImGui::PopID();
+						ImGui::PopStyleColor(1);
+					}
+					ImGui::TreePop();
+				}
+			}
+
+			ImGui::PopItemWidth();
+			ImGui::InputPtr("Node Data", (uint64_t*)&network_data.imnodes_data.selected_node->node_data, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_CharsHexadecimal);
+		}
+	}
+		
+	ImGui::End();
+
 	ImGui::Begin("Nodes");
 	{
 		for (size_t i = 0; i < network_data.nodes.size(); i++)
+		{
+			ImVec4 node_col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
+			ImVec4 node_col_active = ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive);
+			ImVec4 node_col_hovered = ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered);
+
+			if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_nodeID))
 			{
-				ImVec4 node_col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
-				ImVec4 node_col_active = ImGui::GetStyleColorVec4(ImGuiCol_HeaderActive);
-				ImVec4 node_col_hovered = ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered);
-
-				if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_nodeID))
-				{
-					node_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
-					node_col_active = ImVec4(0.39f, 0.39f, 1.0f, 1.0f);
-					node_col_hovered = ImVec4(0.27f, 0.27f, 1.0f, 1.0f);
-				}
-
-				ImGui::PushStyleColor(ImGuiCol_Header, node_col);
-				ImGui::PushStyleColor(ImGuiCol_HeaderActive, node_col_active);
-				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, node_col_hovered);
-
-				char buf[255];
-				sprintf_s(buf, "[%d] %s (%s)", network_data.nodes[i]->m_nodeID, network_data.node_names[i], Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_nodeID));
-
-				if (ImGui::CollapsingHeader(buf))
-				{
-					ImGui::PushItemWidth(100);
-					ImGui::PushID(i);
-					ImGui::InputInt("Node Type", (int*)&network_data.nodes[i]->m_nodeTypeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					ImGui::InputByte("Flag 1", (char*)&network_data.nodes[i]->m_flags1, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					ImGui::InputByte("Flag 2", (char*)&network_data.nodes[i]->m_flags2, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					ImGui::InputShort("Node ID", (short*)&network_data.nodes[i]->m_nodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					ImGui::InputShort("Parent Node ID", (short*)&network_data.nodes[i]->m_parentNodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					ImGui::InputShort("Child Count", (short*)&network_data.nodes[i]->m_numChildNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					ImGui::InputByte("Input Count", (char*)&network_data.nodes[i]->m_numControlParamAndOpNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
-					if (network_data.nodes[i]->m_numChildNodeIDs > 0)
-					{
-						if (ImGui::TreeNode("Child Nodes"))
-						{
-							for (size_t j = 0; j < network_data.nodes[i]->m_numChildNodeIDs; j++)
-							{
-								ImVec4 child_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-
-								if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_childNodeIDs[j]))
-									child_col = ImVec4(0.39f, 0.58f, 1.0f, 1.0f);
-
-								ImGui::PushStyleColor(ImGuiCol_Text, child_col);
-								char id[255];
-								sprintf_s(id, "child %d", j);
-
-								char child_name[255];
-								sprintf_s(child_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.nodes[i]->m_childNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_childNodeIDs[j]));
-								ImGui::PushID(id);
-								ImGui::InputShort(child_name, (short*)&network_data.nodes[i]->m_childNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
-								ImGui::PopID();
-								ImGui::PopStyleColor(1);
-							}
-							ImGui::TreePop();
-						}
-					}
-					if (network_data.nodes[i]->m_numControlParamAndOpNodeIDs > 0)
-					{
-						if (ImGui::TreeNode("Inputs"))
-						{
-							for (byte j = 0; j < network_data.nodes[i]->m_numControlParamAndOpNodeIDs; j++)
-							{
-								ImVec4 input_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-
-								if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]))
-									input_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
-
-								ImGui::PushStyleColor(ImGuiCol_Text, input_col);
-								char id[255];
-								sprintf_s(id, "input %d", j);
-
-								char input_name[255] = "";
-								sprintf_s(input_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]));
-								ImGui::PushID(id);
-								ImGui::InputInt(input_name, &network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
-								ImGui::PopID();
-								ImGui::PopStyleColor(1);
-							}
-							ImGui::TreePop();
-						}
-					}
-
-					ImGui::PopItemWidth();
-					ImGui::InputPtr("Node Data", (uint64_t*)&network_data.nodes[i]->node_data, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_CharsHexadecimal);
-					ImGui::PopID();
-				}
-
-				ImGui::PopStyleColor(3);
+				node_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
+				node_col_active = ImVec4(0.39f, 0.39f, 1.0f, 1.0f);
+				node_col_hovered = ImVec4(0.27f, 0.27f, 1.0f, 1.0f);
 			}
+
+			ImGui::PushStyleColor(ImGuiCol_Header, node_col);
+			ImGui::PushStyleColor(ImGuiCol_HeaderActive, node_col_active);
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, node_col_hovered);
+
+			char buf[255];
+			sprintf_s(buf, "[%d] %s (%s)", network_data.nodes[i]->m_nodeID, network_data.node_names[i], Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_nodeID));
+
+			if (ImGui::CollapsingHeader(buf))
+			{
+				ImGui::PushItemWidth(100);
+				ImGui::PushID(i);
+				ImGui::InputInt("Node Type", (int*)&network_data.nodes[i]->m_nodeTypeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Flag 1", (char*)&network_data.nodes[i]->m_flags1, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Flag 2", (char*)&network_data.nodes[i]->m_flags2, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputShort("Node ID", (short*)&network_data.nodes[i]->m_nodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputShort("Parent Node ID", (short*)&network_data.nodes[i]->m_parentNodeID, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputShort("Child Count", (short*)&network_data.nodes[i]->m_numChildNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				ImGui::InputByte("Input Count", (char*)&network_data.nodes[i]->m_numControlParamAndOpNodeIDs, 0, 0, ImGuiInputTextFlags_ReadOnly);
+				if (network_data.nodes[i]->m_numChildNodeIDs > 0)
+				{
+					if (ImGui::TreeNode("Child Nodes"))
+					{
+						for (size_t j = 0; j < network_data.nodes[i]->m_numChildNodeIDs; j++)
+						{
+							ImVec4 child_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+
+							if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_childNodeIDs[j]))
+								child_col = ImVec4(0.39f, 0.58f, 1.0f, 1.0f);
+
+							ImGui::PushStyleColor(ImGuiCol_Text, child_col);
+							char id[255];
+							sprintf_s(id, "child %d", j);
+
+							char child_name[255];
+							sprintf_s(child_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.nodes[i]->m_childNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_childNodeIDs[j]));
+							ImGui::PushID(id);
+							ImGui::InputShort(child_name, (short*)&network_data.nodes[i]->m_childNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+							ImGui::PopID();
+							ImGui::PopStyleColor(1);
+						}
+						ImGui::TreePop();
+					}
+				}
+				if (network_data.nodes[i]->m_numControlParamAndOpNodeIDs > 0)
+				{
+					if (ImGui::TreeNode("Inputs"))
+					{
+						for (byte j = 0; j < network_data.nodes[i]->m_numControlParamAndOpNodeIDs; j++)
+						{
+							ImVec4 input_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+
+							if (Morpheme::isNodeContainer(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]))
+								input_col = ImVec4(0.2f, 0.2f, 1.0f, 1.0f);
+
+							ImGui::PushStyleColor(ImGuiCol_Text, input_col);
+							char id[255];
+							sprintf_s(id, "input %d", j);
+
+							char input_name[255] = "";
+							sprintf_s(input_name, "%s (%s)", Morpheme::getNodeName(target_character, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]), Morpheme::getNodeTypeName_Alt(network, network_data.nodes[i]->m_controlParamAndOpNodeIDs[j]));
+							ImGui::PushID(id);
+							ImGui::InputInt(input_name, &network_data.nodes[i]->m_controlParamAndOpNodeIDs[j], 0, 0, ImGuiInputTextFlags_ReadOnly);
+							ImGui::PopID();
+							ImGui::PopStyleColor(1);
+						}
+						ImGui::TreePop();
+					}
+				}
+
+				ImGui::PopItemWidth();
+				ImGui::InputPtr("Node Data", (uint64_t*)&network_data.nodes[i]->node_data, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_CharsHexadecimal);
+				ImGui::PopID();
+			}
+
+			ImGui::PopStyleColor(3);
+		}
 	}
 	ImGui::End();
 
@@ -422,9 +499,13 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 	{
 		static char categoryInfo[100], valueInfo[255];
 		static int selectedEntry = -1;
+		static int selectedEntry_tae = -1;
 		static int firstFrame = 0;
+		static int firstFrame_tae = 0;
 		static bool expanded = true;
+		static bool expanded_tae = true;
 		static int currentFrame = 0;
+		static int currentFrame_tae = 0;
 
 		float trackLenght;
 		float animLenght;
@@ -442,8 +523,10 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 			selectedEntry = -1;
 			event_track_editor.Clear();
+			time_act_track_editor.Clear();
 
 			Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.anim_events.event_track_node);
+			network_data.anim_events.anim_tae.current_tae = Morpheme::getTimeActId(anim_sync_node);
 
 			if (anim_sync_node->m_nodeTypeID == Morpheme::NodeType::NodeAnimSyncEvents)
 			{
@@ -543,6 +626,40 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 								id++;
 						}
 					}
+
+					time_act_track_editor.mFrameMin = 0;
+					time_act_track_editor.mFrameMax = Math::timeToFrame(trackLenght, 60);
+
+					if (network_config.eventTrackConfig_scaleToAnim)
+					{
+						network_data.anim_events.mult = animLenght / trackLenght;
+						time_act_track_editor.mFrameMax = Math::timeToFrame(animLenght, 60);
+					}
+
+					if (event_track_count > 0 && TimeAct::loadTimeActTrack(taeLookup(network_data.anim_events.anim_tae.pl_tae, network_data.anim_events.anim_tae.current_tae), &tae_track_list))
+					{
+						int id = 0;
+
+						for (size_t i = 0; i < tae_track_list.count; i++)
+						{
+							time_act_track_editor.AddTimeActTrack(id, &tae_track_list.tracks[i], 1);
+
+							if (tae_track_list.tracks[i].tae_count > 1)
+							{
+								for (size_t j = 0; j < tae_track_list.countSub; j++)
+								{
+									if (tae_track_list.tracksSub[j].parentId == i)
+									{
+										time_act_track_editor.AddTimeActTrack(id, &tae_track_list.tracksSub[j], 1);
+
+										id++;
+									}
+								}
+							}
+							else
+								id++;
+						}
+					}
 				}
 			}
 			else
@@ -556,10 +673,14 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		if (clear_tracks)
 		{
 			selectedEntry = -1;
+			selectedEntry_tae = -1;
 			clear_tracks = false;
 
 			event_track_editor.Clear();
 			Morpheme::ClearTrackList(&track_list);
+
+			time_act_track_editor.Clear();
+			TimeAct::clearTrackList(&tae_track_list);
 		}
 
 		ImGui::SameLine();
@@ -571,6 +692,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			save_tracks = false;
 
 			Morpheme::SaveEventTracks(&track_list);
+			TimeAct::saveTimeActTrack(&tae_track_list);
 		}
 
 		/*if (currentFrame < event_track_editor.mFrameMin)
@@ -579,68 +701,92 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		if (event_track_editor.GetItemCount())
 			ImGui::Text(network_data.anim_events.asset_name);
 
-		ImGui::BeginChild("sequencer");
-		ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
+		ImGui::BeginTabBar("event track tab bar");
+		if (ImGui::BeginTabItem("Event Track"))
+		{
+			ImGui::BeginChild("sequencer");
+			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
+			ImGui::EndChild();
+
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("TimeAct"))
+		{
+			ImGui::BeginChild("tae sequencer");
+			ImSequencer::Sequencer(&time_act_track_editor, &currentFrame_tae, &expanded_tae, &selectedEntry_tae, &firstFrame_tae, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
 
 		ImGui::Begin("Event Data");
-		if (selectedEntry != -1)
+		ImGui::BeginTabBar("event data tab bar");
+
+		if (ImGui::BeginTabItem("EventTrack"))
 		{
-			EventTrackEditor::EventTrack& item = event_track_editor.myItems[selectedEntry];
-			float startTime = Math::frameToTime(item.mFrameStart, 60);
-			float duration = Math::frameToTime(item.mFrameEnd, 60);
-
-			ImGui::Text("%s", event_track_editor.trackNames[item.id]);
-			ImGui::PushItemWidth(100);
-			ImGui::InputInt("Event ID", &item.eventId, 1, 0);
-			if (ImGui::IsItemHovered())
+			if (selectedEntry != -1)
 			{
-				//Morpheme::getCategoryInfo(item.eventId, categoryInfo);
+				EventTrackEditor::EventTrack& item = event_track_editor.myItems[selectedEntry];
+				float startTime = Math::frameToTime(item.mFrameStart, 60);
+				float duration = Math::frameToTime(item.mFrameEnd, 60);
 
-				//ImGui::Text("Event ID");
-				ImGui::Text(categoryInfo);
+				ImGui::Text("%s", event_track_editor.trackNames[item.id]);
+				ImGui::PushItemWidth(100);
+				ImGui::InputInt("Event ID", &item.eventId, 1, 0);
+				if (ImGui::IsItemHovered())
+				{
+					//Morpheme::getCategoryInfo(item.eventId, categoryInfo);
+
+					//ImGui::Text("Event ID");
+					ImGui::Text(categoryInfo);
+				}
+
+				ImGui::InputInt("Event Value", &item.value, 1, 0);
+				if (ImGui::IsItemHovered())
+				{
+					//Morpheme::getValueInfo(item.eventId, item.value, valueInfo);
+
+					ImGui::Text("Info");
+					ImGui::Separator();
+
+					ImGui::Text(valueInfo);
+				}
+
+				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+				ImGui::PopItemWidth();
+
+				item.SaveEventTrackData(item.morpheme_track, network_data.anim_events.mult);
 			}
-
-			ImGui::InputInt("Event Value", &item.value, 1, 0);
-			if (ImGui::IsItemHovered())
-			{
-				//Morpheme::getValueInfo(item.eventId, item.value, valueInfo);
-
-				ImGui::Text("Info");
-				ImGui::Separator();
-
-				ImGui::Text(valueInfo);
-			}
-
-			ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-			ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(event_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-			ImGui::PopItemWidth();
-		
-			item.SaveTrackData((MorphemeEventTrack*)item.morpheme_track, network_data.anim_events.mult);
-		
-			/*
-			if (selectedEntry < track_list.count_discrete)
-			{
-				//printf_s("Saving Blend Track %d\n", selectedEntry);
-				item.SaveTrackData(&track_list.tracks_discrete[selectedEntry], multiplier);
-			}
-			if (track_list.count_discrete <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub)
-			{
-				//printf_s("Saving Blend Sub Track %d\n", selectedEntry);
-				item.SaveTrackData(&track_list.tracks_discreteSub[selectedEntry - track_list.count_discrete], multiplier);
-			}
-			if (track_list.count_discrete + track_list.count_discreteSub <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed)
-			{
-				//printf_s("Saving Generic Track %d\n", selectedEntry);
-				item.SaveTrackData(&track_list.tracks_timed[selectedEntry - (track_list.count_discrete + track_list.count_discreteSub)], multiplier);
-			}
-			if (track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed <= selectedEntry && selectedEntry < track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed + track_list.count_timedSub)
-			{
-				//printf_s("Saving Generic Sub Track %d\n", selectedEntry);
-				item.SaveTrackData(&track_list.tracks_timedSub[selectedEntry - (track_list.count_discrete + track_list.count_discreteSub + track_list.count_timed)], multiplier);
-			}*/
+			ImGui::EndTabItem();
 		}
+
+		if (ImGui::BeginTabItem("TimeAct"))
+		{
+			if (selectedEntry_tae != -1)
+			{
+				EventTrackEditor::EventTrack& item = time_act_track_editor.myItems[selectedEntry_tae];
+				float startTime = Math::frameToTime(item.mFrameStart, 60);
+				float duration = Math::frameToTime(item.mFrameEnd, 60);
+
+				ImGui::Text(item.trackName);
+				ImGui::PushItemWidth(100);
+				ImGui::InputInt("Group ID", &item.eventId, 1, 0);
+
+				ImGui::InputInt("Event ID", &item.value, 1, 0);
+
+				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(time_act_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(time_act_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+				ImGui::PopItemWidth();
+
+				item.SaveTaeTrackData(item.time_act_track, 1);
+			}
+
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+
 		ImGui::End();
-		ImGui::EndChild();
 	}
 	ImGui::End();
 }
@@ -703,6 +849,10 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 			if (network_data.anim_events.anim_nodes.size() == 0)
 				MessageBoxA(NULL, "There are no of the specified type\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
 
+			network_data.anim_events.anim_tae.pl_tae = TimeAct::getTimeActFile_pl(target_character);
+			network_data.anim_events.anim_tae.sfx_tae = TimeAct::getTimeActFile_sfx(target_character);
+			network_data.anim_events.anim_tae.snd_tae = TimeAct::getTimeActFile_snd(target_character);
+
 			network_tasks.get_anim_assets = false;
 		}
 
@@ -747,7 +897,10 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 			network_data.imnodes_data.node_position.clear();
 			network_data.imnodes_data.occupied_positions.clear();
 
-			network_data.imnodes_data.node_def = Morpheme::getNetworkNode(network, network_data.imnodes_data.node_to_inspect);
+			if (Morpheme::doesNodeExist(network, network_data.imnodes_data.node_to_inspect))
+				network_data.imnodes_data.node_def = Morpheme::getNetworkNode(network, network_data.imnodes_data.node_to_inspect);
+			else
+				MessageBoxA(NULL, "The specified node is not present in this network", "MorphemeNetworkInspector", MB_ICONINFORMATION);
 		}
 	}
 }

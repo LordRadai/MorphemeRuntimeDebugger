@@ -16,6 +16,7 @@ uint64_t BaseB;
 uint64_t KatanaMainApp;
 
 oSendMessage sendMessage;
+oTaeLookup taeLookup;
 
 HWND window = NULL;
 
@@ -32,8 +33,12 @@ LRESULT WINAPI WndProc_Alt(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 bool create_network_inspector = false;
 MorphemeNetworkInspectorGUI network_inspector;
+
 MorphemeEventTrackList track_list;
 EventTrackEditor event_track_editor;
+
+TimeActTrackList tae_track_list;
+EventTrackEditor time_act_track_editor;
 
 void initImGui(HWND hwnd)
 {

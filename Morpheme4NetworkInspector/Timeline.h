@@ -10,6 +10,28 @@
 
 #define TRACK_MAX 50
 
+struct TimeActTrack
+{
+    int tae_count;
+    int group_id;
+    int tae_id;
+    float startTime;
+    float endTime;
+    char trackName[50];
+    int parentId;
+    int childId;
+};
+
+struct TimeActTrackList
+{
+    uint64_t parent;
+    int count, countSub;
+    TimeActTrack* tracks;
+    TimeActTrack* tracksSub;
+
+    int getSubTrackcount();
+};
+
 struct MorphemeEventTrack
 {
     int eventCount;
@@ -17,7 +39,7 @@ struct MorphemeEventTrack
     int value;
     float startTime;
     float duration;
-    const char* trackName;
+    char trackName[50];
     int parentId;
     int childId;
     bool is_discrete;
@@ -176,6 +198,7 @@ struct EventTrackEditor : public ImSequencer::SequenceInterface
     virtual void Del(int index) { myItems.erase(myItems.begin() + index); }
     virtual void Duplicate(int index) { myItems.push_back(myItems[index]); }
 
+    void AddTimeActTrack(int id, TimeActTrack* time_act_track, float multiplier);
     void AddMorphemeEventTrack(int id, MorphemeEventTrack* event_track, float multiplier);
     void Clear();
     void LoadTrackName(int id, MorphemeEventTrack event_track);
@@ -197,8 +220,10 @@ struct EventTrackEditor : public ImSequencer::SequenceInterface
         bool isDiscrete;
         bool mExpanded;
         MorphemeEventTrack* morpheme_track;
+        TimeActTrack* time_act_track;
 
-        void SaveTrackData(MorphemeEventTrack* event_track, float multiplier);
+        void SaveEventTrackData(MorphemeEventTrack* event_track, float multiplier);
+        void SaveTaeTrackData(TimeActTrack* tae_track, float multiplier);
     };
 
     std::vector<EventTrack> myItems;
