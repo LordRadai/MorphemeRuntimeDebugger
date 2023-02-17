@@ -198,6 +198,19 @@ struct ImLinkData
     ImLinkData(const int link_id) : Id(link_id), StartPinIdx(), EndPinIdx(), ColorStyle() {}
 };
 
+struct ImNodeLinkData
+{
+    int Id;
+    int src, dst;
+
+    struct
+    {
+        ImU32 Base, Hovered, Selected;
+    } ColorStyle;
+
+    ImNodeLinkData(const int link_id) : Id(link_id), src(), dst(), ColorStyle() {}
+};
+
 struct ImClickInteractionState
 {
     ImNodesClickInteractionType Type;
@@ -249,6 +262,7 @@ struct ImNodesEditorContext
     ImObjectPool<ImNodeData> Nodes;
     ImObjectPool<ImPinData>  Pins;
     ImObjectPool<ImLinkData> Links;
+    ImObjectPool<ImNodeLinkData> NodeLinks;
 
     ImVector<int> NodeDepthOrder;
 

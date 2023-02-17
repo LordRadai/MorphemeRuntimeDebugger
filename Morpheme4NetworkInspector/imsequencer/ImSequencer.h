@@ -26,6 +26,7 @@
 #pragma once
 
 //#include "../Math.h"
+#include <math.h>
 #include <cstddef>
 
 struct ImDrawList;
@@ -40,6 +41,7 @@ namespace ImSequencer
         SEQUENCER_ADD = 1 << 4,
         SEQUENCER_DEL = 1 << 5,
         SEQUENCER_COPYPASTE = 1 << 6,
+        SEQUENCER_LOOP_EVENTS = 1 << 7,
         SEQUENCER_EDIT_ALL = SEQUENCER_EDIT_STARTEND | SEQUENCER_CHANGE_FRAME
     };
 

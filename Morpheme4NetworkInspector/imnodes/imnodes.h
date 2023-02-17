@@ -308,6 +308,8 @@ void PopAttributeFlag();
 // calls. The order of start_attr and end_attr doesn't make a difference for rendering the link.
 void Link(int id, int start_attribute_id, int end_attribute_id);
 
+void LinkNodes(const int id, const int src, const int dst);
+
 // Enable or disable the ability to click and drag a specific node.
 void SetNodeDraggable(int node_id, const bool draggable);
 

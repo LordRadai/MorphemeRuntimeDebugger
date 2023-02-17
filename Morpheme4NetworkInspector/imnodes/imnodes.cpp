@@ -26,6 +26,7 @@
 #include <stdio.h> // for fwrite, ssprintf, sscanf
 #include <stdlib.h>
 #include <string.h> // strlen, strncmp
+#include <math.h>
 
 ImNodesContext* GImNodes = NULL;
 
@@ -1569,6 +1570,72 @@ void DrawLink(ImNodesEditorContext& editor, const int link_idx)
         cubic_bezier.NumSegments);
 }
 
+void DrawLinearLink(ImNodesEditorContext& editor, const int link_idx)
+{
+    const ImNodeLinkData& link = editor.NodeLinks.Pool[link_idx];
+    const ImNodeData& start = editor.Nodes.Pool[link.src];
+    const ImNodeData& end = editor.Nodes.Pool[link.dst];
+
+    ImVec2 start_center = start.Rect.GetCenter();
+    ImVec2 end_center = end.Rect.GetCenter();
+
+    float line_len = abs(sqrt((start_center.x - end_center.x) * (start_center.x - end_center.x) + (start_center.y - end_center.y) * (start_center.y - end_center.y)));
+    float angle = atan2(end_center.y - start_center.y, end_center.x - start_center.x);
+
+    ImVec2 dir_center = ImVec2((start_center.x + end_center.x) / 2, (start_center.y + end_center.y) / 2);
+    ImVec2 dir_top = ImVec2(dir_center.x, dir_center.y);
+    ImVec2 dir_lb = ImVec2(dir_center.x + 4 * GImNodes->Style.LinkThickness * cos(angle + IM_PI / 2), dir_center.y + 4 * GImNodes->Style.LinkThickness * sin(angle + IM_PI / 2));
+    ImVec2 dir_rb = ImVec2(dir_center.x + 4 * GImNodes->Style.LinkThickness * cos(angle - IM_PI / 2), dir_center.y + 4 * GImNodes->Style.LinkThickness * sin(angle - IM_PI / 2));
+
+    const bool link_hovered =
+        GImNodes->HoveredLinkIdx == link_idx &&
+        editor.ClickInteraction.Type != ImNodesClickInteractionType_BoxSelection;
+
+    if (link_hovered)
+    {
+        GImNodes->HoveredLinkIdx = link_idx;
+    }
+
+    // It's possible for a link to be deleted in begin_link_interaction. A user
+    // may detach a link, resulting in the link wire snapping to the mouse
+    // position.
+    //
+    // In other words, skip rendering the link if it was deleted.
+    if (GImNodes->DeletedLinkIdx == link_idx)
+    {
+        return;
+    }
+
+    ImU32 link_color = link.ColorStyle.Base;
+    if (editor.SelectedLinkIndices.contains(link_idx))
+    {
+        link_color = link.ColorStyle.Selected;
+    }
+    else if (link_hovered)
+    {
+        link_color = link.ColorStyle.Hovered;
+    }
+
+    bool offset_link = false;
+
+    for (size_t i = 0; i < editor.NodeLinks.Pool.size(); i++)
+    {
+        if (editor.NodeLinks.Pool[i].dst == editor.NodeLinks.Pool[link_idx].src && editor.NodeLinks.Pool[i].src == editor.NodeLinks.Pool[link_idx].dst)
+            offset_link = true;
+    }
+
+    if (offset_link)
+    {
+        start_center.x += 10 * GImNodes->Style.LinkThickness;
+        end_center.x += 10 * GImNodes->Style.LinkThickness;
+    } 
+
+    GImNodes->CanvasDrawList->AddLine(start_center, end_center, link_color, GImNodes->Style.LinkThickness);
+    //GImNodes->CanvasDrawList->AddCircleFilled(dir_center, 2 * GImNodes->Style.LinkThickness, 0xFF0000FF, 20);
+
+    //GImNodes->CanvasDrawList->AddTriangleFilled(dir_top, dir_lb, dir_rb, 0xFF0000FF);
+}
+
 void BeginPinAttribute(
     const int                  id,
     const ImNodesAttributeType type,
@@ -2134,6 +2201,7 @@ void BeginNodeEditor()
     ObjectPoolReset(editor.Nodes);
     ObjectPoolReset(editor.Pins);
     ObjectPoolReset(editor.Links);
+    //ObjectPoolReset(editor.NodeLinks);
 
     GImNodes->HoveredNodeIdx.Reset();
     GImNodes->HoveredLinkIdx.Reset();
@@ -2261,6 +2329,14 @@ void EndNodeEditor()
         if (editor.Links.InUse[link_idx])
         {
             DrawLink(editor, link_idx);
+        }
+    }
+
+    for (int link_idx = 0; link_idx < editor.NodeLinks.Pool.size(); ++link_idx)
+    {
+        if (editor.Links.InUse[link_idx])
+        {
+            DrawLinearLink(editor, link_idx);
         }
     }
 
@@ -2538,6 +2614,33 @@ void Link(const int id, const int start_attr_id, const int end_attr_id)
          editor.ClickInteraction.LinkCreation.EndPinIdx == link.StartPinIdx))
     {
         GImNodes->SnapLinkIdx = ObjectPoolFindOrCreateIndex(editor.Links, id);
+    }
+}
+
+void LinkNodes(const int id, const int src, const int dst)
+{
+    assert(GImNodes->CurrentScope == ImNodesScope_Editor);
+
+    ImNodesEditorContext& editor = EditorContextGet();
+    ImNodeLinkData& node_link = ObjectPoolFindOrCreateObject(editor.NodeLinks, id);
+    node_link.Id = id;
+    node_link.src = ObjectPoolFindOrCreateIndex(editor.Nodes, src);
+    node_link.dst = ObjectPoolFindOrCreateIndex(editor.Nodes, dst);
+    node_link.ColorStyle.Base = GImNodes->Style.Colors[ImNodesCol_Link];
+    node_link.ColorStyle.Hovered = GImNodes->Style.Colors[ImNodesCol_LinkHovered];
+    node_link.ColorStyle.Selected = GImNodes->Style.Colors[ImNodesCol_LinkSelected];
+
+    //GImNodes->SnapLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
+
+    // Check if this link was created by the current link event
+    if ((editor.ClickInteraction.Type == ImNodesClickInteractionType_LinkCreation &&
+        editor.Pins.Pool[node_link.dst].Flags & ImNodesAttributeFlags_EnableLinkCreationOnSnap &&
+        editor.ClickInteraction.LinkCreation.StartPinIdx == node_link.src &&
+        editor.ClickInteraction.LinkCreation.EndPinIdx == node_link.dst) ||
+        (editor.ClickInteraction.LinkCreation.StartPinIdx == node_link.dst &&
+            editor.ClickInteraction.LinkCreation.EndPinIdx == node_link.src))
+    {
+        GImNodes->SnapLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
     }
 }
 

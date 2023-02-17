@@ -705,7 +705,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		if (ImGui::BeginTabItem("Event Track"))
 		{
 			ImGui::BeginChild("sequencer");
-			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME);
+			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_CHANGE_FRAME | ImSequencer::SEQUENCER_LOOP_EVENTS);
 			ImGui::EndChild();
 
 			ImGui::EndTabItem();

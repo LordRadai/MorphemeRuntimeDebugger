@@ -82,13 +82,14 @@ namespace ImSequencer
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
         ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
-        canvas_size.y = 200;
         int firstFrameUsed = firstFrame ? *firstFrame : 0;
 
         int controlHeight = sequenceCount * ItemHeight;
         for (int i = 0; i < sequenceCount; i++)
             controlHeight += int(sequence->GetCustomHeight(i));
         int frameCount = ImMax(sequence->GetFrameMax() - sequence->GetFrameMin(), 1);
+
+        canvas_size.y = controlHeight + 2.5 * ItemHeight;
 
         static bool MovingScrollBar = false;
         static bool MovingCurrentFrame = false;
@@ -102,9 +103,6 @@ namespace ImSequencer
         };
         ImVector<CustomDraw> customDraws;
         ImVector<CustomDraw> compactCustomDraws;
-
-        if (*firstFrame < sequence->GetFrameMin())
-            *firstFrame = sequence->GetFrameMin();
 
         // zoom in/out
         const int visibleFrameCount = (int)floorf((canvas_size.x - legendWidth) / framePixelWidth);
@@ -273,6 +271,11 @@ namespace ImSequencer
             }
             drawLine(sequence->GetFrameMin(), ItemHeight);
             drawLine(sequence->GetFrameMax(), ItemHeight);
+
+            for (int i = sequence->GetFrameMax() + 1; i <= 500; i += frameStep)
+            {
+                drawLine(i, ItemHeight);
+            }
             /*
             draw_list->AddLine(canvas_pos, ImVec2(canvas_pos.x, canvas_pos.y + controlHeight), 0xFF000000, 1);
             draw_list->AddLine(ImVec2(canvas_pos.x, canvas_pos.y + ItemHeight), ImVec2(canvas_size.x, canvas_pos.y + ItemHeight), 0xFF000000, 1);
@@ -336,6 +339,13 @@ namespace ImSequencer
             drawLineContent(sequence->GetFrameMin(), int(contentHeight));
             drawLineContent(sequence->GetFrameMax(), int(contentHeight));
 
+            for (int i = sequence->GetFrameMax() + 1; i <= 500; i += frameStep)
+            {
+                drawLineContent(i, ItemHeight);
+            }
+
+            draw_list->AddRectFilled(ImVec2(contentMin.x + legendWidth - firstFrameUsed * framePixelWidth + sequence->GetFrameMax() * framePixelWidth, canvas_pos.y), canvas_pos + canvas_size, 0x40000000, 0);
+
             // selection
             bool selected = selectedEntry && (*selectedEntry >= 0);
             /*if (selected)
@@ -370,18 +380,26 @@ namespace ImSequencer
 
                 //Draw Event ID at the event's rectangle middle section
                 sprintf_s(buffer, "%d", *value);
+
                 ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrameUsed * framePixelWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
                 ImVec2 slotP1(pos.x + *start * framePixelWidth - 1, pos.y + 2);
                 ImVec2 slotP2(pos.x + *end * framePixelWidth - 1, pos.y + ItemHeight - 2);
                 ImVec2 slotP3(pos.x + *end * framePixelWidth - 1, pos.y + ItemHeight - 2 + localCustomHeight);
+                ImVec2 slotP1Loop;
+                ImVec2 slotP2Loop;
+                ImVec2 slotP3Loop;
+
+                ImVec2 frameMin = ImVec2(pos.x - 1, 0);
+                ImVec2 frameMax = ImVec2(frameMin.x + sequence->GetFrameMax() * framePixelWidth, 0);
 
                 ImVec2 textSize = ImGui::CalcTextSize(buffer);
                 ImVec2 textP(slotP1.x + (slotP2.x - slotP1.x - textSize.x) / 2, slotP2.y + (slotP1.y - slotP2.y - textSize.y) / 2);
+                ImVec2 textPLoop;
 
-                if (*end == 0)
+                /*if (*end == 0)
                 {
                     slotP2.x = pos.x - 1;
-                }
+                }*/
 
                 if (*start == *end)
                 {
@@ -403,6 +421,54 @@ namespace ImSequencer
                     draw_list->AddRectFilled(slotP1, slotP2, slotColor, 0); //Track Box
                     draw_list->AddRect(slotP1, slotP2, TRACK_BOUND, 0); //Track Bounding Box
                     draw_list->AddText(textP, TRACK_TEXT_COLOR, buffer); //Event Value
+
+                    if (sequenceOptions & SEQUENCER_LOOP_EVENTS)
+                    {
+                        if (slotP2.x > frameMax.x)
+                        {
+                            if (slotP1.x < frameMax.x)
+                            {
+                                slotP1Loop = ImVec2(frameMin.x, slotP1.y);
+                                slotP2Loop = ImVec2(slotP1Loop.x + fmin(abs(slotP2.x - slotP1.x), abs(slotP2.x - frameMax.x)), slotP2.y);
+                                textPLoop = ImVec2(slotP1Loop.x + (slotP2Loop.x - slotP1Loop.x - textSize.x) / 2, slotP2Loop.y + (slotP1Loop.y - slotP2Loop.y - textSize.y) / 2);
+                            }
+                            else
+                            {
+                                slotP1Loop = ImVec2(frameMin.x + abs(slotP1.x - frameMax.x), slotP1.y);
+                                slotP2Loop = ImVec2(slotP1Loop.x + fmin(abs(slotP2.x - slotP1.x), abs(slotP2.x - frameMax.x)), slotP2.y);
+                                textPLoop = ImVec2(slotP1Loop.x + (slotP2Loop.x - slotP1Loop.x - textSize.x) / 2, slotP2Loop.y + (slotP1Loop.y - slotP2Loop.y - textSize.y) / 2);
+                            }
+
+                            draw_list->AddRectFilled(slotP1Loop, slotP2Loop, slotColor, 0); //Track Box
+                            draw_list->AddRect(slotP1Loop, slotP2Loop, TRACK_BOUND, 0); //Track Bounding Box
+                            draw_list->AddText(textPLoop, TRACK_TEXT_COLOR, buffer); //Event Value
+                        }
+                        else if (slotP1.x < frameMin.x)
+                        {
+                            if (slotP2.x > frameMin.x)
+                            {
+                                slotP2Loop = ImVec2(frameMax.x, slotP2.y);
+                                slotP1Loop = ImVec2(slotP2Loop.x - fmin(abs(slotP2.x - slotP1.x), abs(slotP1.x - frameMin.x)), slotP1.y);
+                                textPLoop = ImVec2(slotP1Loop.x + (slotP2Loop.x - slotP1Loop.x - textSize.x) / 2, slotP2Loop.y + (slotP1Loop.y - slotP2Loop.y - textSize.y) / 2);
+                            }
+                            else
+                            {
+                                slotP2Loop = ImVec2(frameMax.x - abs(slotP2.x - frameMin.x), slotP2.y);
+                                slotP1Loop = ImVec2(slotP2Loop.x - fmin(abs(slotP2.x - slotP1.x), abs(slotP1.x - frameMin.x)), slotP1.y);
+                                textPLoop = ImVec2(slotP1Loop.x + (slotP2Loop.x - slotP1Loop.x - textSize.x) / 2, slotP2Loop.y + (slotP1Loop.y - slotP2Loop.y - textSize.y) / 2);
+                            }
+
+                            draw_list->AddRectFilled(slotP1Loop, slotP2Loop, slotColor, 0); //Track Box
+                            draw_list->AddRect(slotP1Loop, slotP2Loop, TRACK_BOUND, 0); //Track Bounding Box
+                            draw_list->AddText(textPLoop, TRACK_TEXT_COLOR, buffer); //Event Value
+                        }
+                        else
+                        {
+                            slotP1Loop = ImVec2(0, 0);
+                            slotP2Loop = ImVec2(0, 0);
+                            textPLoop = ImVec2(0, 0);
+                        }
+                    }
                 }
 
                 if (ImRect(slotP1, slotP2).Contains(io.MousePos) && io.MouseDoubleClicked[0])
@@ -411,74 +477,139 @@ namespace ImSequencer
                 }
 
                 //Drag
-                ImRect rects[3] = { ImRect(ImVec2(slotP1.x - framePixelWidth / 3, slotP1.y), ImVec2(slotP1.x, slotP2.y))
-                    , ImRect(ImVec2(slotP2.x, slotP1.y), ImVec2(slotP2.x + framePixelWidth / 3, slotP2.y))
-                    , ImRect(slotP1, slotP2) };
-
-                //rect[1] = start drag
-                //rect[2] = end drag
-                //rect[3] = event drag
-
-                if (slotP1.x > slotP2.x)
-                    rects[2] = ImRect(ImVec2(slotP2.x, slotP1.y), ImVec2(slotP1.x, slotP2.y));
-
-                const unsigned int quadColor[] = { 0x20FFFFFF, 0x20FFFFFF, 0x20FFFFFF };
-                if (movingEntry == -1 && (sequenceOptions & SEQUENCER_EDIT_STARTEND))// TODOFOCUS && backgroundRect.Contains(io.MousePos))
                 {
+                    ImRect rects[3] = { ImRect(ImVec2(slotP1.x - framePixelWidth / 3, slotP1.y), ImVec2(slotP1.x, slotP2.y))
+                        , ImRect(ImVec2(slotP2.x, slotP1.y), ImVec2(slotP2.x + framePixelWidth / 3, slotP2.y))
+                        , ImRect(slotP1, slotP2) };
 
-                    for (int j = 2; j >= 0; j--)
+                    ImRect rects_loop[3] = { ImRect(ImVec2(slotP1Loop.x - framePixelWidth / 3, slotP1Loop.y), ImVec2(slotP1Loop.x, slotP2Loop.y))
+                        , ImRect(ImVec2(slotP2Loop.x, slotP1Loop.y), ImVec2(slotP2Loop.x + framePixelWidth / 3, slotP2Loop.y))
+                        , ImRect(slotP1Loop, slotP2Loop) };
+
+                    //rect[1] = start drag
+                    //rect[2] = end drag
+                    //rect[3] = event drag
+
+                    if (slotP1.x > slotP2.x)
+                        rects[2] = ImRect(ImVec2(slotP2.x, slotP1.y), ImVec2(slotP1.x, slotP2.y));
+
+                    const unsigned int quadColor[] = { 0x20FFFFFF, 0x20FFFFFF, 0x20FFFFFF };
+
+                    //Tracks
+                    if (movingEntry == -1 && (sequenceOptions & SEQUENCER_EDIT_STARTEND))// TODOFOCUS && backgroundRect.Contains(io.MousePos))
                     {
-                        if (j == 2)
+                        for (int j = 2; j >= 0; j--)
                         {
-                            ImRect& rc = rects[j];
-                            if (!rc.Contains(io.MousePos))
-                                continue;
-                            draw_list->AddRectFilled(rc.Min, rc.Max, quadColor[j], 0);
-                        }
-                        else if (!isDiscrete)
-                        {
-                            ImRect& rc = rects[j];
-                            if (!rc.Contains(io.MousePos))
-                                continue;
-                            draw_list->AddRectFilled(rc.Min, rc.Max, quadColor[j], 0);
-                        }                   
-                    }                 
-
-                    for (int j = 0; j < 3; j++)
-                    {
-                        ImRect& rc = rects[j];
-                        if (!rc.Contains(io.MousePos))
-                            continue;
-                        if (!ImRect(childFramePos, childFramePos + childFrameSize).Contains(io.MousePos))
-                            continue;
-
-                        if (j == 2)
-                        {
-                            if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+                            if (j == 2)
                             {
-                                movingEntry = i;
-                                movingPos = cx;
-                                movingPart = j + 1;
-
-                                sequence->BeginEdit(movingEntry);
-                                break;
+                                ImRect& rc = rects[j];
+                                if (!rc.Contains(io.MousePos))
+                                    continue;
+                                draw_list->AddRectFilled(rc.Min, rc.Max, quadColor[j], 0);
                             }
-                        }  
-                        else if (!isDiscrete)
-                        {
-                            if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+                            else if (!isDiscrete)
                             {
-                                movingEntry = i;
-                                movingPos = cx;
-                                movingPart = j + 1;
+                                ImRect& rc = rects[j];
+                                if (!rc.Contains(io.MousePos))
+                                    continue;
+                                draw_list->AddRectFilled(rc.Min, rc.Max, quadColor[j], 0);
+                            }
+                        }
 
-                                sequence->BeginEdit(movingEntry);
-                                break;
+                        for (int j = 0; j < 3; j++)
+                        {
+                            ImRect& rc = rects[j];
+                            if (!rc.Contains(io.MousePos))
+                                continue;
+                            if (!ImRect(childFramePos, childFramePos + childFrameSize).Contains(io.MousePos))
+                                continue;
+
+                            if (j == 2)
+                            {
+                                if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+                                {
+                                    movingEntry = i;
+                                    movingPos = cx;
+                                    movingPart = j + 1;
+
+                                    sequence->BeginEdit(movingEntry);
+                                    break;
+                                }
+                            }
+                            else if (!isDiscrete)
+                            {
+                                if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+                                {
+                                    movingEntry = i;
+                                    movingPos = cx;
+                                    movingPart = j + 1;
+
+                                    sequence->BeginEdit(movingEntry);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    //Looped entries
+                    if (sequenceOptions & SEQUENCER_LOOP_EVENTS)
+                    {
+                        if (movingEntry == -1 && (sequenceOptions & SEQUENCER_EDIT_STARTEND))// TODOFOCUS && backgroundRect.Contains(io.MousePos))
+                        {
+                            for (int j = 2; j >= 0; j--)
+                            {
+                                if (j == 2)
+                                {
+                                    ImRect& rc = rects_loop[j];
+                                    if (!rc.Contains(io.MousePos))
+                                        continue;
+                                    draw_list->AddRectFilled(rc.Min, rc.Max, quadColor[j], 0);
+                                }
+                                else if (!isDiscrete)
+                                {
+                                    ImRect& rc = rects_loop[j];
+                                    if (!rc.Contains(io.MousePos))
+                                        continue;
+                                    draw_list->AddRectFilled(rc.Min, rc.Max, quadColor[j], 0);
+                                }
+                            }
+
+                            for (int j = 0; j < 3; j++)
+                            {
+                                ImRect& rc = rects_loop[j];
+                                if (!rc.Contains(io.MousePos))
+                                    continue;
+                                if (!ImRect(childFramePos, childFramePos + childFrameSize).Contains(io.MousePos))
+                                    continue;
+
+                                if (j == 2)
+                                {
+                                    if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+                                    {
+                                        movingEntry = i;
+                                        movingPos = cx;
+                                        movingPart = j + 1;
+
+                                        sequence->BeginEdit(movingEntry);
+                                        break;
+                                    }
+                                }
+                                else if (!isDiscrete)
+                                {
+                                    if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+                                    {
+                                        movingEntry = i;
+                                        movingPos = cx;
+                                        movingPart = j + 1;
+
+                                        sequence->BeginEdit(movingEntry);
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
                 }
-
                 // custom draw (black bars)
                 /*if (localCustomHeight > 0)
                 {
@@ -508,6 +639,7 @@ namespace ImSequencer
             {
                 ImGui::CaptureMouseFromApp();
                 int diffFrame = int((cx - movingPos) / framePixelWidth);
+
                 if (std::abs(diffFrame) > 0)
                 {
                     int* start, * end;
@@ -517,25 +649,25 @@ namespace ImSequencer
                     int& l = *start;
                     int& r = *end;
 
-                    if (movingPart & 1)
-                        l += diffFrame;
-
-                    if (movingPart & 2)
-                        r += diffFrame;
-
-                    if (l < 0)
+                    if (l + diffFrame >= -sequence->GetFrameMax() && r + diffFrame <= 2 * sequence->GetFrameMax())
                     {
-                        if (movingPart & 2)
-                            r -= l;
-                        l = 0;
-                    }
+                        if (movingPart & 1)
+                            l += diffFrame;
 
-                    //if (movingPart & 1 && l > r)
-                       // l = r;
-                    //if (movingPart & 2 && r < l)
-                        //r = l;
-                    //movingPos += int(diffFrame * framePixelWidth);
-                    movingPos = cx;
+                        if (movingPart & 2)
+                            r += diffFrame;
+
+                        movingPos += int(diffFrame * framePixelWidth);
+                    }
+                    else
+                    {
+                        if (l < -sequence->GetFrameMax())
+                            l = -sequence->GetFrameMax();
+
+                        if (r > 2 * sequence->GetFrameMax())
+                            r = 2 * sequence->GetFrameMax();
+                    }
+                    
                 }
                 if (!io.MouseDown[0])
                 {
