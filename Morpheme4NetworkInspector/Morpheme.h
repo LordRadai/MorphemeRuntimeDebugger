@@ -69,8 +69,8 @@ public:
         NodeType m_nodeTypeID;
         byte m_flags1;
         byte m_flags2;
-        uint16_t m_nodeID;
-        uint16_t m_parentNodeID;
+        short m_nodeID;
+        short m_parentNodeID;
         uint16_t m_numChildNodeIDs;
         uint16_t field7_0xc;
         byte m_numControlParamAndOpNodeIDs;

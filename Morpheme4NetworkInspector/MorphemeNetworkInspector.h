@@ -97,6 +97,10 @@ public:
 		bool is_inspect;
 		Morpheme::NodeDef* node_def;
 		Morpheme::NodeDef* selected_node;
+
+		short parent_id;
+		Morpheme::NodeDef* parent_node;
+
 		ImNodesEditorContext* current_editor;
 		std::vector<ImNodesEditorContext*> editors;
 	};
@@ -109,6 +113,8 @@ public:
 		ImNodesData imnodes_data;
 		std::vector<const char*> node_names;
 		std::vector<Morpheme::NodeDef*> nodes;
+		bool is_load = false;
+		bool is_save = false;
 	};
 
 	GetNetworkTask network_tasks;

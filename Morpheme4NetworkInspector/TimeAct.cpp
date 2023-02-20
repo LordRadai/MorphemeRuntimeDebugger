@@ -264,6 +264,12 @@ TimeActDef TimeAct::getTimeActDef(int group_id, int tae_id)
 	sprintf(tae_def.tae_name, "%s", tae_template.GetString(tae_id_str, "tae_name", def).c_str());
 	tae_def.arg_count = tae_template.GetInteger(tae_id_str, "arg_count", 0);
 	
+	if (tae_def.arg_count > 8)
+	{
+		MessageBoxA(NULL, "Invalid TAE template. Argument count must not exceed 8", "MorphemeNetworkInspector", MB_ICONERROR);
+		tae_def.arg_count = 0;
+	}
+
 	tae_args = tae_template.GetString(tae_id_str, "args_type", "");
 
 	if (tae_args != "")
