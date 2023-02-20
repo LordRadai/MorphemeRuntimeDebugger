@@ -14,6 +14,7 @@ HMODULE ModuleAddr;
 uint64_t GameManagerImp;
 uint64_t BaseB;
 uint64_t KatanaMainApp;
+int game_state;
 
 oSendMessage sendMessage;
 oTaeLookup taeLookup;
@@ -154,6 +155,9 @@ bool MainLoop(uint64_t qModuleHandle)
                     BaseB = *(uint64_t*)((uint64_t)ModuleAddr + 0x1616CF8);
                     KatanaMainApp = *(uint64_t*)((uint64_t)ModuleAddr + 0x16751F8);
                 }
+
+                if (GameManagerImp)
+                    game_state = *(int*)(GameManagerImp + 0x24AC);
 
                 MSG msg;
                 while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))

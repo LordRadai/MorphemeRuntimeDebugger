@@ -2201,13 +2201,14 @@ void BeginNodeEditor()
     ObjectPoolReset(editor.Nodes);
     ObjectPoolReset(editor.Pins);
     ObjectPoolReset(editor.Links);
-    //ObjectPoolReset(editor.NodeLinks);
+    ObjectPoolReset(editor.NodeLinks);
 
     GImNodes->HoveredNodeIdx.Reset();
     GImNodes->HoveredLinkIdx.Reset();
     GImNodes->HoveredPinIdx.Reset();
     GImNodes->DeletedLinkIdx.Reset();
     GImNodes->SnapLinkIdx.Reset();
+    GImNodes->NodeLinkIdx.Reset();
 
     GImNodes->NodeIndicesOverlappingWithMouse.clear();
 
@@ -2640,7 +2641,7 @@ void LinkNodes(const int id, const int src, const int dst)
         (editor.ClickInteraction.LinkCreation.StartPinIdx == node_link.dst &&
             editor.ClickInteraction.LinkCreation.EndPinIdx == node_link.src))
     {
-        GImNodes->SnapLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
+        GImNodes->NodeLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
     }
 }
 

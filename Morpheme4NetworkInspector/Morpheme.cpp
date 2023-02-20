@@ -1,5 +1,6 @@
 #include "Morpheme.h"
 #include "common.h"
+#include "Debug.h"
 
 int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackList* track_list)
 {
@@ -565,6 +566,8 @@ Morpheme::Network* Morpheme::getNetwork(uint64_t character_ctrl)
 
 Morpheme::NodeDef* Morpheme::getNetworkNode(Network* network, short node_id)
 {
+	Debug::debuggerMessage(Debug::LVL_INFO, "Node ID: %d, NodeType: %d\n", node_id, network->m_networkDef->m_nodes[node_id]->m_nodeTypeID);
+
 	if (!network || node_id == -1)
 		return NULL;
 

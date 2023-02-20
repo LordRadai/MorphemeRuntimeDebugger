@@ -10,6 +10,23 @@
 
 #define TRACK_MAX 50
 
+struct TimeActDef
+{
+    int group_id;
+    const char* group_name;
+    int tae_id;
+    char tae_name[256];
+    int arg_count;
+    std::vector<byte> arg_type;
+    
+    struct ArgName
+    {
+        char name[256];
+    };
+
+    std::vector<ArgName> arg_names;
+};
+
 struct TimeActTrack
 {
     int tae_count;
@@ -20,6 +37,8 @@ struct TimeActTrack
     char trackName[50];
     int parentId;
     int childId;
+    uint64_t args;
+    TimeActDef tae_def;
 };
 
 struct TimeActTrackList

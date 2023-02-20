@@ -67,12 +67,19 @@ struct sEventGroup {
     int field5_0x1c;
 };
 
+struct sTaeEventData
+{
+    int value;
+    int padding;
+    uint64_t args;
+};
+
 struct sTaeBuffer {
     float start_time;
     int field1_0x4;
     float end_time;
     int field3_0xc;
-    uint32_t* value;
+    sTaeEventData* event_data;
 };
 
 namespace TimeAct
@@ -88,4 +95,6 @@ namespace TimeAct
 
     const char* getGroupName(int group_id);
     void getTaeEventName(char buf[], int group_id, int tae_id);
+    TimeActDef getTimeActDef(int group_id, int tae_id);
+    int getTaeArgCount(int tae_id);
 }

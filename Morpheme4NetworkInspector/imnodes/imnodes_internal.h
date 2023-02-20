@@ -341,6 +341,7 @@ struct ImNodesContext
 
     ImOptionalIndex DeletedLinkIdx;
     ImOptionalIndex SnapLinkIdx;
+    ImOptionalIndex NodeLinkIdx;
 
     // Event helper state
     // TODO: this should be a part of a state machine, and not a member of the global struct.

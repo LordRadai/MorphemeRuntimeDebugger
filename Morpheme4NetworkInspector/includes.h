@@ -19,6 +19,7 @@
 #include "inih/ini.h"
 #include "inih/INIReader.h"
 
+#include "Debug.h"
 #include "FRPG2.h"
 #include "MorphemeNetworkInspector.h"
 #include "common.h"
