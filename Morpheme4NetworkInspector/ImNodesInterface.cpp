@@ -72,6 +72,9 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 	case 107:
 		createBlend2Node(node);
 		break;
+	case 142:
+		createSmoothDampNode(node);
+		break;
 	case 400:
 	case 402:
 		createTransitNode(node);
@@ -283,7 +286,7 @@ void ImNodesInterface::createTransitNode(Morpheme::NodeDef* node)
 		//createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[0]));
 		//createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[1]));
 
-		ImNodes::LinkNodes(link_id, node->m_childNodeIDs[0], node->m_childNodeIDs[1]);
+		ImNodes::LinkNodes(node->m_nodeID, node->m_childNodeIDs[0], node->m_childNodeIDs[1]);
 		//ImNodes::Link(link_id + 1, output_id, getNodeSourcePinId(node->m_childNodeIDs[1], 0));
 
 		/*
@@ -487,6 +490,72 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 			}
 		}
 	}
+
+	/*
+	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+	{
+		ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
+		link_id++;
+	}*/
+}
+
+void ImNodesInterface::createSmoothDampNode(Morpheme::NodeDef* node)
+{
+	ImNodes::PushColorStyle(ImNodesCol_TitleBar, 0xFF3C3C3C);
+	ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, 0xFF3C3C3C);
+	ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, 0xFF3C3C3C);
+
+	ImNodes::PushColorStyle(ImNodesCol_NodeBackground, 0xFF282828);
+	ImNodes::PushColorStyle(ImNodesCol_NodeBackgroundHovered, 0xFF282828);
+	ImNodes::PushColorStyle(ImNodesCol_NodeBackgroundSelected, 0xFF282828);
+
+	ImNodes::PushColorStyle(ImNodesCol_Pin, 0xFF00FF00);
+	ImNodes::PushColorStyle(ImNodesCol_PinHovered, 0xFF00FF00);
+
+	int output_id = node->m_nodeID * 100000;
+	int source_id = node->m_nodeID * 100000 + 1;
+	int input_id = node->m_nodeID * 1000000 + 10;
+	int link_id = node->m_nodeID * 10000000;
+	char title[255];
+	const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+
+	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+	if (node_name[0])
+		strcpy(title, node_name);
+
+	ImNodes::BeginNode(node->m_nodeID);
+
+	ImNodes::BeginNodeTitleBar();
+	ImGui::TextUnformatted(title);
+	ImNodes::EndNodeTitleBar();
+
+	ImNodes::BeginOutputAttribute(output_id);
+	const float label_width = ImGui::CalcTextSize("Result").x;
+	ImGui::Indent(ImGui::CalcTextSize(title).x - label_width);
+	ImGui::TextUnformatted("Result");
+	ImNodes::EndOutputAttribute();
+
+	ImNodes::BeginInputAttribute(input_id);
+	ImGui::TextUnformatted("Input");
+	ImNodes::EndInputAttribute();
+
+	ImNodes::EndNode();
+
+	if (node->m_numControlParamAndOpNodeIDs > 0)
+	{
+		for (byte i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
+		{
+			if (node->m_controlParamAndOpNodeIDs[i] != -1)
+			{
+				createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_controlParamAndOpNodeIDs[i]));
+				ImNodes::Link(link_id, getNodeOutputPinId(node->m_controlParamAndOpNodeIDs[i]), input_id + i);
+				link_id++;
+			}
+		}
+	}
+
+	for (size_t i = 0; i < 8; i++)
+		ImNodes::PopColorStyle();
 
 	/*
 	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))

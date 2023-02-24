@@ -13,6 +13,7 @@ namespace ImNodesInterface
 	void createTransitNode(Morpheme::NodeDef* node);
 	void createAnimSyncEventNode(Morpheme::NodeDef* node);
 	void createBlend2Node(Morpheme::NodeDef* node);
+	void createSmoothDampNode(Morpheme::NodeDef* node);
 
 	inline int getNodeInputPinId(int node, int index);
 	inline int getNodeOutputPinId(int node);

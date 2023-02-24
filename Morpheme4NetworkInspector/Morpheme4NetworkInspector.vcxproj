@@ -235,6 +235,7 @@
     <ClCompile Include="kiero\minhook\src\trampoline.c" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Morpheme.cpp" />
+    <ClCompile Include="MorphemeInterface.cpp" />
     <ClCompile Include="MorphemeNetworkInspector.cpp" />
     <ClCompile Include="TimeAct.cpp" />
     <ClCompile Include="Timeline.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Morpheme.h" />
+    <ClInclude Include="MorphemeInterface.h" />
     <ClInclude Include="MorphemeNetworkInspector.h" />
     <ClInclude Include="TimeAct.h" />
     <ClInclude Include="Timeline.h" />

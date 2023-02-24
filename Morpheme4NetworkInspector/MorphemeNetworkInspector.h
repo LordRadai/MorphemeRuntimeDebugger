@@ -64,6 +64,8 @@ public:
 		ImU64 event_track_node;
 		const char* asset_name;
 		AnimTimeAct anim_tae;
+		int first_active_frame;
+		float anim_len;
 		float mult;
 	};
 
@@ -121,6 +123,7 @@ public:
 	NetworkData network_data;
 	NetworkSettings network_config;
 
+	bool clear_network = false;
 	bool pull_tracks;
 	bool clear_tracks;
 	bool save_tracks;

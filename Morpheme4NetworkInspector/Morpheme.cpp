@@ -5,7 +5,7 @@
 int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackList* track_list)
 {
 	if (!track_base)
-		return 0;
+		return -1;
 
 	int track_count = 0;
 	int index_subBlend = 0;
@@ -667,12 +667,10 @@ const char* Morpheme::getMessageName(uint64_t character_ctrl, short message_id)
 	return "";
 }
 
-Morpheme::NodeBin* Morpheme::getNodeBin(uint64_t character_ctrl, short node_id)
+Morpheme::NodeBin* Morpheme::getNetworkNodeBin(Network* network, short node_id)
 {
 	if (node_id != -1)
 	{
-		Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
-
 		return &network->m_nodeBins[node_id];
 	}
 	
@@ -854,4 +852,50 @@ uint32_t Morpheme::getTimeActId(Morpheme::NodeDef* node_def)
 	
 	MessageBoxA(NULL, "Node is not an animation node", "MorphemeNetworkInspector", MB_ICONERROR);
 	return 0;
+}
+
+Morpheme::NodeConnections* Morpheme::getNetworkNodeConnections(Morpheme::Network* network, short node_id)
+{
+	if (node_id != -1)
+		return network->m_nodeConnections[node_id];
+
+	return NULL;
+}
+
+int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
+{
+	NodeDef* node_def = getNetworkNode(network, node_id);
+
+	if (node_def->m_nodeTypeID != NodeAnimSyncEvents)
+	{
+		Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an animation node\n", node_def->m_nodeID);
+		return 0;
+	}
+
+	//int first_active_frame = network_inspector.network_data.anim_events.first_active_frame;
+	int current_frame = -1;
+
+	Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
+	float anim_len = *(float*)(node_data + 0x88);
+	float track_len = *(float*)(node_data + 0x84);
+	float current_time = 0;
+
+	NodeBin* node_bin = getNetworkNodeBin(network, node_id);
+
+	if (node_bin->m_attributes)
+	{
+		for (NodeBinEntry* current_bin_entry = node_bin->m_attributes; current_bin_entry != NULL; current_bin_entry = current_bin_entry->m_next)
+		{
+			if (current_bin_entry->m_semantic == ATTRIB_SEMANTIC_FRACTION_POS)
+			{
+				current_time = (float)current_bin_entry->m_attribDataHandle->field7_0x18;
+				Debug::debuggerMessage(Debug::LVL_INFO, "Current Time: %f\n", current_time);
+				break;
+			}
+		}
+		current_time *= network_inspector.network_data.anim_events.mult;
+		current_frame = Math::timeToFrame(current_time, 60);
+	}
+
+	return current_frame;
 }

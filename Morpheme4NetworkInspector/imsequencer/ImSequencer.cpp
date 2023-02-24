@@ -31,7 +31,9 @@
 #define TRACK_COLOR 0xFFEB5050
 #define TRACK_COLOR_INACTIVE 0xFF464646
 #define TRACK_COLOR_INVERT 0xFF633132
+#define TRACK_COLOR_ACTIVE 0xFF633132
 #define TRACK_BOUND 0xFF1D0D0E
+#define TRACK_BOUND_ACTIVE 0xFF0000FF
 #define TRACK_TEXT_COLOR 0xFFE3E3E1
 
 namespace ImSequencer
@@ -367,6 +369,7 @@ namespace ImSequencer
                 char buffer[10];
                 unsigned int slotColor = TRACK_COLOR;
                 unsigned int slotColorHalf = slotColor | 0x40000000;
+                unsigned int boundColor = TRACK_BOUND;
 
                 sequence->Get(i, &start, &end, NULL, NULL, &value, &isDiscrete, &isActive, NULL);
 
@@ -375,6 +378,12 @@ namespace ImSequencer
 
                 if (!isActive)
                     slotColor = TRACK_COLOR_INACTIVE;
+
+                if (*currentFrame >= *start && *currentFrame <= *end)
+                {
+                    slotColor = TRACK_COLOR_ACTIVE;
+                    //boundColor = TRACK_BOUND_ACTIVE;
+                }
 
                 size_t localCustomHeight = sequence->GetCustomHeight(0);
 
@@ -419,7 +428,7 @@ namespace ImSequencer
                 {
                     draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 0);
                     draw_list->AddRectFilled(slotP1, slotP2, slotColor, 0); //Track Box
-                    draw_list->AddRect(slotP1, slotP2, TRACK_BOUND, 0); //Track Bounding Box
+                    draw_list->AddRect(slotP1, slotP2, boundColor, 0); //Track Bounding Box
                     draw_list->AddText(textP, TRACK_TEXT_COLOR, buffer); //Event Value
 
                     if (sequenceOptions & SEQUENCER_LOOP_EVENTS)
@@ -684,17 +693,17 @@ namespace ImSequencer
             }
 
             // cursor
-            /*if (currentFrame && firstFrame && *currentFrame >= *firstFrame && *currentFrame <= sequence->GetFrameMax())
+            if (currentFrame && firstFrame && *currentFrame >= *firstFrame && *currentFrame <= sequence->GetFrameMax())
             {
                 static const float cursorWidth = 1.f;
 
                 float cursorOffset = contentMin.x + legendWidth + (*currentFrame - firstFrameUsed) * framePixelWidth - cursorWidth * 0.5f;
-                draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y), 0xFF000000, cursorWidth);
+                draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y), 0xFF0000FF, cursorWidth);
                 
                 char tmps[512];
                 ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", *currentFrame);
                 draw_list->AddText(ImVec2(cursorOffset + 10, canvas_pos.y + 2), 0xFF2A2AFF, tmps);
-            }*/
+            }
 
             draw_list->PopClipRect();
             draw_list->PopClipRect();

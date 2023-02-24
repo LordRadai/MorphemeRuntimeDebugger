@@ -5,52 +5,409 @@
 #include "inih/INIReader.h"
 #include <windows.h>
 
+enum NodeType
+{
+    NetworkInstance = 9,
+    StateMachine_Node = 10,
+    ControlParameterFloat = 20,
+    ControlParameterInt = 24,
+    ControlParameterVector3 = 21,
+    ControlParameterBool = 23,
+    NodeAnimSyncEvents = 104,
+    Blend2SyncEvents = 107,
+    Blend2Additive = 108,
+    Blend2Additive_2 = 114,
+    ShareUpdateConnections1Child1InputCP = 125,
+    Freeze = 126,
+    ShareUpdateConnectionsChildrenOptionalInputCPs = 129,
+    Switch = 131,
+    ShareUpdateConnectionsChildren = 134,
+    ShareUpdateConnectionsChildren_2 = 135,
+    ShareUpdateConnections1Child2OptionalInputCP = 136,
+    PredictiveUnevenTerrain = 138,
+    OperatorSmoothDamp = 142,
+    Transit = 402,
+    ShareUpdateConnections1Child1OptionalInputCP = 500,
+    Unk550 = 550,
+};
+
+enum AttribType : short
+{
+    ATTRIB_TYPE_BOOL = 0,
+    ATTRIB_TYPE_UINT = 1,
+    ATTRIB_TYPE_INT = 2,
+    ATTRIB_TYPE_FLOAT = 3,
+    ATTRIB_TYPE_VECTOR3 = 4,
+    ATTRIB_TYPE_VECTOR4 = 5,
+    ATTRIB_TYPE_BOOL_ARRAY = 6,
+    ATTRIB_TYPE_UINT_ARRAY = 7,
+    ATTRIB_TYPE_INT_ARRAY = 8,
+    ATTRIB_TYPE_FLOAT_ARRAY = 9,
+    ATTRIB_TYPE_UPDATE_PLAYBACK_POS = 10,
+    ATTRIB_TYPE_PLAYBACK_POS = 11,
+    ATTRIB_TYPE_UPDATE_SYNC_EVENT_PLAYBACK_POS = 12,
+    ATTRIB_TYPE_TRANSFORM_BUFFER = 13,
+    ATTRIB_TYPE_TRAJECTORY_DELTA_TRANSFORM = 14,
+    ATTRIB_TYPE_TRANSFORM = 15,
+    ATTRIB_TYPE_VELOCITY = 16,
+    ATTRIB_TYPE_SYNC_EVENT_TRACK = 17,
+    ATTRIB_TYPE_SAMPLED_EVENTS_BUFFER = 18,
+    ATTRIB_TYPE_DURATION_EVENT_TRACK_SET = 19,
+    ATTRIB_TYPE_RIG = 20,
+    ATTRIB_TYPE_SOURCE_ANIM = 21,
+    ATTRIB_TYPE_SOURCE_EVENT_TRACKS = 23,
+    ATTRIB_TYPE_HEAD_LOOK_SETUP = 24,
+    ATTRIB_TYPE_HEAD_LOOK_CHAIN = 25,
+    ATTRIB_TYPE_GUN_AIM_SETUP = 26,
+    ATTRIB_TYPE_GUN_AIM_IK_CHAIN = 27,
+    ATTRIB_TYPE_TWO_BONE_IK_SETUP = 28,
+    ATTRIB_TYPE_TWO_BONE_IK_CHAIN = 29,
+    ATTRIB_TYPE_LOCK_FOOT_SETUP = 30,
+    ATTRIB_TYPE_LOCK_FOOT_CHAIN = 31,
+    ATTRIB_TYPE_LOCK_FOOT_STATE = 32,
+    ATTRIB_TYPE_HIPS_IK_DEF = 33,
+    ATTRIB_TYPE_HIPS_IK_ANIM_SET_DEF = 34,
+    ATTRIB_TYPE_CLOSEST_ANIM_DEF = 35,
+    ATTRIB_TYPE_CLOSEST_ANIM_DEF_ANIM_SET = 36,
+    ATTRIB_TYPE_CLOSEST_ANIM_STATE = 37,
+    ATTRIB_TYPE_STATE_MACHINE_DEF = 38,
+    ATTRIB_TYPE_STATE_MACHINE = 39,
+    ATTRIB_TYPE_CHARACTER_PROPERTIES = 42,
+    ATTRIB_TYPE_CHARACTER_CONTROLLER_DEF = 43,
+    ATTRIB_TYPE_PHYSICS_SETUP = 45,
+    ATTRIB_TYPE_PHYSICS_SETUP_ANIM_SET = 46,
+    ATTRIB_TYPE_PHYSICS_STATE = 47,
+    ATTRIB_TYPE_PHYSICS_INITIALISATION = 48,
+    ATTRIB_TYPE_PHYSICS_GROUPER_CONFIG = 49,
+    ATTRIB_TYPE_FLOAT_OPERATION = 50,
+    ATTRIB_TYPE_2_FLOAT_OPERATION = 51,
+    ATTRIB_TYPE_SMOOTH_FLOAT_OPERATION = 52,
+    ATTRIB_TYPE_RATE_OF_CHANGE_OPERATION = 53,
+    ATTRIB_TYPE_RANDOM_FLOAT_OPERATION = 54,
+    ATTRIB_TYPE_RANDOM_FLOAT_DEF = 55,
+    ATTRIB_TYPE_NOISE_GEN_DEF = 56,
+    ATTRIB_TYPE_SWITCH_DEF = 57,
+    ATTRIB_TYPE_RAY_CAST_DEF = 58,
+    ATTRIB_TYPE_TRANSIT_DEF = 59,
+    ATTRIB_TYPE_TRANSIT_SYNC_EVENTS_DEF = 60,
+    ATTRIB_TYPE_TRANSIT_SYNC_EVENTS = 61,
+    ATTRIB_TYPE_DEAD_BLEND_DEF = 62,
+    ATTRIB_TYPE_DEAD_BLEND_STATE = 63,
+    ATTRIB_TYPE_BLEND_NXM_DEF = 65,
+    ATTRIB_TYPE_ANIM_MIRRORED_MAPPING = 66,
+    ATTRIB_TYPE_PLAYBACK_POS_INIT = 67,
+    ATTRIB_TYPE_EMITTED_MESSAGE_MAP = 68,
+    ATTRIB_TYPE_BASIC_UNEVEN_TERRAIN_SETUP = 69,
+    ATTRIB_TYPE_BASIC_UNEVEN_TERRAIN_IK_SETUP = 70,
+    ATTRIB_TYPE_BASIC_UNEVEN_TERRAIN_FOOT_LIFTING_TARGET = 71,
+    ATTRIB_TYPE_BASIC_UNEVEN_TERRAIN_IK_STATE = 72,
+    ATTRIB_TYPE_BASIC_UNEVEN_TERRAIN_CHAIN = 73,
+    ATTRIB_TYPE_PREDICTIVE_UNEVEN_TERRAIN_IK_PREDICTION_STATE = 74,
+    ATTRIB_TYPE_PREDICTIVE_UNEVEN_TERRAIN_FOOT_LIFTING_STATE = 75,
+    ATTRIB_TYPE_PREDICTIVE_UNEVEN_TERRAIN_PREDICTION_DEF = 76,
+    ATTRIB_TYPE_SCATTER_BLEND_ANALYSIS_DEF = 77,
+    ATTRIB_TYPE_SCATTER_BLEND_1D_DEF = 78,
+    ATTRIB_TYPE_SCATTER_BLEND_2D_DEF = 79,
+    ATTRIB_TYPE_EMIT_MESSAGE_ON_CP_VALUE = 81,
+    ATTRIB_TYPE_PHYSICS_INFO_DEF = 82,
+    ATTRIB_TYPE_JOINT_LIMITS = 84,
+    ATTRIB_TYPE_BLEND_FLAGS = 85,
+    ATTRIB_TYPE_BLEND_WEIGHTS = 86,
+    ATTRIB_TYPE_FEATHER_BLEND2_CHANNEL_ALPHAS = 87,
+    ATTRIB_TYPE_RETARGET_STATE = 88,
+    ATTRIB_TYPE_RIG_RETARGET_MAPPING = 89,
+    ATTRIB_TYPE_SCALECHARACTER_STATE = 90,
+    ATTRIB_TYPE_RETARGET_STORAGE_STATS = 91,
+    ATTRIB_TYPE_C_C_OVERRIDE_CONDITIONS_DEF = 92,
+    ATTRIB_TYPE_C_C_OVERRIDE_PROPERTIES_DEF = 93,
+    ATTRIB_TYPE_C_C_OVERRIDE_CONDITIONS = 94,
+};
+
+enum AttribSemantic : short
+{
+    ATTRIB_SEMANTIC_UPDATE_TIME_POS = 0,
+    ATTRIB_SEMANTIC_UPDATE_SYNC_EVENT_POS = 1,
+    ATTRIB_SEMANTIC_TIME_POS = 2,
+    ATTRIB_SEMANTIC_ANIM_SAMPLE_POS = 3,
+    ATTRIB_SEMANTIC_FRACTION_POS = 4,
+    ATTRIB_SEMANTIC_LOOPED_ON_UPDATE = 5,
+    ATTRIB_SEMANTIC_TRANSFORM_BUFFER = 6,
+    ATTRIB_SEMANTIC_TRAJECTORY_DELTA_TRANSFORM = 7,
+    ATTRIB_SEMANTIC_TRAJECTORY_TRANSFORM = 8,
+    ATTRIB_SEMANTIC_TRAJECTORY_DELTA_TRANSFORM_BUFFER = 9,
+    ATTRIB_SEMANTIC_VELOCITY = 10,
+    ATTRIB_SEMANTIC_TRANSFORM_RATES = 11,
+    ATTRIB_SEMANTIC_SYNC_EVENT_TRACK = 12,
+    ATTRIB_SEMANTIC_SAMPLED_EVENTS_BUFFER = 13,
+    ATTRIB_SEMANTIC_DURATION_EVENT_TRACK_SET = 14,
+    ATTRIB_SEMANTIC_LOOP = 15,
+    ATTRIB_SEMANTIC_RIG = 16,
+    ATTRIB_SEMANTIC_SOURCE_ANIM = 17,
+    ATTRIB_SEMANTIC_START_SYNC_EVENT_INDEX = 18,
+    ATTRIB_SEMANTIC_SOURCE_EVENT_TRACKS = 19,
+    ATTRIB_SEMANTIC_ACTIVE_ANIM_SET_INDEX = 20,
+    ATTRIB_SEMANTIC_BLEND_FLAGS = 21,
+    ATTRIB_SEMANTIC_BLEND_WEIGHTS = 22,
+    ATTRIB_SEMANTIC_CP_BOOL = 23,
+    ATTRIB_SEMANTIC_CP_UINT = 24,
+    ATTRIB_SEMANTIC_CP_PHYSICS_OBJECT_POINTER = 25,
+    ATTRIB_SEMANTIC_CP_INT = 26,
+    ATTRIB_SEMANTIC_CP_FLOAT = 27,
+    ATTRIB_SEMANTIC_CP_VECTOR3 = 28,
+    ATTRIB_SEMANTIC_CP_VECTOR4 = 29,
+    ATTRIB_SEMANTIC_RIG_RETARGET_MAPPING = 30,
+    ATTRIB_SEMANTIC_RETARGET_STORAGE_STATS = 31,
+    ATTRIB_SEMANTIC_MIRRORED_ANIM_MAPPING = 32,
+    ATTRIB_SEMANTIC_SYNC_EVENT_OFFSET = 33,
+    ATTRIB_SEMANTIC_CHILD_NODE_WEIGHTS = 34,
+    ATTRIB_SEMANTIC_BONE_WEIGHTS = 35,
+    ATTRIB_SEMANTIC_BONE_IDS = 36,
+    ATTRIB_SEMANTIC_NODE_SPECIFIC_DEF = 37,
+    ATTRIB_SEMANTIC_NODE_SPECIFIC_DEF_ANIM_SET = 38,
+    ATTRIB_SEMANTIC_NODE_SPECIFIC_STATE = 39,
+    ATTRIB_SEMANTIC_NODE_SPECIFIC_STATE_2 = 40,
+    ATTRIB_SEMANTIC_PHYSICS_RIG_DEF = 41,
+    ATTRIB_SEMANTIC_PHYSICS_RIG = 42,
+    ATTRIB_SEMANTIC_CHARACTER_PROPERTIES = 43,
+    ATTRIB_SEMANTIC_CHARACTER_CONTROLLER_DEF = 44,
+    ATTRIB_SEMANTIC_ANIM_TO_PHYSICS_MAP = 45,
+    ATTRIB_SEMANTIC_PHYSICS_INITIALISATION = 46,
+    ATTRIB_SEMANTIC_OUTPUT_MASK = 47,
+    ATTRIB_SEMANTIC_PRE_PHYSICS_TRANSFORMS = 48,
+    ATTRIB_SEMANTIC_CHARACTER_CONTROLLER_UPDATED = 49,
+    ATTRIB_SEMANTIC_PHYSICS_UPDATED = 50,
+    ATTRIB_SEMANTIC_ROOT_UPDATED = 51,
+    ATTRIB_SEMANTIC_MERGED_PHYSICS_RIG_TRANSFORM_BUFFER = 52,
+    ATTRIB_SEMANTIC_TRANSIT_COMPLETE = 53,
+    ATTRIB_SEMANTIC_TRANSIT_REVERSED = 54,
+    ATTRIB_SEMANTIC_DURATION_EVENT_MATCHING_OP = 55,
+    ATTRIB_SEMANTIC_DEAD_BLEND_DEF = 56,
+    ATTRIB_SEMANTIC_DEAD_BLEND_STATE = 57,
+    ATTRIB_SEMANTIC_DEAD_BLEND_TRANSFORMS_STATE = 58,
+    ATTRIB_SEMANTIC_PLAYBACK_POS_INIT = 59,
+    ATTRIB_SEMANTIC_EMITTED_MESSAGES_MAP = 60,
+    ATTRIB_SEMANTIC_EMITTED_MESSAGES = 61,
+    ATTRIB_SEMANTIC_UNEVEN_TERRAIN_IK_SETUP = 62,
+    ATTRIB_SEMANTIC_UNEVEN_TERRAIN_FOOT_LIFTING_TARGET = 63,
+    ATTRIB_SEMANTIC_UNEVEN_TERRAIN_PREDICTION_DEF = 64,
+    ATTRIB_SEMANTIC_UNEVEN_TERRAIN_PREDICTION_STATE = 65,
+    ATTRIB_SEMANTIC_JOINT_LIMITS = 66,
+    ATTRIB_SEMANTIC_RETARGET_RIG_MAP = 67,
+    ATTRIB_SEMANTIC_UPDATE_TIME_POS_T_MINUS_ONE = 68,
+    ATTRIB_SEMANTIC_TRAJECTORY_DELTA_T_MINUS_ONE = 69,
+    ATTRIB_SEMANTIC_TRANSFORM_BUFFER_T_MINUS_ONE = 70,
+    ATTRIB_SEMANTIC_TRANSFORM_BUFFER_T_MINUS_TWO = 71,
+    ATTRIB_SEMANTIC_RETARGET_STATE = 72,
+};
+
+/*enum TaskID
+{
+    TaskAnimSyncEventsUpdateTimePos = 0,
+    TaskAnimSyncEventsUpdateSyncEventPos = 1,
+    TaskSampleTransformsFromAnimSourceASA = 2,
+    TaskSampleTransformsFromAnimSourceMBA = 3,
+    TaskSampleTransformsFromAnimSourceNSA = 4,
+    TaskSampleTransformsFromAnimSourceQSA = 5,
+    TaskUpdateDeltaTrajectoryFromTrajectorySourceASA = 6,
+    TaskUpdateDeltaTrajectoryFromTrajectorySourceMBA = 7,
+    TaskUpdateDeltaTrajectoryFromTrajectorySourceNSA = 8,
+    TaskUpdateDeltaTrajectoryFromTrajectorySourceQSA = 9,
+    TaskUpdateDeltaTrajectoryAndTransformsFromSourceASA = 10,
+    TaskUpdateDeltaTrajectoryAndTransformsFromSourceMBA = 11,
+    TaskUpdateDeltaTrajectoryAndTransformsFromSourceNSA = 12,
+    TaskUpdateDeltaTrajectoryAndTransformsFromSourceQSA = 13,
+    TaskInitSyncEventTrackFromDiscreteEventTrack = 14,
+    TaskInitUnitLengthSyncEventTrack = 15,
+    TaskSampleEventsFromSourceTracks = 16,
+    TaskSampleEventsFromSourceTracksIncDurationEvents = 17,
+    TaskInitEventTrackDurationSetFromSource = 18,
+    TaskInitEmptyEventTrackDurationSet = 19,
+    TaskInitSampledEventsBuffer = 20,
+    TaskBufferLastFramesTransformBuffer = 21,
+    TaskBufferLastFramesTrajectoryDeltaAndTransformBuffer = 22,
+    TaskBufferLastFramesTransformsZeroTrajectory = 23,
+    TaskBlend2TransformBuffsAddAttAddPos = 24,
+    TaskBlend2TransformBuffsAddAttInterpPos = 25,
+    TaskBlend2TransformBuffsInterpAttAddPos = 26,
+    TaskBlend2TransformBuffsInterpAttInterpPos = 27,
+    TaskBlend2TransformBuffsSubtractAttSubtractPos = 28,
+    TaskBlend2x2TransformBuffsInterpAttInterpPos = 29,
+    TaskBlend2x2TrajectoryDeltaTransformsInterpAttInterpPos = 30,
+    TaskBlend2x2TrajectoryDeltaTransformsInterpAttSlerpPos = 31,
+    TaskBlend2x2TrajectoryDeltaAndTransformsInterpTraj = 32,
+    TaskBlend2x2TrajectoryDeltaAndTransformsSlerpTraj = 33,
+    TaskCombine2x2SampledEventsBuffers = 34,
+    TaskCombine2x2SampledEventsBuffersAndSampleDurationEvents = 35,
+    TaskBlend2x2DurationEventTrackSets = 36,
+    TaskBlend2x2SyncEventTracks = 37,
+    TaskTriangleBlendTransformBuffsInterpAttInterpPos = 38,
+    TaskTriangleBlendTrajectoryDeltaTransformsInterpAttInterpPos = 39,
+    TaskTriangleBlendTrajectoryDeltaTransformsInterpAttSlerpPos = 40,
+    TaskTriangleBlendTrajectoryDeltaAndTransformsInterpTraj = 41,
+    TaskTriangleBlendTrajectoryDeltaAndTransformsSlerpTraj = 42,
+    TaskTriangleCombineSampledEventsBuffers = 43,
+    TaskTriangleCombineSampledEventsBuffersAndSampleDurationEvents = 44,
+    TaskTriangleBlendDurationEventTrackSets = 45,
+    TaskTriangleBlendSyncEventTracks = 46,
+    TaskBlendAllTransformBuffsInterpAttInterpPos = 47,
+    TaskCombineAllSampledEventsBuffers = 48,
+    TaskCombineAllSampledEventsBuffersAndSampleDurationEvents = 49,
+    TaskBlendAllTrajectoryDeltaTransformsInterpAttInterpPos = 50,
+    TaskBlendAllTrajectoryDeltaTransformsInterpAttSlerpPos = 51,
+    TaskBlendAllTrajectoryDeltaAndTransformsSlerpTraj = 52,
+    TaskBlendAllTrajectoryDeltaAndTransformsInterpTraj = 53,
+    TaskBlendAllDurationEventTrackSets = 54,
+    TaskBlendAllSyncEventTracks = 55,
+    TaskFeatherBlend2TransformBuffsAddAttAddPos = 56,
+    TaskFeatherBlend2TransformBuffsAddAttInterpPos = 57,
+    TaskFeatherBlend2TransformBuffsInterpAttAddPos = 58,
+    TaskFeatherBlend2TransformBuffsInterpAttInterpPos = 59,
+    TaskHeadLookTransforms = 61,
+    TaskHeadLookTrajectoryDeltaAndTransforms = 62,
+    TaskHeadLookSetup = 63,
+    TaskGunAimTransforms = 64,
+    TaskGunAimTrajectoryDeltaAndTransforms = 65,
+    TaskGunAimSetup = 66,
+    TaskTwoBoneIKTransforms = 67,
+    TaskTwoBoneIKTrajectoryDeltaAndTransforms = 68,
+    TaskTwoBoneIKSetup = 69,
+    TaskLockFootTransforms = 70,
+    TaskHipsIKTransforms = 71,
+    TaskHipsIKTrajectoryDeltaAndTransforms = 72,
+    TaskRetargetTransforms = 73,
+    TaskRetargetTrajectoryDeltaTransform = 74,
+    TaskRetargetTrajectoryDeltaAndTransforms = 75,
+    TaskLockFootTrajectoryDeltaAndTransforms = 76,
+    TaskScaleCharacterTransforms = 77,
+    TaskScaleCharacterDeltaTransform = 78,
+    TaskScaleCharacterDeltaAndTransforms = 79,
+    TaskBasicUnevenTerrainIKSetup = 80,
+    TaskBasicUnevenTerrainFootLiftingTarget = 81,
+    TaskBasicUnevenTerrainTransforms1 = 82,
+    TaskBasicUnevenTerrainTransforms2 = 83,
+    TaskPredictiveUnevenTerrainIKSetup = 84,
+    TaskPredictiveUnevenTerrainFootLiftingTarget = 85,
+    TaskPredictiveUnevenTerrainTransforms1 = 86,
+    TaskPredictiveUnevenTerrainTransforms2 = 87,
+    TaskCombine2SampledEventsBuffers = 88,
+    TaskCombine2SampledEventsBuffersAndSampleDurationEvents = 89,
+    TaskBlend2DurationEventTrackSets = 90,
+    TaskBlend2TrajectoryDeltaTransformsAddAttAddPos = 91,
+    TaskBlend2TrajectoryDeltaTransformsAddAttInterpPos = 92,
+    TaskBlend2TrajectoryDeltaTransformsAddAttSlerpPos = 93,
+    TaskBlend2TrajectoryDeltaTransformsInterpAttAddPos = 94,
+    TaskBlend2TrajectoryDeltaTransformsInterpAttInterpPos = 95,
+    TaskBlend2TrajectoryDeltaTransformsInterpAttSlerpPos = 96,
+    TaskBlend2TrajectoryDeltaTransformsSubtractAttSubtractPos = 97,
+    TaskBlend2TrajectoryDeltaTransformsSubtractAttSlerpPos = 98,
+    TaskBlend2TrajectoryAndTransformsAddAttAddPosSlerpTraj = 99,
+    TaskBlend2TrajectoryAndTransformsAddAttInterpPosSlerpTraj = 100,
+    TaskBlend2TrajectoryAndTransformsInterpAttAddPosSlerpTraj = 101,
+    TaskBlend2TrajectoryAndTransformsInterpAttInterpPosSlerpTraj = 102,
+    TaskBlend2TrajectoryAndTransformsSubtractAttSubtractPosSlerpTraj = 103,
+    TaskBlend2TrajectoryAndTransformsAddAttAddPosInterpTraj = 104,
+    TaskBlend2TrajectoryAndTransformsAddAttInterpPosInterpTraj = 105,
+    TaskBlend2TrajectoryAndTransformsInterpAttAddPosInterpTraj = 106,
+    TaskBlend2TrajectoryAndTransformsInterpAttInterpPosInterpTraj = 107,
+    TaskBlend2TrajectoryAndTransformsSubtractAttSubtractPosInterpTraj = 108,
+    TaskBlend2TransformsAddAttAddPosPassDestTraj = 109,
+    TaskBlend2TransformsAddAttInterpPosPassDestTraj = 110,
+    TaskBlend2TransformsInterpAttAddPosPassDestTraj = 111,
+    TaskBlend2TransformsInterpAttInterpPosPassDestTraj = 112,
+    TaskBlend2TransformsAddAttAddPosPassSourceTraj = 113,
+    TaskBlend2TransformsAddAttInterpPosPassSourceTraj = 114,
+    TaskBlend2TransformsInterpAttAddPosPassSourceTraj = 115,
+    TaskBlend2TransformsInterpAttInterpPosPassSourceTraj = 116,
+    TaskFeatherBlend2TrajectoryDeltaTransformsAddAttAddPos = 117,
+    TaskFeatherBlend2TrajectoryDeltaTransformsAddAttInterpPos = 118,
+    TaskFeatherBlend2TrajectoryDeltaTransformsAddAttSlerpPos = 119,
+    TaskFeatherBlend2TrajectoryDeltaTransformsInterpAttAddPos = 120,
+    TaskFeatherBlend2TrajectoryDeltaTransformsInterpAttInterpPos = 121,
+    TaskFeatherBlend2TrajectoryDeltaTransformsInterpAttSlerpPos = 122,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsAddAttAddPosSlerpTraj = 123,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsAddAttInterpPosSlerpTraj = 124,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsInterpAttAddPosSlerpTraj = 125,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsInterpAttInterpPosSlerpTraj = 126,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsAddAttAddPosInterpTraj = 127,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsAddAttInterpPosInterpTraj = 128,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsInterpAttAddPosInterpTraj = 129,
+    TaskFeatherBlend2TrajectoryDeltaAndTransformsInterpAttInterpPosInterpTraj = 130,
+    TaskBlend2SyncEventsUpdateTimeViaTimePos = 131,
+    TaskBlend2SyncEventsUpdateTimeViaSyncEventPos = 132,
+    TaskBlend2SyncEventTracks = 133,
+    TaskScaleUpdateTime = 134,
+    TaskScaleUpdateSyncEventTrack = 135,
+    TaskSetUpdateTimeViaControlParam = 136,
+    TaskFilterTransforms = 137,
+    TaskFilterTrajectoryDelta = 138,
+    TaskFilterTrajectoryDeltaAndTransforms = 139,
+    TaskApplyBindPoseTransforms = 140,
+    TaskApplyBindPoseTrajectoryDeltaAndTransforms = 141,
+    TaskApplyGlobalTimeUpdateTimePos = 142,
+    TaskGetBindPoseTransforms = 143,
+    TaskMirrorTransforms = 144,
+    TaskMirrorTrajectoryDelta = 145,
+    TaskMirrorTrajectoryDeltaAndTransforms = 146,
+    TaskMirrorSampledEvents = 147,
+    TaskMirrorSampledAndSampleDurationEvents = 148,
+    TaskMirrorSyncEventsAndOffset = 149,
+    TaskMirrorDurationEvents = 150,
+    TaskMirrorUpdateTimeViaSyncEventPos = 151,
+    TaskMirrorUpdateTimeViaTimePos = 152,
+    TaskClosestAnimTransforms = 153,
+    TaskClosestAnimTrajectoryDelta = 154,
+    TaskClosestAnimTrajectoryDeltaAndTransforms = 155,
+    TaskNetworkUpdateCharacterController = 166,
+    TaskNetworkUpdatePhysics = 167,
+    TaskNetworkUpdateRoot = 168,
+    TaskNetworkMergePhysicsRigTransformBuffers = 169,
+    TaskNetworkDummyTask = 170,
+    TaskEmptyTask = 171,
+    TaskTransitUpdateTimePos = 172,
+    TaskTransitDeadBlendUpdateTimePos = 173,
+    TaskTransitSyncEventsUpdateTimeViaSyncEventPos = 174,
+    TaskTransitSyncEventsUpdateTimeViaTimePos = 175,
+    TaskTransitSyncEventsBlendSyncEventTracks = 176,
+    TaskTransitSyncEventsPassThroughSyncEventTrack = 177,
+    TaskDeadBlendCacheState = 178,
+    TaskAnimDeadBlendTransformBuffs = 180,
+    TaskAnimDeadBlendTrajectoryDeltaAndTransformBuffs = 181,
+    TaskDeadBlendTrajectory = 182,
+    TaskOutputSmoothTransformsTransforms = 184,
+    TaskOutputSmoothTransformsTrajectoryDeltaAndTransforms = 185,
+    TaskScaleToDuration = 186,
+    TaskScaleToDurationSyncEventTrack = 187,
+    TaskPassThroughTransformsExtractJointInfoObjectSpace = 201,
+    TaskPassThroughTransformsExtractJointInfoLocalSpace = 202,
+    TaskPassThroughTransformsExtractJointInfoObjectSpaceJointSelect = 203,
+    TaskPassThroughTransformsExtractJointInfoLocalSpaceJointSelect = 204,
+    TaskPassThroughTrajectoryDeltaAndTransformsExtractJointInfoObjectSpace = 205,
+    TaskPassThroughTrajectoryDeltaAndTransformsExtractJointInfoLocalSpace = 206,
+    TaskPassThroughTrajectoryDeltaAndTransformsExtractJointInfoObjectSpaceJointSelect = 207,
+    TaskPassThroughTrajectoryDeltaAndTransformsExtractJointInfoLocalSpaceJointSelect = 208,
+    TaskSampledEventsBufferEmitMessageAndPassThrough = 209,
+    TaskCreateReferenceToInputAttribTypeUpdatePlaybackPos = 216,
+    TaskCreateReferenceToInputAttribTypeUpdateSyncEventPlaybackPos = 217,
+    TaskCreateReferenceToInputAttribTypePlaybackPos = 218,
+    TaskCreateReferenceToInputAttribTypePlaybackPos = 219,
+    TaskCreateReferenceToInputAttribTypePlaybackPos = 220,
+    TaskCreateReferenceToInputAttribTypeTransformBuffer = 222,
+    TaskCreateReferenceToInputAttribTypeTrajectoryDeltaTransform = 223,
+    TaskCreateReferenceToInputAttribTypeTransform = 224,
+    TaskCreateReferenceToInputAttribTypeTransformBuffer = 225,
+    TaskCreateReferenceToInputAttribTypeSyncEventTrack = 228,
+    TaskCreateReferenceToInputAttribTypeSampledEvents = 229,
+    TaskCreateReferenceToInputAttribTypeDurationEventTrackSet = 230,
+    TaskCreateReferenceToInputAttribTypeFloat = 243,
+    TaskCreateReferenceToInputAttribTypeFloat = 244,
+    TaskCreateReferenceToInputAttribTypeVector4 = 245,
+    TaskCreateReferenceToInputAttribTypeUIntArray = 252,
+    TaskCreateReferenceToInputAttribTypeBoolArray = 263
+};*/
+
 static class Morpheme
 {
 public:
-
-    enum NodeType
-    {
-        NetworkInstance = 9,
-        StateMachine_Node = 10,
-        ControlParameterFloat = 20,
-        ControlParameterInt = 24,
-        ControlParameterVector3 = 21,
-        ControlParameterBool = 23,
-        NodeAnimSyncEvents = 104,
-        Blend2SyncEvents = 107,
-        Blend2Additive = 108,
-        Blend2Additive_2 = 114,
-        ShareUpdateConnections1Child1InputCP = 125,
-        Freeze = 126,
-        ShareUpdateConnectionsChildrenOptionalInputCPs = 129,
-        Switch = 131,
-        ShareUpdateConnectionsChildren = 134,
-        ShareUpdateConnectionsChildren_2 = 135,
-        ShareUpdateConnections1Child2OptionalInputCP = 136,
-        PredictiveUnevenTerrain = 138,
-        OperatorSmoothDamp = 142,
-        Transit = 402,
-        ShareUpdateConnections1Child1OptionalInputCP = 500,
-        Unk550 = 550,
-    };
-
-    enum AttribType
-    {};
-    
-    enum AttribSemantic
-    {};
-
-    enum TaskID
-    {};
-
-    enum ControlParam_ValueType
-    {
-        Int = 2,
-        Float = 3,
-        Vector3 = 4,
-    };
-
     struct sSmStateList {
         uint32_t m_numStateMachinesNodes;
         int field1_0x4;
@@ -479,33 +836,48 @@ public:
         short* node_array;
     };
 
-    struct NodeBin {
-        uint32_t m_lastFrameUpdate;
-        uint32_t field1_0x4;
-        struct NodeBinEntry* m_attributes;
-        uint32_t field3_0x10;
-        uint32_t field4_0x14;
-        struct Task* m_queuedTask;
-        struct sControlParamContainer* m_controlParamContainer;
-        int field7_0x28;
-        int field8_0x2c;
+    struct AttribDataHandle {
+        struct MorphemeAllocator* m_allocator;
+        short field1_0x8;
+        AttribType m_type;
+        int padding;
+        short m_activeStateID;
+        short m_targetStateID;
+        float field6_0x14;
+        float field7_0x18;
+        byte field8_0x19;
+        byte field9_0x1a;
+        byte field10_0x1b;
+        int field11_0x1c;
     };
 
     struct NodeBinEntry {
-        struct NodeBinEntry* m_next;
-        struct AttribDataHandle* m_attribDataHandle;
+        NodeBinEntry* m_next;
+        AttribDataHandle* m_attribDataHandle;
         uint32_t format_size;
         uint32_t format_alignment;
         int field4_0x18;
         int field5_0x1c;
         short m_owningNodeID;
         short m_targetNodeID;
-        short m_semantic;
+        AttribSemantic m_semantic;
         short m_animSetIndex;
         int m_validFrame;
         int field11_0x2c;
         struct MorphemeAllocator* m_allocator;
         uint16_t m_lifespan;
+    };
+
+    struct NodeBin {
+        uint32_t m_lastFrameUpdate;
+        uint32_t field1_0x4;
+        NodeBinEntry* m_attributes;
+        uint32_t field3_0x10;
+        uint32_t field4_0x14;
+        struct Task* m_queuedTask;
+        struct sControlParamContainer* m_controlParamContainer;
+        int field7_0x28;
+        int field8_0x2c;
     };
 
     struct NodeConnections {
@@ -517,21 +889,6 @@ public:
         short m_maxNumActiveChildNodes;
         short m_numActiveChildNodes;
         int field7_0x14;
-    };
-
-    struct AttribDataHandle {
-        struct MorphemeAllocator* m_allocator;
-        short field1_0x8;
-        short m_type;
-        int padding;
-        short m_activeStateID;
-        short m_targetStateID;
-        float field6_0x14;
-        byte field7_0x18;
-        byte field8_0x19;
-        byte field9_0x1a;
-        byte field10_0x1b;
-        int field11_0x1c;
     };
 
     struct NetworkDef {
@@ -778,9 +1135,11 @@ public:
 
     static const char* getMessageName(uint64_t character_ctrl, short message_id);
 
-    static NodeBin* getNodeBin(uint64_t character_ctrl, short node_id);
+    static NodeBin* getNetworkNodeBin(Morpheme::Network* network, short node_id);
 
     static std::vector<sMessageDef*> getMessageDefs(uint64_t character_ctrl);
+
+    static NodeConnections* getNetworkNodeConnections(Morpheme::Network* network, short node_id);
 
     static bool isNodeActive(Network* network, short node_id);
 
@@ -795,4 +1154,6 @@ public:
     static const char* getNodeTypeName(Morpheme::Network* network, short node_id);
 
     static uint32_t getTimeActId(Morpheme::NodeDef* node_def);
+
+    static int getCurrentAnimFrame(Morpheme::Network* network, short node_id);
 };
