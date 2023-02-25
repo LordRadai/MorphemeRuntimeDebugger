@@ -309,6 +309,15 @@ void ImNodesInterface::createAnimSyncEventNode(Morpheme::NodeDef* node)
 	int link_id = node->m_nodeID * 10000000;
 	char title[255];
 
+	Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node->node_data;
+	float end_time = 1;
+	float track_len = *(float*)(node_data->m_animData + 0x84);
+	float anim_len = *(float*)(node_data->m_animData + 0x88);
+	float current_time = Math::frameToTime(Morpheme::getCurrentAnimFrame(network_inspector.network, node->m_nodeID), 60);
+
+	if (network_inspector.network_config.eventTrackConfig_scaleToAnim)
+		end_time = anim_len / track_len;
+
 	sprintf_s(title, "%s_%d", Morpheme::getAnimNameFromAnimNode(node), node->m_nodeID);
 
 	ImNodes::BeginNode(node->m_nodeID);
@@ -327,6 +336,11 @@ void ImNodesInterface::createAnimSyncEventNode(Morpheme::NodeDef* node)
 	ImNodes::PushColorStyle(ImNodesCol_PinHovered, 0x0000FF00);
 	ImNodes::BeginInputAttribute(source_id);
 	ImGui::TextUnformatted("");
+
+	ImGui::PushItemWidth(ImGui::CalcTextSize(title).x);
+	ImGui::SliderFloat("", &current_time, 0, end_time, "%.3f");
+	ImGui::PopItemWidth();
+
 	ImNodes::EndInputAttribute();
 	ImNodes::PopColorStyle();
 	ImNodes::PopColorStyle();

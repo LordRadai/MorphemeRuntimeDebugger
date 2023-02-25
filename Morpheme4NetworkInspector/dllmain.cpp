@@ -15,6 +15,7 @@ uint64_t GameManagerImp;
 uint64_t BaseB;
 uint64_t KatanaMainApp;
 int game_state;
+int prev_game_state = 0;
 
 oSendMessage sendMessage;
 oTaeLookup taeLookup;
@@ -158,6 +159,12 @@ bool MainLoop(uint64_t qModuleHandle)
 
                 if (GameManagerImp)
                     game_state = *(int*)(GameManagerImp + 0x24AC);
+
+                if (game_state != prev_game_state)
+                {
+                    Debug::debuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d.\n", prev_game_state, game_state);
+                    prev_game_state = game_state;
+                }
 
                 MSG msg;
                 while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))

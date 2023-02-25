@@ -930,7 +930,8 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 {
 	if (game_state != 30)
 	{
-		Debug::debuggerMessage(Debug::LVL_INFO, "Game State %d. Performing Network Cleanup.\n", game_state);
+		if (game_state != prev_game_state)
+			Debug::debuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d. Performing Network Cleanup\n", prev_game_state, game_state);
 
 		target_character = NULL;
 		NetworkCleanup();
@@ -1055,7 +1056,7 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 			network_data.imnodes_data.node_position.clear();
 			network_data.imnodes_data.occupied_positions.clear();
 			network_data.imnodes_data.editors.clear();
-			network_data.imnodes_data.node_def = 0;
+			network_data.imnodes_data.node_def = NULL;
 
 			if (Morpheme::doesNodeExist(network, network_data.imnodes_data.node_to_inspect))
 				network_data.imnodes_data.node_def = Morpheme::getNetworkNode(network, network_data.imnodes_data.node_to_inspect);
@@ -1096,7 +1097,8 @@ void MorphemeNetworkInspectorGUI::NetworkCleanup()
 	network_data.imnodes_data.node_ids.clear();
 	network_data.imnodes_data.node_position.clear();
 	network_data.imnodes_data.occupied_positions.clear();
-	network_data.imnodes_data.node_def = 0;
+	network_data.imnodes_data.node_to_inspect = 0;
+	network_data.imnodes_data.node_def = NULL;
 
 	ImNodesEditorContext& editor = ImNodes::EditorContextGet();
 	ImNodes::ObjectPoolReset(editor.Nodes);

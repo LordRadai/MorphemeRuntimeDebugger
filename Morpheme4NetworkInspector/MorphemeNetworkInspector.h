@@ -64,7 +64,6 @@ public:
 		ImU64 event_track_node;
 		const char* asset_name;
 		AnimTimeAct anim_tae;
-		int first_active_frame;
 		float anim_len;
 		float mult;
 	};

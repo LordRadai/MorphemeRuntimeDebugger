@@ -59,6 +59,9 @@ sEventGroup* TimeAct::getEventGroup(sTaeData* tae_data, int index)
 
 int TimeAct::loadTimeActTrack(sTaeData* tae_data, TimeActTrackList* tae_list)
 {
+	if (tae_data == NULL)
+		return -1;
+
 	int track_count = tae_data->event_group_count;
 
 	tae_list->parent = (uint64_t)tae_data;
@@ -274,19 +277,21 @@ TimeActDef TimeAct::getTimeActDef(int group_id, int tae_id)
 
 	if (tae_args != "")
 	{
+		int count = 0;
+
 		std::size_t start_pos = tae_args.find("{");
 		while (start_pos != std::string::npos)
 		{
 			std::size_t end_pos = tae_args.find("}", start_pos);
 			if (end_pos == std::string::npos)
-			{
-				// Invalid input string
 				break;
-			}
+
 			std::string value_str = tae_args.substr(start_pos + 1, end_pos - start_pos - 1);
 			tae_def.arg_type.push_back(std::stoi(value_str));
-			Debug::debuggerMessage(Debug::LVL_INFO, "Argument Value: %d\n", std::stoi(value_str));
 			start_pos = tae_args.find("{", end_pos);
+
+			Debug::debuggerMessage(Debug::LVL_INFO, "TAE ID: %d, Argument %d Value: %d\n", tae_id, count, std::stoi(value_str));
+			count++;
 		}
 	}
 

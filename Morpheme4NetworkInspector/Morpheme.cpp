@@ -566,9 +566,7 @@ Morpheme::Network* Morpheme::getNetwork(uint64_t character_ctrl)
 
 Morpheme::NodeDef* Morpheme::getNetworkNode(Network* network, short node_id)
 {
-	Debug::debuggerMessage(Debug::LVL_INFO, "Node ID: %d, NodeType: %d\n", node_id, network->m_networkDef->m_nodes[node_id]->m_nodeTypeID);
-
-	if (!network || node_id == -1)
+	if (!network || !doesNodeExist(network, node_id))
 		return NULL;
 
 	return network->m_networkDef->m_nodes[node_id];
@@ -606,7 +604,7 @@ const char* Morpheme::getAnimNameFromAnimNode(NodeDef* node)
 {
 	if (node->m_nodeTypeID != NodeType::NodeAnimSyncEvents)
 	{
-		printf_s("[ERR, MorphemeSystem] Node %d is not an Animation node\n", node->m_nodeID);
+		Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an Animation node\n", node->m_nodeID);
 		return NULL;
 	}
 
@@ -643,10 +641,10 @@ const char* Morpheme::stringTableLookup(StringTable* table, short id)
 
 const char* Morpheme::getNodeName(uint64_t character_ctrl, short node_id)
 {
-	if (node_id != -1)
-	{
-		Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
+	Morpheme::Network* network = Morpheme::getNetwork(character_ctrl);
 
+	if (doesNodeExist(network, node_id))
+	{
 		StringTable* string_table = network->m_networkDef->m_nodeIDNamesTable;
 		return stringTableLookup(string_table, node_id);
 	}
@@ -669,10 +667,8 @@ const char* Morpheme::getMessageName(uint64_t character_ctrl, short message_id)
 
 Morpheme::NodeBin* Morpheme::getNetworkNodeBin(Network* network, short node_id)
 {
-	if (node_id != -1)
-	{
+	if (doesNodeExist(network, node_id))
 		return &network->m_nodeBins[node_id];
-	}
 	
 	return NULL;
 }
@@ -690,7 +686,7 @@ std::vector<Morpheme::sMessageDef*> Morpheme::getMessageDefs(uint64_t character_
 
 bool Morpheme::isNodeActive(Network* network, short node_id)
 {
-	if (node_id != -1)
+	if (doesNodeExist(network, node_id))
 		if ((network->m_nodeConnections[node_id]->flags_1 & 2) >> 1)
 			return true;
 
@@ -699,7 +695,7 @@ bool Morpheme::isNodeActive(Network* network, short node_id)
 
 bool Morpheme::isNodeContainer(Network* network, short node_id)
 {
-	if (node_id != -1)
+	if (doesNodeExist(network, node_id))
 		if ((network->m_networkDef->m_nodes[node_id]->m_flags1 & 16) >> 4)
 			return true;
 
@@ -708,7 +704,7 @@ bool Morpheme::isNodeContainer(Network* network, short node_id)
 
 bool Morpheme::isNodeConnectedToOutput(Network* network, short node_id)
 {
-	if (node_id != -1)
+	if (doesNodeExist(network, node_id))
 		if ((network->m_networkDef->m_nodes[node_id]->m_flags2 & 64) >> 6)
 			return true;
 
@@ -718,86 +714,89 @@ bool Morpheme::isNodeConnectedToOutput(Network* network, short node_id)
 
 const char* Morpheme::getNodeTypeName_Alt(Morpheme::Network* network, short node_id)
 {
-	if (node_id != -1)
+	if (network)
 	{
-		int node_type = network->m_networkDef->m_nodes[node_id]->m_nodeTypeID;
-
-		switch (node_type)
+		if (doesNodeExist(network, node_id))
 		{
-		case 9:
-			return "Network";
-		case 10:
-			return "StateMachine";
-		case 20:
-			return "CP_Float";
-		case 21:
-			return "CP_Vector3";
-		case 23:
-			return "CP_Bool";
-		case 24:
-			return "CP_Int";
-		case 104:
-			return "AnimSyncEvents";
-		case 105:
-			return "ShareChildren_105";
-		case 107:
-			return "Blend2SyncEvents";
-		case 108:
-			return "Blend2Additive_108";
-		case 109:
-			return "Share1Child1InputCP_109";
-		case 110:
-			return "ShareCreateFloatOutputAttribute_110";
-		case 112:
-			return "ShareCreateFloatOutputAttribute_112";
-		case 114:
-			return "Blend2Additive_114";
-		case 120:
-			return "TwoBoneIK";
-		case 121:
-			return "LockFoot";
-		case 122:
-			return "ShareChildren1CompulsoryManyOptionalInputCPs_120";
-		case 125:
-			return "Share1Child1InputCP_125";
-		case 126:
-			return "Freeze";
-		case 129:
-			return "ShareChildrenOptionalInputCPs";
-		case 131:
-			return "Switch";
-		case 134:
-			return "ShareChildren_134";
-		case 135:
-			return "ShareChildren_135";
-		case 136:
-			return "Share1Child2OptionalInputCP";
-		case 138:
-			return "PredictiveUnevenTerrain";
-		case 142:
-			return "OperatorSmoothDamp";
-		case 144:
-			return "ShareCreateVector3OutputAttribute";
-		case 146:
-			return "OperatorRandomFloat";
-		case 150:
-			return "ShareChildren1CompulsoryManyOptionalInputCPs_150";
-		case 151:
-			return "ShareChild1InputCP_151";
-		case 153:
-			return "ShareChildren_153";
-		case 170:
-			return "SubtractiveBlend";
-		case 400:
-			return "TransitSyncEvents";
-		case 402:
-			return "Transit";
-		case 500:
-			return "Share1Child1OptionalInputCP";
-		default:
-			char name[255];
-			sprintf_s(name, "NodeType_%d", node_type);
-			return name;
+			int node_type = network->m_networkDef->m_nodes[node_id]->m_nodeTypeID;
+
+			switch (node_type)
+			{
+			case 9:
+				return "Network";
+			case 10:
+				return "StateMachine";
+			case 20:
+				return "CP_Float";
+			case 21:
+				return "CP_Vector3";
+			case 23:
+				return "CP_Bool";
+			case 24:
+				return "CP_Int";
+			case 104:
+				return "AnimSyncEvents";
+			case 105:
+				return "ShareChildren_105";
+			case 107:
+				return "Blend2SyncEvents";
+			case 108:
+				return "Blend2Additive_108";
+			case 109:
+				return "Share1Child1InputCP_109";
+			case 110:
+				return "ShareCreateFloatOutputAttribute_110";
+			case 112:
+				return "ShareCreateFloatOutputAttribute_112";
+			case 114:
+				return "Blend2Additive_114";
+			case 120:
+				return "TwoBoneIK";
+			case 121:
+				return "LockFoot";
+			case 122:
+				return "ShareChildren1CompulsoryManyOptionalInputCPs_120";
+			case 125:
+				return "Share1Child1InputCP_125";
+			case 126:
+				return "Freeze";
+			case 129:
+				return "ShareChildrenOptionalInputCPs";
+			case 131:
+				return "Switch";
+			case 134:
+				return "ShareChildren_134";
+			case 135:
+				return "ShareChildren_135";
+			case 136:
+				return "Share1Child2OptionalInputCP";
+			case 138:
+				return "PredictiveUnevenTerrain";
+			case 142:
+				return "OperatorSmoothDamp";
+			case 144:
+				return "ShareCreateVector3OutputAttribute";
+			case 146:
+				return "OperatorRandomFloat";
+			case 150:
+				return "ShareChildren1CompulsoryManyOptionalInputCPs_150";
+			case 151:
+				return "ShareChild1InputCP_151";
+			case 153:
+				return "ShareChildren_153";
+			case 170:
+				return "SubtractiveBlend";
+			case 400:
+				return "TransitSyncEvents";
+			case 402:
+				return "Transit";
+			case 500:
+				return "Share1Child1OptionalInputCP";
+			default:
+				char name[255];
+				sprintf_s(name, "NodeType_%d", node_type);
+				return name;
+			}
 		}
 	}
 
@@ -826,12 +825,13 @@ const char* Morpheme::getNodeTypeName(Morpheme::Network* network, short node_id)
 
 bool Morpheme::doesNodeExist(Network* network, short node_id)
 {
-	for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
+	if (node_id != -1)
 	{
-		if (network->m_networkDef->m_nodes[i]->m_nodeID == node_id)
+		if (node_id <= network->m_networkDef->m_numNodes)
 			return true;
 	}
-
+	
+	Debug::debuggerMessage(Debug::LVL_INFO, "Node %d is not present in the current Network\n", node_id);
 	return false;
 }
 
@@ -864,38 +864,50 @@ Morpheme::NodeConnections* Morpheme::getNetworkNodeConnections(Morpheme::Network
 
 int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 {
-	NodeDef* node_def = getNetworkNode(network, node_id);
-
-	if (node_def->m_nodeTypeID != NodeAnimSyncEvents)
+	if (network)
 	{
-		Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an animation node\n", node_def->m_nodeID);
-		return 0;
-	}
-
-	//int first_active_frame = network_inspector.network_data.anim_events.first_active_frame;
-	int current_frame = -1;
-
-	Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
-	float anim_len = *(float*)(node_data + 0x88);
-	float track_len = *(float*)(node_data + 0x84);
-	float current_time = 0;
-
-	NodeBin* node_bin = getNetworkNodeBin(network, node_id);
-
-	if (node_bin->m_attributes)
-	{
-		for (NodeBinEntry* current_bin_entry = node_bin->m_attributes; current_bin_entry != NULL; current_bin_entry = current_bin_entry->m_next)
+		if (doesNodeExist(network, node_id))
 		{
-			if (current_bin_entry->m_semantic == ATTRIB_SEMANTIC_FRACTION_POS)
-			{
-				current_time = (float)current_bin_entry->m_attribDataHandle->field7_0x18;
-				Debug::debuggerMessage(Debug::LVL_INFO, "Current Time: %f\n", current_time);
-				break;
-			}
-		}
-		current_time *= network_inspector.network_data.anim_events.mult;
-		current_frame = Math::timeToFrame(current_time, 60);
-	}
+			NodeDef* node_def = getNetworkNode(network, node_id);
 
-	return current_frame;
+			if (node_def && node_def->m_nodeTypeID != NodeAnimSyncEvents)
+			{
+				Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an animation node\n", node_def->m_nodeID);
+				return 0;
+			}
+
+			int current_frame = -1;
+
+			Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
+
+			float track_len = *(float*)(node_data->m_animData + 0x84);
+			float anim_len = *(float*)(node_data->m_animData + 0x88);
+			float current_time = 0;
+			float mult = 1;
+
+			NodeBin* node_bin = getNetworkNodeBin(network, node_id);
+
+			if (node_bin && node_bin->m_attributes)
+			{
+				for (NodeBinEntry* current_bin_entry = node_bin->m_attributes; current_bin_entry != NULL; current_bin_entry = current_bin_entry->m_next)
+				{
+					if (current_bin_entry->m_semantic == ATTRIB_SEMANTIC_FRACTION_POS)
+					{
+						current_time = (float)current_bin_entry->m_attribDataHandle->field7_0x18;
+						break;
+					}
+				}
+
+				if (network_inspector.network_config.eventTrackConfig_scaleToAnim)
+					mult = anim_len / track_len;
+
+				current_time *= mult;
+				current_frame = Math::timeToFrame(current_time, 60);
+			}
+
+			return current_frame;
+		}
+	}
+	
+	return -1;
 }
