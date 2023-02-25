@@ -876,7 +876,7 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 				return 0;
 			}
 
-			int current_frame = -1;
+			int current_frame = 0;
 
 			Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
 
@@ -909,5 +909,5 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 		}
 	}
 	
-	return -1;
+	return 0;
 }
