@@ -5,7 +5,7 @@
 #include "inih/INIReader.h"
 #include <windows.h>
 
-enum NodeType : short
+enum NodeType
 {
     NodeType_NetworkInstance = 9,
     NodeType_StateMachine = 10,

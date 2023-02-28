@@ -856,7 +856,7 @@ const char* Morpheme::getNodeTypeName(Morpheme::Network* network, short node_id)
 
 bool Morpheme::doesNodeExist(Network* network, short node_id)
 {
-	if (node_id != -1)
+	if (node_id != -1 && network)
 	{
 		if (node_id <= network->m_networkDef->m_numNodes)
 			return true;
