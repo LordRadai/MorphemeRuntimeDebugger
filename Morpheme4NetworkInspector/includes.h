@@ -23,6 +23,7 @@
 #include "FRPG2.h"
 #include "MorphemeNetworkInspector.h"
 #include "common.h"
+#include "Renderer.h"
 
 typedef HRESULT(__stdcall* Present) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef HRESULT(__stdcall* ResizeBuffers)(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);

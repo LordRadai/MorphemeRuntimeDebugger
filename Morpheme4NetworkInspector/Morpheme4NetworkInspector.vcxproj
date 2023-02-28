@@ -237,6 +237,7 @@
     <ClCompile Include="Morpheme.cpp" />
     <ClCompile Include="MorphemeInterface.cpp" />
     <ClCompile Include="MorphemeNetworkInspector.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="TimeAct.cpp" />
     <ClCompile Include="Timeline.cpp" />
   </ItemGroup>
@@ -272,6 +273,7 @@
     <ClInclude Include="Morpheme.h" />
     <ClInclude Include="MorphemeInterface.h" />
     <ClInclude Include="MorphemeNetworkInspector.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="TimeAct.h" />
     <ClInclude Include="Timeline.h" />
   </ItemGroup>

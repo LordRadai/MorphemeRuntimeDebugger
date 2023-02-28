@@ -23,6 +23,7 @@
 #include "Timeline.h"
 #include "Morpheme.h"
 #include "TimeAct.h"
+#include "Renderer.h"
 
 class MorphemeNetworkInspectorGUI
 {
@@ -41,6 +42,12 @@ public:
 	uint64_t target_character;
 	bool get_network;
 	Morpheme::Network* network;
+
+	struct View
+	{
+		bool attributes = true;
+		bool nodes = true;
+	};
 
 	struct ControlParameters
 	{
@@ -118,6 +125,7 @@ public:
 		bool is_save = false;
 	};
 
+	View view;
 	GetNetworkTask network_tasks;
 	NetworkData network_data;
 	NetworkSettings network_config;
@@ -126,4 +134,6 @@ public:
 	bool pull_tracks;
 	bool clear_tracks;
 	bool save_tracks;
+
+	bool show_skeleton = false;
 };

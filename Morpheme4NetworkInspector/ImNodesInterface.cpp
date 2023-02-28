@@ -311,8 +311,11 @@ void ImNodesInterface::createAnimSyncEventNode(Morpheme::NodeDef* node)
 
 	Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node->node_data;
 	float end_time = 1;
-	float track_len = *(float*)(node_data->m_animData + 0x84);
-	float anim_len = *(float*)(node_data->m_animData + 0x88);
+
+	uint64_t nsaFile = (uint64_t)node_data->m_animData;
+
+	float track_len = *(float*)(nsaFile + 0x84);
+	float anim_len = *(float*)(nsaFile + 0x88);
 	float current_time = Math::frameToTime(Morpheme::getCurrentAnimFrame(network_inspector.network, node->m_nodeID), 60);
 
 	if (network_inspector.network_config.eventTrackConfig_scaleToAnim)
@@ -384,6 +387,10 @@ void ImNodesInterface::createCPNode(Morpheme::NodeDef* node)
 	char title[255];
 	const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
 
+	Morpheme::NodeBin* node_bin = Morpheme::getNetworkNodeBin(network_inspector.network, node->m_nodeID);
+	DWORD* value = node_bin->m_controlParamContainer->m_controlParamData->m_value;
+	int cp_type = node_bin->m_controlParamContainer->m_controlParamData->m_dataType;
+
 	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
 	if (node_name[0])
 		strcpy(title, node_name);
@@ -404,6 +411,38 @@ void ImNodesInterface::createCPNode(Morpheme::NodeDef* node)
 	ImNodes::PushColorStyle(ImNodesCol_PinHovered, 0x0000FF00);
 	ImNodes::BeginInputAttribute(source_id);
 	ImGui::TextUnformatted("");
+	ImGui::PushItemWidth(ImGui::CalcTextSize(title).x);
+	switch (cp_type)
+	{
+	case 0:
+		ImGui::PushID(input_id);
+		ImGui::DragByte("", (char*)(value), 0, 0, 1, "%d", ImGuiSliderFlags_ReadOnly);
+		ImGui::PopID();
+		break;
+	case 2:
+		ImGui::PushID(input_id);
+		ImGui::DragInt("", (int*)(value), 0, -10000, 10000, "%d", ImGuiSliderFlags_ReadOnly);
+		ImGui::PopID();
+		break;
+	case 3:
+		ImGui::PushID(input_id);
+		ImGui::DragFloat("", (float*)(value), 0, -10000, 10000, "%.3f", ImGuiSliderFlags_ReadOnly);
+		ImGui::PopID();
+		break;
+	case 4:
+		ImGui::PushID(input_id);
+		ImGui::DragFloat("X", (float*)&node_bin->m_controlParamContainer->m_controlParamData->m_value[0], 0, -10000, 1000, "%.3f", ImGuiSliderFlags_ReadOnly);
+		ImGui::DragFloat("Y", (float*)&node_bin->m_controlParamContainer->m_controlParamData->m_value[1], 0, -10000, 1000, "%.3f", ImGuiSliderFlags_ReadOnly);
+		ImGui::DragFloat("Z", (float*)&node_bin->m_controlParamContainer->m_controlParamData->m_value[2], 0, -10000, 1000, "%.3f", ImGuiSliderFlags_ReadOnly);
+		ImGui::PopID();
+		break;
+	default:
+		char buf[50];
+		sprintf_s(buf, "Unknown CP type %d (%d)\n", node->m_nodeTypeID, node_bin->m_controlParamContainer->m_controlParamData->m_dataType);
+		ImGui::Text(buf);
+		break;
+	}
+	ImGui::PopItemWidth();
 	ImNodes::EndInputAttribute();
 	ImNodes::PopColorStyle();
 	ImNodes::PopColorStyle();

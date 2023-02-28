@@ -3,6 +3,7 @@
 #include "FRPG2.h"
 #include "Morpheme.h"
 #include "ImNodesInterface.h"
+#include "MorphemeInterface.h"
 
 MorphemeNetworkInspectorGUI::MorphemeNetworkInspectorGUI()
 {
@@ -70,8 +71,8 @@ void MorphemeNetworkInspectorGUI::GUIStyle()
 	colors[ImGuiCol_Tab] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 	colors[ImGuiCol_TabHovered] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
 	colors[ImGuiCol_TabActive] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
-	colors[ImGuiCol_TabUnfocused] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+	colors[ImGuiCol_TabUnfocused] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
 	colors[ImGuiCol_DockingPreview] = ImVec4(0.26f, 0.59f, 0.98f, 0.70f);
 	colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 	colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
@@ -120,6 +121,13 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			ImGui::EndMenu();
 		}
 
+		/*
+		if (ImGui::BeginMenu("Debug"))
+		{
+			//if (ImGui::MenuItem("Show Skeleton", NULL, &show_skeleton)) { show_skeleton != show_skeleton; }
+			ImGui::EndMenu();
+		}*/
+
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();
@@ -127,7 +135,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 	ImGui::Begin("Network");
 	{
 		ImGui::PushItemWidth(200);
-		ImGui::InputPtr("Target", &target_character, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue);
+		ImGui::InputPtr("Target", &target_character, ImGuiInputTextFlags_CharsHexadecimal);
 		ImGui::PopItemWidth();
 
 		if (ImGui::Button("Player"))
@@ -163,7 +171,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 		if (!clear_network && network && network_data.imnodes_data.node_def)
 		{ 
-			if (network_data.imnodes_data.node_def->m_parentNodeID != -1 && network_data.imnodes_data.node_def->m_nodeTypeID != NetworkInstance);
+			if (network_data.imnodes_data.node_def->m_parentNodeID != -1 && network_data.imnodes_data.node_def->m_nodeTypeID != NodeType_NetworkInstance);
 			{
 				char label[256];
 				Morpheme::NodeDef* temp = network_data.imnodes_data.node_def;
@@ -176,7 +184,7 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 					network_data.imnodes_data.parent_node = Morpheme::getNetworkNode(network, temp->m_parentNodeID);
 					network_data.imnodes_data.parent_id = temp->m_parentNodeID;
 
-					if (network_data.imnodes_data.parent_node->m_nodeTypeID == StateMachine_Node || network_data.imnodes_data.parent_node->m_nodeTypeID == NetworkInstance)
+					if (network_data.imnodes_data.parent_node->m_nodeTypeID == NodeType_StateMachine || network_data.imnodes_data.parent_node->m_nodeTypeID == NodeType_NetworkInstance)
 						break;
 
 					temp = network_data.imnodes_data.parent_node;
@@ -346,8 +354,8 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 			ImGui::PopItemWidth();
 			ImGui::InputPtr("Node Data", (uint64_t*)&network_data.imnodes_data.selected_node->node_data, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_CharsHexadecimal);
-
 			ImGui::Separator();
+			MorphemeInterface::renderNodeAttributeType(network_data.imnodes_data.selected_node, MorphemeInterface::getNodeContentAmount(network_data.imnodes_data.selected_node));
 		}
 	}
 		
@@ -606,13 +614,13 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 
 			network_data.anim_events.anim_tae.current_tae = Morpheme::getTimeActId(anim_sync_node);
 
-			if (anim_sync_node->m_nodeTypeID == NodeAnimSyncEvents)
+			if (anim_sync_node->m_nodeTypeID == NodeType_NodeAnimSyncEvents)
 			{
 				Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)anim_sync_node->node_data;
 
 				if (node_data->m_animData && node_data->m_eventTrackData)
 				{
-					uint64_t nsaFile = node_data->m_animData;
+					uint64_t nsaFile = (uint64_t)node_data->m_animData;
 
 					trackLenght = *(float*)(nsaFile + 0x84);
 					animLenght = *(float*)(nsaFile + 0x88);
@@ -782,18 +790,22 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 		if (network_data.anim_events.event_track_node)
 		{
 			Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.anim_events.event_track_node);
+			Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)anim_sync_node->node_data;
 
 			if (anim_sync_node)
 				currentFrame = Morpheme::getCurrentAnimFrame(network, anim_sync_node->m_nodeID);
 
-			currentFrame_tae = currentFrame;
+			currentFrame_tae = currentFrame + Math::timeToFrame(*(float*)(node_data->m_animData + 0x80), 60);
+
+			Debug::debuggerMessage(Debug::LVL_DEBUG, "Current Time (EventTrack): %.3f\n", Math::frameToTime(currentFrame, 60));
+			Debug::debuggerMessage(Debug::LVL_DEBUG, "Current Time (TAE): %.3f\n", Math::frameToTime(currentFrame_tae, 60));
 		}
 
 		ImGui::BeginTabBar("event track tab bar");
 		if (ImGui::BeginTabItem("Event Track"))
 		{
 			ImGui::BeginChild("sequencer");
-			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_LOOP_EVENTS);
+			ImSequencer::Sequencer(&event_track_editor, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND /*| ImSequencer::SEQUENCER_LOOP_EVENTS*/);
 			ImGui::EndChild();
 
 			ImGui::EndTabItem();
@@ -866,7 +878,6 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 				ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, Math::frameToTime(time_act_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 				ImGui::DragFloat("End Time", &duration, 1 / 60, 0, Math::frameToTime(time_act_track_editor.mFrameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 				
-				Debug::debuggerMessage(Debug::LVL_INFO, "Arg Count: %d\n", item.time_act_track->tae_def.arg_count);
 				if (item.time_act_track->tae_def.arg_count > 0)
 				{
 					ImGui::Text("Arguments");
@@ -945,6 +956,11 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 		NetworkCleanup();
 	}
 
+	if (target_character && show_skeleton)
+	{
+		//MorphemeInterface::drawSkeleton(target_character);
+	}
+
 	if (style_editor)
 	{
 		ImGui::Begin("Style Editor", &style_editor);
@@ -989,7 +1005,7 @@ void MorphemeNetworkInspectorGUI::ProcessVariables()
 		if (network_tasks.get_anim_assets)
 		{
 			network_data.anim_events.anim_nodes.clear();
-			network_data.anim_events.anim_nodes = Morpheme::getNetworkAllNodesType(target_character, NodeAnimSyncEvents);
+			network_data.anim_events.anim_nodes = Morpheme::getNetworkAllNodesType(target_character, NodeType_NodeAnimSyncEvents);
 
 			if (network_data.anim_events.anim_nodes.size() == 0)
 				MessageBoxA(NULL, "There are no Animation nodes", "Morpheme Network Inspector", MB_ICONINFORMATION);

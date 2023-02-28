@@ -139,13 +139,22 @@ void TimeAct::saveTimeActTrack(TimeActTrackList* tae_list)
 	if (tae_list->parent)
 	{
 		track_base = (sTaeData*)tae_list->parent;
+		Debug::debuggerMessage(Debug::LVL_DEBUG, "Saving TimeAct tracks\n");
 
 		if (tae_list->count > 0)
 		{
 			for (int i = 0; i < tae_list->count; i++)
 			{
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "%s:\n", tae_list->tracks[i].trackName);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tgroupCount: %d -> %d\n", track_base->event_group[i].group_count, tae_list->tracks[i].tae_count);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tgroupID: %d -> %d\n", *track_base->event_group[i].group_id, tae_list->tracks[i].group_id);
+				
 				track_base->event_group[i].group_count = tae_list->tracks[i].tae_count;
 				*track_base->event_group[i].group_id = tae_list->tracks[i].group_id;
+
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[0]: %.3f -> %.3f\n", track_base->event_group[i].tae_data[0]->start_time, tae_list->tracks[i].startTime);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tendTime[0]: %.3f -> %.3f\n", track_base->event_group[i].tae_data[0]->end_time, tae_list->tracks[i].endTime);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tvalue[0]: %d -> %d\n", track_base->event_group[i].tae_data[0]->event_data->value, tae_list->tracks[i].tae_id);
 
 				track_base->event_group[i].tae_data[0]->start_time = tae_list->tracks[i].startTime;
 				track_base->event_group[i].tae_data[0]->end_time = tae_list->tracks[i].endTime;
@@ -155,12 +164,17 @@ void TimeAct::saveTimeActTrack(TimeActTrackList* tae_list)
 				{
 					if (index_sub < tae_list->countSub)
 					{
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[%d]: %.3f -> %.3f\n", j, track_base->event_group[i].tae_data[j]->start_time, tae_list->tracksSub[index_sub].startTime);
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tendTime[%d]: %.3f -> %.3f\n", j, track_base->event_group[i].tae_data[j]->end_time, tae_list->tracksSub[index_sub].endTime);
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tvalue[%d]: %d -> %d\n", j, track_base->event_group[i].tae_data[j]->event_data->value, tae_list->tracksSub[index_sub].tae_id);
+
 						track_base->event_group[i].tae_data[j]->start_time = tae_list->tracksSub[index_sub].startTime;
 						track_base->event_group[i].tae_data[j]->end_time = tae_list->tracksSub[index_sub].endTime;
 						track_base->event_group[i].tae_data[j]->event_data->value = tae_list->tracksSub[index_sub].tae_id;
 						index_sub++;
 					}
 				}
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\n");
 			}
 		}
 	}
@@ -289,8 +303,6 @@ TimeActDef TimeAct::getTimeActDef(int group_id, int tae_id)
 			std::string value_str = tae_args.substr(start_pos + 1, end_pos - start_pos - 1);
 			tae_def.arg_type.push_back(std::stoi(value_str));
 			start_pos = tae_args.find("{", end_pos);
-
-			Debug::debuggerMessage(Debug::LVL_INFO, "TAE ID: %d, Argument %d Value: %d\n", tae_id, count, std::stoi(value_str));
 			count++;
 		}
 	}

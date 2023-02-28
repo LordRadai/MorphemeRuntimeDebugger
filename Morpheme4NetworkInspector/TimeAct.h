@@ -58,15 +58,6 @@ struct sTaeGroup {
     struct sGroupData* groups;
 };
 
-struct sEventGroup {
-    int group_count;
-    int field1_0x4;
-    struct sTaeBuffer** tae_data;
-    uint32_t* group_id;
-    int field4_0x18;
-    int field5_0x1c;
-};
-
 struct sTaeEventData
 {
     int value;
@@ -80,6 +71,15 @@ struct sTaeBuffer {
     float end_time;
     int field3_0xc;
     sTaeEventData* event_data;
+};
+
+struct sEventGroup {
+    int group_count;
+    int field1_0x4;
+    sTaeBuffer** tae_data;
+    uint32_t* group_id;
+    int field4_0x18;
+    int field5_0x1c;
 };
 
 namespace TimeAct

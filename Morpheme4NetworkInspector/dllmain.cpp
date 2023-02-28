@@ -17,6 +17,9 @@ uint64_t KatanaMainApp;
 int game_state;
 int prev_game_state = 0;
 
+float viewMatrix[16];
+float height, width;
+
 oSendMessage sendMessage;
 oTaeLookup taeLookup;
 
@@ -158,7 +161,19 @@ bool MainLoop(uint64_t qModuleHandle)
                 }
 
                 if (GameManagerImp)
+                {
                     game_state = *(int*)(GameManagerImp + 0x24AC);
+
+                    uint64_t camera_matrix = *(uint64_t*)(GameManagerImp + 0x16F0);
+                    camera_matrix = (camera_matrix + 0x170);
+                    memcpy(&viewMatrix, (PBYTE*)camera_matrix, sizeof(viewMatrix));
+
+                    uint64_t KatanaDrawSystem = *(uint64_t*)(KatanaMainApp + 0x348);
+                    int32_t* pResolution = (int32_t*)(KatanaDrawSystem + 0x30);
+
+                    width = *(pResolution);
+                    height = *(pResolution + 1);
+                }
 
                 if (game_state != prev_game_state)
                 {

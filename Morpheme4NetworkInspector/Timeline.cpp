@@ -4,7 +4,7 @@ const char* trackNames[50];
 
 void EventTrackEditor::AddTimeActTrack(int id, TimeActTrack* time_act_track, float multiplier)
 {
-	myItems.push_back(EventTrack{ id, time_act_track->group_id, Math::timeToFrame(time_act_track->startTime * multiplier, 60), Math::timeToFrame((time_act_track->endTime) * multiplier, 60), time_act_track->tae_id, 1, time_act_track->trackName, false, false, NULL, time_act_track });
+	myItems.push_back(EventTrack{ id, time_act_track->group_id, Math::timeToFrame(time_act_track->startTime * multiplier, 60), Math::timeToFrame((time_act_track->endTime) * multiplier, 60), time_act_track->tae_id, time_act_track->tae_count, time_act_track->trackName, false, false, NULL, time_act_track });
 }
 
 void EventTrackEditor::AddMorphemeEventTrack(int id, MorphemeEventTrack* event_track, float multiplier)

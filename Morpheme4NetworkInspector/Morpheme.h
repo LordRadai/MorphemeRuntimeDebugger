@@ -5,29 +5,43 @@
 #include "inih/INIReader.h"
 #include <windows.h>
 
-enum NodeType
+enum NodeType : short
 {
-    NetworkInstance = 9,
-    StateMachine_Node = 10,
-    ControlParameterFloat = 20,
-    ControlParameterInt = 24,
-    ControlParameterVector3 = 21,
-    ControlParameterBool = 23,
-    NodeAnimSyncEvents = 104,
-    Blend2SyncEvents = 107,
-    Blend2Additive = 108,
-    Blend2Additive_2 = 114,
-    ShareUpdateConnections1Child1InputCP = 125,
-    Freeze = 126,
-    ShareUpdateConnectionsChildrenOptionalInputCPs = 129,
-    Switch = 131,
-    ShareUpdateConnectionsChildren = 134,
-    ShareUpdateConnectionsChildren_2 = 135,
-    ShareUpdateConnections1Child2OptionalInputCP = 136,
-    PredictiveUnevenTerrain = 138,
-    OperatorSmoothDamp = 142,
-    Transit = 402,
-    ShareUpdateConnections1Child1OptionalInputCP = 500,
+    NodeType_NetworkInstance = 9,
+    NodeType_StateMachine = 10,
+    NodeType_ControlParameterFloat = 20,
+    NodeType_ControlParameterVector3 = 21,
+    NodeType_ControlParameterBool = 23,
+    NodeType_ControlParameterInt = 24,
+    NodeType_NodeAnimSyncEvents = 104,
+    Nodetype_ShareChildren_105 = 105,
+    NodeType_Blend2SyncEvents = 107,
+    NodeType_Blend2Additive = 108,
+    NodeType_Share1Child1InputCP_109,
+    NodeType_ShareCreateFloatOutputAttribute_110 = 110,
+    NodeType_ShareCreateFloatOutputAttribute_112 = 112,
+    NodeType_Blend2Additive_2 = 114,
+    NodeType_TwoBoneIK = 120,
+    NodeType_LockFoot = 121,
+    NodeType_ShareChildren1CompulsoryManyOptionalInputCPs_120 = 122,
+    NodeType_Share1Child1InputCP = 125,
+    NodeType_Freeze = 126,
+    NodeType_ShareChildrenOptionalInputCPs = 129,
+    NodeType_Switch = 131,
+    NodeType_ShareChildren = 134,
+    NodeType_ShareChildren_2 = 135,
+    NodeType_ShareUpdateConnections1Child2OptionalInputCP = 136,
+    NodeType_PredictiveUnevenTerrain = 138,
+    NodeType_OperatorSmoothDamp = 142,
+    NodeType_ShareCreateVector3OutputAttribute = 144,
+    NodeType_OperatorRandomFloat = 146,
+    NodeType_ShareChildren1CompulsoryManyOptionalInputCPs_150 = 150,
+    NodeType_ShareChild1InputCP_151 = 151,
+    NodeType_ShareChildren_153 = 153,
+    NodeType_SubtractiveBlend = 170,
+    NodeType_TransitSyncEvents = 400,
+    NodeType_Transit = 402,
+    NodeType_Share1Child1OptionalInputCP = 500,
     Unk550 = 550,
 };
 
@@ -422,6 +436,80 @@ public:
         char* m_Data;
     };
 
+    struct NodeDataContent_Bool
+    {
+        bool attrib_bool;
+    };
+
+    struct NodeDataContent_FloatArray
+    {
+        int size;
+        int padding;
+        float* flt_array;
+    };
+
+    struct NodeDataContent_SourceAnim
+    {
+        uint64_t nsa_data;
+        uint64_t lVar18;
+        int iVar20;
+        float fVar24;
+        int iVar28;
+        int iVar2C;
+        int iVar30;
+        int iVar34;
+        float fVar38;
+        float fVar3C;
+        float fVar40;
+        float fVar44;
+        int iVar48;
+        int iVar4C;
+        int iVar50;
+        int iVar54;
+        float fVar58;
+        float fVar5C;
+        uint64_t lVar60;
+        int iVar68;
+        int iVar6C;
+        int iVar70;
+        int iVar74;
+        int iVar78;
+        byte bVar7C;
+        byte bvar7D;
+        byte bVar7E;
+        byte bVar7F;
+        float track_start;
+        float track_lenght;
+        float anim_lenght;
+        int iVar8C;
+        byte bVar90;
+        byte padding[15];
+    };
+
+    struct NodeDataContentBase 
+    {
+        int field0_0x0;
+        int field1_0x4;
+        short field2_0x8;
+        AttribType m_type;
+        int padding;
+        uint64_t data_start;
+    };
+
+    struct NodeDataBase
+    {
+        NodeDataContentBase* content;
+        int size;
+        int alignment;
+        int iVar0;
+        int iVar1;
+    };
+
+    struct sNodeData
+    {
+        NodeDataBase data[10];
+    };
+
     struct NodeDef {
         NodeType m_nodeTypeID;
         byte m_flags1;
@@ -438,7 +526,7 @@ public:
         struct NetworkDef* m_owningNetworkDef;
         short* m_childNodeIDs;
         int* m_controlParamAndOpNodeIDs;
-        struct NodeDataBase* node_data;
+        sNodeData* node_data;
         short field16_0x38;
         short field17_0x3a;
         int field18_0x3c;
@@ -461,14 +549,6 @@ public:
         uint64_t field35_0x88;
     };
 
-    struct NodeDataBase {
-        uint32_t field0_0x0;
-        uint32_t field1_0x4;
-        short field2_0x8;
-        short m_type;
-        int padding;
-    };
-
     struct sEventTrackEventData {
         float m_startTime;
         float m_duration;
@@ -481,7 +561,7 @@ public:
         char* m_trackName;
         uint32_t m_eventId;
         uint32_t m_trackType;
-        struct sEventTrackEventData* m_trackData;
+        sEventTrackEventData* m_trackData;
     };
 
     struct sEventTrack {
@@ -501,15 +581,21 @@ public:
     };
 
     struct NodeData104 {
-        struct NodeDataBase m_nodeDataBase;
-        int field1_0x10;
-        int field2_0x14;
-        uint64_t m_animData;
-        int field4_0x20;
-        int field5_0x24;
-        int field6_0x28;
-        int field7_0x2c;
-        struct sEventTrackData* m_eventTrackData;
+        NodeDataContentBase* m_nodeDataBase;
+        int size;
+        int alignment;
+        int iVar0;
+        int iVar1;
+        NodeDataContentBase* m_animData;
+        int size_1;
+        int alignment_1;
+        int iVar0_1;
+        int iVar1_1;
+        sEventTrackData* m_eventTrackData;
+        int size_2;
+        int alignment_2;
+        int iVar0_2;
+        int iVar1_2;
     };
 
     struct AttribAddress {
@@ -1085,15 +1171,24 @@ public:
         int field6_0x14;
     };
 
-	static void loadControlParameters();
+    struct SkeletonBoneData
+    {
+        short parent_bone;
+        short child_bone[3];
+        const char* bone_name;
+    };
+
+    struct SkeletonMap
+    {
+        int bone_count;
+        SkeletonBoneData* bones;
+    };
 
     static int LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackList* track_list);
 
 	static void ClearTrackList(MorphemeEventTrackList* track_list);
 
     static void SaveEventTracks(MorphemeEventTrackList* track_list);
-
-	static void disableMorphemeUpdates(bool state);
 
 	static const char* getStringFromStringTable(StringTable* string_table, int id);
 

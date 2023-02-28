@@ -200,10 +200,20 @@ void Morpheme::SaveEventTracks(MorphemeEventTrackList* track_list)
 
 		if (track_list->count_discrete > 0)
 		{
+			Debug::debuggerMessage(Debug::LVL_DEBUG, "Saving Discrete Event Tracks\n");
+
 			for (int i = 0; i < track_list->count_discrete; i++)
 			{
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "%s:\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackName);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tnumEvents: %d -> %d\n", track_base->m_eventTracks[0].m_tracks[i]->m_numEvents, track_list->tracks_discrete[i].eventCount);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\teventId: %d -> %d\n", track_base->m_eventTracks[0].m_tracks[i]->m_eventId, track_list->tracks_discrete[i].eventId);
+
 				track_base->m_eventTracks[0].m_tracks[i]->m_numEvents = track_list->tracks_discrete[i].eventCount;
 				track_base->m_eventTracks[0].m_tracks[i]->m_eventId = track_list->tracks_discrete[i].eventId;
+
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[0]: %.3f -> %.3f\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_startTime, track_list->tracks_discrete[i].startTime);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[0]: %.3f -> %.3f\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_duration, track_list->tracks_discrete[i].duration);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[0]: %d -> %d\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_userData, track_list->tracks_discrete[i].value);
 
 				track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_startTime = track_list->tracks_discrete[i].startTime;
 				track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_duration = track_list->tracks_discrete[i].duration;
@@ -213,22 +223,36 @@ void Morpheme::SaveEventTracks(MorphemeEventTrackList* track_list)
 				{
 					if (index_subBlend < track_list->count_discreteSub)
 					{
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_startTime, track_list->tracks_discreteSub[index_subBlend].startTime);
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_duration, track_list->tracks_discreteSub[index_subBlend].duration);
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[%d]: %d -> %d\n", j, track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_userData, track_list->tracks_discreteSub[index_subBlend].value);
+
 						track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_startTime = track_list->tracks_discreteSub[index_subBlend].startTime;
 						track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_duration = track_list->tracks_discreteSub[index_subBlend].duration;
 						track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_userData = track_list->tracks_discreteSub[index_subBlend].value;
 						index_subBlend++;
 					}
 				}
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\n");
 			}
 		}
 
 		if (track_list->count_timed > 0)
 		{	
+			Debug::debuggerMessage(Debug::LVL_DEBUG, "Saving Timed Event Tracks\n");
+
 			for (int i = 0; i < track_list->count_timed; i++)
 			{
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "%s:\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackName);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tnumEvents: %d -> %d\n", track_base->m_eventTracks[2].m_tracks[i]->m_numEvents, track_list->tracks_timed[i].eventCount);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\teventId: %d -> %d\n", track_base->m_eventTracks[2].m_tracks[i]->m_eventId, track_list->tracks_timed[i].eventId);
 
 				track_base->m_eventTracks[2].m_tracks[i]->m_numEvents = track_list->tracks_timed[i].eventCount;
 				track_base->m_eventTracks[2].m_tracks[i]->m_eventId = track_list->tracks_timed[i].eventId;
+
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[0]: %.3f -> %.3f\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_startTime, track_list->tracks_timed[i].startTime);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[0]: %.3f -> %.3f\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_duration, track_list->tracks_timed[i].duration);
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[0]: %d -> %d\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_userData, track_list->tracks_timed[i].value);
 
 				track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_startTime = track_list->tracks_timed[i].startTime;
 				track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_duration = track_list->tracks_timed[i].duration;
@@ -238,12 +262,17 @@ void Morpheme::SaveEventTracks(MorphemeEventTrackList* track_list)
 				{
 					if (index_subGeneric < track_list->count_timedSub)
 					{
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_startTime, track_list->tracks_timedSub[index_subBlend].startTime);
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_duration, track_list->tracks_timedSub[index_subBlend].duration);
+						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[%d]: %d -> %d\n", j, track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_userData, track_list->tracks_timedSub[index_subBlend].value);
+
 						track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_startTime = track_list->tracks_timedSub[index_subGeneric].startTime;
 						track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_duration = track_list->tracks_timedSub[index_subGeneric].duration;
 						track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_userData = track_list->tracks_timedSub[index_subGeneric].value;
 						index_subGeneric++;
 					}
 				}
+				Debug::debuggerMessage(Debug::LVL_DEBUG, "\n");
 			}
 		}
 	}
@@ -577,12 +606,14 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkAllNodesType(uint64_t charac
 	Network* network = getNetwork(character_ctrl);
 	std::vector<Morpheme::NodeDef*> nodes;
 
+	Debug::debuggerMessage(Debug::LVL_DEBUG, "CharacterCtrl: %llX, Network: %llX\n", character_ctrl, network);
+
 	if (!network)
 		return nodes;
 
 	for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
 	{
-		if (node_type == NodeType::NodeAnimSyncEvents && network_inspector.network_config.filter_events)
+		if (node_type == NodeType::NodeType_NodeAnimSyncEvents && network_inspector.network_config.filter_events)
 		{
 			if (network->m_networkDef->m_nodes[i]->m_nodeTypeID == node_type)
 			{
@@ -602,14 +633,14 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkAllNodesType(uint64_t charac
 
 const char* Morpheme::getAnimNameFromAnimNode(NodeDef* node)
 {
-	if (node->m_nodeTypeID != NodeType::NodeAnimSyncEvents)
+	if (node->m_nodeTypeID != NodeType::NodeType_NodeAnimSyncEvents)
 	{
 		Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an Animation node\n", node->m_nodeID);
 		return NULL;
 	}
 
 	NodeData104* node_data = (NodeData104*)node->node_data;
-	uint64_t nsa_file = node_data->m_animData;
+	uint64_t nsa_file = (uint64_t)node_data->m_animData;
 
 	nsa_file = *(uint64_t*)(nsa_file + 0x10);
 
@@ -623,7 +654,7 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkControlParameterNodes(uint64
 	std::vector<Morpheme::NodeDef*> cp_nodes;
 
 	for (size_t i = 0; i < network_inspector.network->m_networkDef->m_numNodes; i++)
-		if (network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterFloat || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterInt || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterVector3 || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::ControlParameterBool)
+		if (network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterFloat || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterInt || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterVector3 || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterBool)
 			cp_nodes.push_back(network_inspector.network->m_networkDef->m_nodes[i]);
 
 	return cp_nodes;
@@ -837,7 +868,7 @@ bool Morpheme::doesNodeExist(Network* network, short node_id)
 
 uint32_t Morpheme::getTimeActId(Morpheme::NodeDef* node_def)
 {
-	if (node_def->m_nodeTypeID == NodeType::NodeAnimSyncEvents)
+	if (node_def->m_nodeTypeID == NodeType::NodeType_NodeAnimSyncEvents)
 	{
 		Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
 
@@ -856,7 +887,7 @@ uint32_t Morpheme::getTimeActId(Morpheme::NodeDef* node_def)
 
 Morpheme::NodeConnections* Morpheme::getNetworkNodeConnections(Morpheme::Network* network, short node_id)
 {
-	if (node_id != -1)
+	if (doesNodeExist(network, node_id))
 		return network->m_nodeConnections[node_id];
 
 	return NULL;
@@ -870,7 +901,7 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 		{
 			NodeDef* node_def = getNetworkNode(network, node_id);
 
-			if (node_def && node_def->m_nodeTypeID != NodeAnimSyncEvents)
+			if (node_def && node_def->m_nodeTypeID != NodeType_NodeAnimSyncEvents)
 			{
 				Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an animation node\n", node_def->m_nodeID);
 				return 0;
@@ -880,8 +911,11 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 
 			Morpheme::NodeData104* node_data = (Morpheme::NodeData104*)node_def->node_data;
 
-			float track_len = *(float*)(node_data->m_animData + 0x84);
-			float anim_len = *(float*)(node_data->m_animData + 0x88);
+			uint64_t nsaFile = (uint64_t)node_data->m_animData;
+
+			float track_len = *(float*)(nsaFile + 0x84);
+			float anim_len = *(float*)(nsaFile + 0x88);
+
 			float current_time = 0;
 			float mult = 1;
 
@@ -894,6 +928,7 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 					if (current_bin_entry->m_semantic == ATTRIB_SEMANTIC_FRACTION_POS)
 					{
 						current_time = (float)current_bin_entry->m_attribDataHandle->field7_0x18;
+						//Debug::debuggerMessage(Debug::LVL_DEBUG, "UpdateTimePos = (%.3f, %.3f, %.3f, %.3f)\n", *(float*)&current_bin_entry->m_attribDataHandle->m_activeStateID, current_bin_entry->m_attribDataHandle->field6_0x14, current_bin_entry->m_attribDataHandle->field7_0x18, *(float*)&current_bin_entry->m_attribDataHandle->field11_0x1c);
 						break;
 					}
 				}

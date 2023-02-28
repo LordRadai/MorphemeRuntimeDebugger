@@ -1,4 +1,6 @@
 #pragma once
+#define PI 3.14159265358979323846
+
 #include "MorphemeNetworkInspector.h"
 #include "Timeline.h"
 
@@ -15,3 +17,6 @@ extern MorphemeEventTrackList track_list;
 extern EventTrackEditor event_track_editor;
 extern TimeActTrackList tae_track_list;
 extern EventTrackEditor time_act_track_editor;
+
+extern float viewMatrix[16];
+extern float height, width;
