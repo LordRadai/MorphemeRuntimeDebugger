@@ -610,8 +610,14 @@ void MorphemeNetworkInspectorGUI::RenderGUI(const char* title)
 			pull_tracks = false;
 
 			selectedEntry = -1;
+			selectedEntry_tae = -1;
+			clear_tracks = false;
+
 			event_track_editor.Clear();
+			Morpheme::ClearTrackList(&track_list);
+
 			time_act_track_editor.Clear();
+			TimeAct::clearTrackList(&tae_track_list);
 
 			Morpheme::NodeDef* anim_sync_node = (Morpheme::NodeDef*)(network_data.anim_events.event_track_node);
 

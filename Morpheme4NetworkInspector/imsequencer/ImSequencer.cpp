@@ -397,12 +397,26 @@ namespace ImSequencer
                 ImVec2 slotP1Loop;
                 ImVec2 slotP2Loop;
                 ImVec2 slotP3Loop;
+                ImVec2 slotD1Loop;
+                ImVec2 slotD2Loop;
+                ImVec2 slotD3Loop;
+                ImVec2 slotT1Loop;
+                ImVec2 slotT2Loop;
+                ImVec2 slotT3Loop;
+
+                ImVec2 slotD1(pos.x + *start * framePixelWidth - 1, pos.y + 2);
+                ImVec2 slotD2(pos.x + *end * framePixelWidth - 1, pos.y + ItemHeight - 2 - 5);
+                ImVec2 slotD3(pos.x + *end * framePixelWidth - 1, pos.y + ItemHeight - 2 + localCustomHeight - 5);
+                ImVec2 slotT1 = ImVec2(pos.x + *start * framePixelWidth - 1, pos.y + ItemHeight - 2 - 5);
+                ImVec2 slotT2 = ImVec2(pos.x + *end * framePixelWidth - 1, pos.y + ItemHeight - 2 - 5);
+                ImVec2 slotT3 = ImVec2((slotT2.x + slotT1.x) / 2, (slotT2.y + slotT1.y) / 2 + 5);
 
                 ImVec2 frameMin = ImVec2(pos.x - 1, 0);
                 ImVec2 frameMax = ImVec2(frameMin.x + sequence->GetFrameMax() * framePixelWidth, 0);
 
                 ImVec2 textSize = ImGui::CalcTextSize(buffer);
                 ImVec2 textP(slotP1.x + (slotP2.x - slotP1.x - textSize.x) / 2, slotP2.y + (slotP1.y - slotP2.y - textSize.y) / 2);
+                ImVec2 textD(slotD1.x + (slotD2.x - slotD1.x - textSize.x) / 2, slotD2.y + (slotD1.y - slotD2.y - textSize.y) / 2);
                 ImVec2 textPLoop;
 
                 /*if (*end == 0)
@@ -414,6 +428,12 @@ namespace ImSequencer
                 {
                     slotP1.x -= framePixelWidth / 2;
                     slotP2.x += framePixelWidth / 2;
+
+                    slotD1.x -= framePixelWidth / 2;
+                    slotD2.x += framePixelWidth / 2;
+
+                    slotT1.x -= framePixelWidth / 2;
+                    slotT2.x += framePixelWidth / 2;
                 }                             
 
                 /*if (slotP1.x <= (canvas_size.x + contentMin.x) && slotP2.x >= (contentMin.x + legendWidth + 1))
@@ -426,10 +446,30 @@ namespace ImSequencer
 
                 if ((slotP1.x <= (canvas_size.x + contentMin.x) || slotP1.x >= (contentMin.x + legendWidth)) && (slotP2.x >= (contentMin.x + legendWidth) || slotP2.x <= (canvas_size.x + contentMin.x)))
                 {
-                    draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 0);
-                    draw_list->AddRectFilled(slotP1, slotP2, slotColor, 0); //Track Box
-                    draw_list->AddRect(slotP1, slotP2, boundColor, 0); //Track Bounding Box
-                    draw_list->AddText(textP, TRACK_TEXT_COLOR, buffer); //Event Value
+                    if (isDiscrete)
+                    {
+                        draw_list->AddRectFilled(slotD1, slotD3, slotColorHalf, 0);
+                        draw_list->AddRectFilled(slotD1, slotD2, slotColor, 0); //Track Box
+                        draw_list->AddLine(slotD1, ImVec2(slotD2.x, slotD1.y), boundColor);
+                        draw_list->AddLine(slotD2, ImVec2(slotD2.x, slotD1.y), boundColor);
+                        draw_list->AddLine(slotD1, ImVec2(slotD1.x, slotD2.y), boundColor);
+
+                        //draw_list->AddRect(slotD1, slotD2, boundColor, 0); //Track Bounding Box
+
+                        draw_list->AddTriangleFilled(slotT1, slotT2, slotT3, slotColorHalf);
+                        draw_list->AddTriangleFilled(slotT1, slotT2, slotT3, slotColor);
+                        draw_list->AddLine(slotT1, slotT3, boundColor);
+                        draw_list->AddLine(slotT2, slotT3, boundColor);
+
+                        draw_list->AddText(textD, TRACK_TEXT_COLOR, buffer); //Event Value
+                    }
+                    else
+                    {
+                        draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 0);
+                        draw_list->AddRectFilled(slotP1, slotP2, slotColor, 0); //Track Box
+                        draw_list->AddRect(slotP1, slotP2, boundColor, 0); //Track Bounding Box
+                        draw_list->AddText(textP, TRACK_TEXT_COLOR, buffer); //Event Value
+                    }
 
                     if (sequenceOptions & SEQUENCER_LOOP_EVENTS)
                     {
