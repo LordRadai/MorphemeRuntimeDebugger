@@ -1630,7 +1630,7 @@ void DrawLinearLink(ImNodesEditorContext& editor, const int link_idx)
         end_center.x += 10 * GImNodes->Style.LinkThickness;
     } 
 
-    GImNodes->CanvasDrawList->AddLine(start_center, end_center, link_color, GImNodes->Style.LinkThickness);
+    GImNodes->CanvasDrawList->AddVector(start_center, end_center, link_color, GImNodes->Style.LinkThickness);
     //GImNodes->CanvasDrawList->AddCircleFilled(dir_center, 2 * GImNodes->Style.LinkThickness, 0xFF0000FF, 20);
 
     //GImNodes->CanvasDrawList->AddTriangleFilled(dir_top, dir_lb, dir_rb, 0xFF0000FF);
@@ -2335,7 +2335,7 @@ void EndNodeEditor()
 
     for (int link_idx = 0; link_idx < editor.NodeLinks.Pool.size(); ++link_idx)
     {
-        if (editor.Links.InUse[link_idx])
+        if (editor.NodeLinks.InUse[link_idx])
         {
             DrawLinearLink(editor, link_idx);
         }
@@ -2631,8 +2631,9 @@ void LinkNodes(const int id, const int src, const int dst)
     node_link.ColorStyle.Hovered = GImNodes->Style.Colors[ImNodesCol_LinkHovered];
     node_link.ColorStyle.Selected = GImNodes->Style.Colors[ImNodesCol_LinkSelected];
 
-    //GImNodes->SnapLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
+    GImNodes->NodeLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
 
+    /*
     // Check if this link was created by the current link event
     if ((editor.ClickInteraction.Type == ImNodesClickInteractionType_LinkCreation &&
         editor.Pins.Pool[node_link.dst].Flags & ImNodesAttributeFlags_EnableLinkCreationOnSnap &&
@@ -2642,7 +2643,7 @@ void LinkNodes(const int id, const int src, const int dst)
             editor.ClickInteraction.LinkCreation.EndPinIdx == node_link.src))
     {
         GImNodes->NodeLinkIdx = ObjectPoolFindOrCreateIndex(editor.NodeLinks, id);
-    }
+    }*/
 }
 
 void PushColorStyle(const ImNodesCol item, unsigned int color)
@@ -3159,12 +3160,43 @@ const char* SaveEditorStateToIniString(
 
     for (int i = 0; i < editor.Nodes.Pool.size(); i++)
     {
-        if (editor.Nodes.InUse[i])
+        if (editor.Nodes.Pool[i].Id > 0)
         {
             const ImNodeData& node = editor.Nodes.Pool[i];
             GImNodes->TextBuffer.appendf("\n[node.%d]\n", node.Id);
             GImNodes->TextBuffer.appendf("origin=%i,%i\n", (int)node.Origin.x, (int)node.Origin.y);
         }
+    }
+
+    if (data_size != NULL)
+    {
+        *data_size = GImNodes->TextBuffer.size();
+    }
+
+    return GImNodes->TextBuffer.c_str();
+}
+
+const char* SaveNetworkToIniString(
+    const ImNodesEditorContext* const editor_ptr,
+    size_t* const                     data_size,
+    int parent_node)
+{
+    assert(editor_ptr != NULL);
+    const ImNodesEditorContext& editor = *editor_ptr;
+
+    GImNodes->TextBuffer.clear();
+    // TODO: check to make sure that the estimate is the upper bound of element
+    GImNodes->TextBuffer.reserve(64 * editor.Nodes.Pool.size());
+
+    GImNodes->TextBuffer.appendf(
+        "[editor]\npanning=%i,%i\n", (int)editor.Panning.x, (int)editor.Panning.y);
+
+    GImNodes->TextBuffer.appendf("\n[node.%d]\n", parent_node);
+    for (int i = 0; i < editor.Nodes.Pool.size(); i++)
+    {
+        const ImNodeData& node = editor.Nodes.Pool[i];
+        GImNodes->TextBuffer.appendf("\nnode.%d = [node.%d]\n", node.Id, node.Id);
+        GImNodes->TextBuffer.appendf("origin=%i,%i\n", (int)node.Origin.x, (int)node.Origin.y);
     }
 
     if (data_size != NULL)
@@ -3244,6 +3276,20 @@ void SaveCurrentEditorStateToIniFile(const char* const file_name)
     SaveEditorStateToIniFile(&EditorContextGet(), file_name);
 }
 
+void SaveCurrentNetworkToIniFile(const char* const file_name, int parent_node)
+{
+    size_t      data_size = 0u;
+    const char* data = SaveNetworkToIniString(&EditorContextGet(), &data_size, parent_node);
+    FILE* file = ImFileOpen(file_name, "at");
+    if (!file)
+    {
+        return;
+    }
+
+    fwrite(data, sizeof(char), data_size, file);
+    fclose(file);
+}
+
 void SaveEditorStateToIniFile(const ImNodesEditorContext* const editor, const char* const file_name)
 {
     size_t      data_size = 0u;
@@ -3261,6 +3307,20 @@ void SaveEditorStateToIniFile(const ImNodesEditorContext* const editor, const ch
 void LoadCurrentEditorStateFromIniFile(const char* const file_name)
 {
     LoadEditorStateFromIniFile(&EditorContextGet(), file_name);
+}
+
+void LoadCurrentNetworkFromIniFile(const char* const file_name)
+{
+    size_t data_size = 0u;
+    char* file_data = (char*)ImFileLoadToMemory(file_name, "rb", &data_size);
+    //char* node_data = 
+    if (!file_data)
+    {
+        return;
+    }
+
+    LoadEditorStateFromIniString(&EditorContextGet(), file_data, data_size);
+    ImGui::MemFree(file_data);
 }
 
 void LoadEditorStateFromIniFile(ImNodesEditorContext* const editor, const char* const file_name)

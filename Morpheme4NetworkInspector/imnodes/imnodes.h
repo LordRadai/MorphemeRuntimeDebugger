@@ -407,12 +407,19 @@ const char* SaveEditorStateToIniString(
     const ImNodesEditorContext* editor,
     size_t*                     data_size = NULL);
 
+const char* SaveNetworkToIniString(
+    const ImNodesEditorContext* editor,
+    size_t* data_size,
+    int parent_node);
+
 void LoadCurrentEditorStateFromIniString(const char* data, size_t data_size);
 void LoadEditorStateFromIniString(ImNodesEditorContext* editor, const char* data, size_t data_size);
 
 void SaveCurrentEditorStateToIniFile(const char* file_name);
+void SaveCurrentNetworkToIniFile(const char* file_name, int parent_node);
 void SaveEditorStateToIniFile(const ImNodesEditorContext* editor, const char* file_name);
 
 void LoadCurrentEditorStateFromIniFile(const char* file_name);
+void LoadCurrentNetworkFromIniFile(const char* file_name);
 void LoadEditorStateFromIniFile(ImNodesEditorContext* editor, const char* file_name);
 } // namespace IMNODES_NAMESPACE

@@ -1388,6 +1388,26 @@ void ImDrawList::AddLine(const ImVec2& p1, const ImVec2& p2, ImU32 col, float th
     PathStroke(col, 0, thickness);
 }
 
+void ImDrawList::AddVector(const ImVec2& p1, const ImVec2& p2, ImU32 col, float thickness)
+{
+    float angle = atan2f(p1.y - p2.y, p1.x - p2.x);
+
+    ImVec2 center = ImVec2((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+    ImVec2 t1 = center;
+    ImVec2 t2 = ImVec2(center.x + 15 * cos(-angle + IM_PI / 4), center.y - 15 * sin(-angle + IM_PI / 4));
+    ImVec2 t3 = ImVec2(center.x + 15 * cos(-angle - IM_PI / 4), center.y - 15 * sin(-angle - IM_PI / 4));
+
+    if ((col & IM_COL32_A_MASK) == 0)
+        return;
+
+    PathLineTo(p1 + ImVec2(0.5f, 0.5f));
+    PathLineTo(p2 + ImVec2(0.5f, 0.5f));
+    PathStroke(col, 0, thickness);
+
+    AddLine(t1, t2, col, thickness);
+    AddLine(t1, t3, col, thickness);
+}
+
 // p_min = upper-left, p_max = lower-right
 // Note we don't render 1 pixels sized rectangles properly.
 void ImDrawList::AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawFlags flags, float thickness)
