@@ -590,10 +590,10 @@ typedef struct stbtt_fontinfo stbtt_fontinfo;
 typedef struct stbrp_rect stbrp_rect;
 #endif
 
-STBTT_DEF int  stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, int width, int height, int stride_in_bytes, int padding, void *alloc_context);
+STBTT_DEF int  stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, int width, int height, int stride_in_BYTEs, int padding, void *alloc_context);
 // Initializes a packing context stored in the passed-in stbtt_pack_context.
 // Future calls using this context will pack characters into the bitmap passed
-// in here: a 1-channel bitmap that is width * height. stride_in_bytes is
+// in here: a 1-channel bitmap that is width * height. stride_in_BYTEs is
 // the distance from one row to the next (or 0 to mean they are packed tightly
 // together). "padding" is the amount of padding to leave between each
 // character (normally you want '1' for bitmaps you'll use as textures with
@@ -685,7 +685,7 @@ struct stbtt_pack_context {
    void *pack_info;
    int   width;
    int   height;
-   int   stride_in_bytes;
+   int   stride_in_BYTEs;
    int   padding;
    int   skip_missing;
    unsigned int   h_oversample, v_oversample;
@@ -891,8 +891,8 @@ STBTT_DEF unsigned char *stbtt_GetCodepointBitmapSubpixel(const stbtt_fontinfo *
 
 STBTT_DEF void stbtt_MakeCodepointBitmap(const stbtt_fontinfo *info, unsigned char *output, int out_w, int out_h, int out_stride, float scale_x, float scale_y, int codepoint);
 // the same as stbtt_GetCodepointBitmap, but you pass in storage for the bitmap
-// in the form of 'output', with row spacing of 'out_stride' bytes. the bitmap
-// is clipped to out_w/out_h bytes. Call stbtt_GetCodepointBitmapBox to get the
+// in the form of 'output', with row spacing of 'out_stride' BYTEs. the bitmap
+// is clipped to out_w/out_h BYTEs. Call stbtt_GetCodepointBitmapBox to get the
 // width and height and positioning info for it first.
 
 STBTT_DEF void stbtt_MakeCodepointBitmapSubpixel(const stbtt_fontinfo *info, unsigned char *output, int out_w, int out_h, int out_stride, float scale_x, float scale_y, float shift_x, float shift_y, int codepoint);
@@ -965,7 +965,7 @@ STBTT_DEF unsigned char * stbtt_GetCodepointSDF(const stbtt_fontinfo *info, floa
 //                                 if positive, > onedge_value is inside; if negative, < onedge_value is inside
 //        width,height      --  output height & width of the SDF bitmap (including padding)
 //        xoff,yoff         --  output origin of the character
-//        return value      --  a 2D array of bytes 0..255, width*height in size
+//        return value      --  a 2D array of BYTEs 0..255, width*height in size
 //
 // pixel_dist_scale & onedge_value are a scale & bias that allows you to make
 // optimal use of the limited 0..255 for your application, trading off precision
@@ -1039,8 +1039,8 @@ STBTT_DEF int stbtt_CompareUTF8toUTF16_bigendian(const char *s1, int len1, const
 // the second string interpreted as big-endian utf16... useful for strings from next func
 
 STBTT_DEF const char *stbtt_GetFontNameString(const stbtt_fontinfo *font, int *length, int platformID, int encodingID, int languageID, int nameID);
-// returns the string (which may be big-endian double byte, e.g. for unicode)
-// and puts the length in bytes in *length.
+// returns the string (which may be big-endian double BYTE, e.g. for unicode)
+// and puts the length in BYTEs in *length.
 //
 // some of the values for the IDs are below; for more see the truetype spec:
 //     http://developer.apple.com/textfonts/TTRefMan/RM06/Chap6name.html
@@ -1504,9 +1504,9 @@ STBTT_DEF int stbtt_FindGlyphIndex(const stbtt_fontinfo *info, int unicode_codep
    stbtt_uint32 index_map = info->index_map;
 
    stbtt_uint16 format = ttUSHORT(data + index_map + 0);
-   if (format == 0) { // apple byte encoding
-      stbtt_int32 bytes = ttUSHORT(data + index_map + 2);
-      if (unicode_codepoint < bytes-6)
+   if (format == 0) { // apple BYTE encoding
+      stbtt_int32 BYTEs = ttUSHORT(data + index_map + 2);
+      if (unicode_codepoint < BYTEs-6)
          return ttBYTE(data + index_map + 6 + unicode_codepoint);
       return 0;
    } else if (format == 6) {
@@ -1516,7 +1516,7 @@ STBTT_DEF int stbtt_FindGlyphIndex(const stbtt_fontinfo *info, int unicode_codep
          return ttUSHORT(data + index_map + 10 + (unicode_codepoint - first)*2);
       return 0;
    } else if (format == 2) {
-      STBTT_assert(0); // @TODO: high-byte mapping for japanese/chinese/korean
+      STBTT_assert(0); // @TODO: high-BYTE mapping for japanese/chinese/korean
       return 0;
    } else if (format == 4) { // standard mapping for windows fonts: binary search collection of ranges
       stbtt_uint16 segcount = ttUSHORT(data+index_map+6) >> 1;
@@ -2166,7 +2166,7 @@ static int stbtt__run_charstring(const stbtt_fontinfo *info, int glyph_index, st
          stbtt__csctx_close_shape(c);
          return 1;
 
-      case 0x0C: { // two-byte escape
+      case 0x0C: { // two-BYTE escape
          float dx1, dx2, dx3, dx4, dx5, dx6, dy1, dy2, dy3, dy4, dy5, dy6;
          float dx, dy;
          int b1 = stbtt__buf_get8(&b);
@@ -3962,7 +3962,7 @@ static void stbrp_pack_rects(stbrp_context *con, stbrp_rect *rects, int num_rect
 // This is SUPER-AWESOME (tm Ryan Gordon) packing using stb_rect_pack.h. If
 // stb_rect_pack.h isn't available, it uses the BakeFontBitmap strategy.
 
-STBTT_DEF int stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, int pw, int ph, int stride_in_bytes, int padding, void *alloc_context)
+STBTT_DEF int stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, int pw, int ph, int stride_in_BYTEs, int padding, void *alloc_context)
 {
    stbrp_context *context = (stbrp_context *) STBTT_malloc(sizeof(*context)            ,alloc_context);
    int            num_nodes = pw - padding;
@@ -3981,7 +3981,7 @@ STBTT_DEF int stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, in
    spc->pack_info = context;
    spc->nodes = nodes;
    spc->padding = padding;
-   spc->stride_in_bytes = stride_in_bytes != 0 ? stride_in_bytes : pw;
+   spc->stride_in_BYTEs = stride_in_BYTEs != 0 ? stride_in_BYTEs : pw;
    spc->h_oversample = 1;
    spc->v_oversample = 1;
    spc->skip_missing = 0;
@@ -4017,7 +4017,7 @@ STBTT_DEF void stbtt_PackSetSkipMissingCodepoints(stbtt_pack_context *spc, int s
 
 #define STBTT__OVER_MASK  (STBTT_MAX_OVERSAMPLE-1)
 
-static void stbtt__h_prefilter(unsigned char *pixels, int w, int h, int stride_in_bytes, unsigned int kernel_width)
+static void stbtt__h_prefilter(unsigned char *pixels, int w, int h, int stride_in_BYTEs, unsigned int kernel_width)
 {
    unsigned char buffer[STBTT_MAX_OVERSAMPLE];
    int safe_w = w - kernel_width;
@@ -4075,11 +4075,11 @@ static void stbtt__h_prefilter(unsigned char *pixels, int w, int h, int stride_i
          pixels[i] = (unsigned char) (total / kernel_width);
       }
 
-      pixels += stride_in_bytes;
+      pixels += stride_in_BYTEs;
    }
 }
 
-static void stbtt__v_prefilter(unsigned char *pixels, int w, int h, int stride_in_bytes, unsigned int kernel_width)
+static void stbtt__v_prefilter(unsigned char *pixels, int w, int h, int stride_in_BYTEs, unsigned int kernel_width)
 {
    unsigned char buffer[STBTT_MAX_OVERSAMPLE];
    int safe_h = h - kernel_width;
@@ -4096,45 +4096,45 @@ static void stbtt__v_prefilter(unsigned char *pixels, int w, int h, int stride_i
       switch (kernel_width) {
          case 2:
             for (i=0; i <= safe_h; ++i) {
-               total += pixels[i*stride_in_bytes] - buffer[i & STBTT__OVER_MASK];
-               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_bytes];
-               pixels[i*stride_in_bytes] = (unsigned char) (total / 2);
+               total += pixels[i*stride_in_BYTEs] - buffer[i & STBTT__OVER_MASK];
+               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_BYTEs];
+               pixels[i*stride_in_BYTEs] = (unsigned char) (total / 2);
             }
             break;
          case 3:
             for (i=0; i <= safe_h; ++i) {
-               total += pixels[i*stride_in_bytes] - buffer[i & STBTT__OVER_MASK];
-               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_bytes];
-               pixels[i*stride_in_bytes] = (unsigned char) (total / 3);
+               total += pixels[i*stride_in_BYTEs] - buffer[i & STBTT__OVER_MASK];
+               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_BYTEs];
+               pixels[i*stride_in_BYTEs] = (unsigned char) (total / 3);
             }
             break;
          case 4:
             for (i=0; i <= safe_h; ++i) {
-               total += pixels[i*stride_in_bytes] - buffer[i & STBTT__OVER_MASK];
-               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_bytes];
-               pixels[i*stride_in_bytes] = (unsigned char) (total / 4);
+               total += pixels[i*stride_in_BYTEs] - buffer[i & STBTT__OVER_MASK];
+               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_BYTEs];
+               pixels[i*stride_in_BYTEs] = (unsigned char) (total / 4);
             }
             break;
          case 5:
             for (i=0; i <= safe_h; ++i) {
-               total += pixels[i*stride_in_bytes] - buffer[i & STBTT__OVER_MASK];
-               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_bytes];
-               pixels[i*stride_in_bytes] = (unsigned char) (total / 5);
+               total += pixels[i*stride_in_BYTEs] - buffer[i & STBTT__OVER_MASK];
+               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_BYTEs];
+               pixels[i*stride_in_BYTEs] = (unsigned char) (total / 5);
             }
             break;
          default:
             for (i=0; i <= safe_h; ++i) {
-               total += pixels[i*stride_in_bytes] - buffer[i & STBTT__OVER_MASK];
-               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_bytes];
-               pixels[i*stride_in_bytes] = (unsigned char) (total / kernel_width);
+               total += pixels[i*stride_in_BYTEs] - buffer[i & STBTT__OVER_MASK];
+               buffer[(i+kernel_width) & STBTT__OVER_MASK] = pixels[i*stride_in_BYTEs];
+               pixels[i*stride_in_BYTEs] = (unsigned char) (total / kernel_width);
             }
             break;
       }
 
       for (; i < h; ++i) {
-         STBTT_assert(pixels[i*stride_in_bytes] == 0);
+         STBTT_assert(pixels[i*stride_in_BYTEs] == 0);
          total -= buffer[i & STBTT__OVER_MASK];
-         pixels[i*stride_in_bytes] = (unsigned char) (total / kernel_width);
+         pixels[i*stride_in_BYTEs] = (unsigned char) (total / kernel_width);
       }
 
       pixels += 1;
@@ -4252,23 +4252,23 @@ STBTT_DEF int stbtt_PackFontRangesRenderIntoRects(stbtt_pack_context *spc, const
                                     scale * spc->v_oversample,
                                     &x0,&y0,&x1,&y1);
             stbtt_MakeGlyphBitmapSubpixel(info,
-                                          spc->pixels + r->x + r->y*spc->stride_in_bytes,
+                                          spc->pixels + r->x + r->y*spc->stride_in_BYTEs,
                                           r->w - spc->h_oversample+1,
                                           r->h - spc->v_oversample+1,
-                                          spc->stride_in_bytes,
+                                          spc->stride_in_BYTEs,
                                           scale * spc->h_oversample,
                                           scale * spc->v_oversample,
                                           0,0,
                                           glyph);
 
             if (spc->h_oversample > 1)
-               stbtt__h_prefilter(spc->pixels + r->x + r->y*spc->stride_in_bytes,
-                                  r->w, r->h, spc->stride_in_bytes,
+               stbtt__h_prefilter(spc->pixels + r->x + r->y*spc->stride_in_BYTEs,
+                                  r->w, r->h, spc->stride_in_BYTEs,
                                   spc->h_oversample);
 
             if (spc->v_oversample > 1)
-               stbtt__v_prefilter(spc->pixels + r->x + r->y*spc->stride_in_bytes,
-                                  r->w, r->h, spc->stride_in_bytes,
+               stbtt__v_prefilter(spc->pixels + r->x + r->y*spc->stride_in_BYTEs,
+                                  r->w, r->h, spc->stride_in_BYTEs,
                                   spc->v_oversample);
 
             bc->x0       = (stbtt_int16)  r->x;
@@ -4825,7 +4825,7 @@ static int stbtt_CompareUTF8toUTF16_bigendian_internal(char *s1, int len1, char 
    return len1 == stbtt__CompareUTF8toUTF16_bigendian_prefix((stbtt_uint8*) s1, len1, (stbtt_uint8*) s2, len2);
 }
 
-// returns results in whatever encoding you request... but note that 2-byte encodings
+// returns results in whatever encoding you request... but note that 2-BYTE encodings
 // will be BIG-ENDIAN... use stbtt_CompareUTF8toUTF16_bigendian() to compare
 STBTT_DEF const char *stbtt_GetFontNameString(const stbtt_fontinfo *font, int *length, int platformID, int encodingID, int languageID, int nameID)
 {

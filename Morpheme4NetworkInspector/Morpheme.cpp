@@ -2,282 +2,6 @@
 #include "common.h"
 #include "Debug.h"
 
-int Morpheme::LoadEventTracks(sEventTrackData* track_base, MorphemeEventTrackList* track_list)
-{
-	if (!track_base)
-		return -1;
-
-	int track_count = 0;
-	int index_subBlend = 0;
-	int index_subGeneric = 0;
-	int index_subUnk = 0;
-
-	if (track_base->m_eventTracks[0].m_trackCount > 0)
-	{
-		track_count = track_base->m_eventTracks[0].m_trackCount;
-
-		track_list->parent = (uint64_t)track_base;
-		track_list->count_discrete = track_count;
-		track_list->tracks_discrete = new MorphemeEventTrack[track_count];
-
-		for (int i = 0; i < track_count; i++)
-		{
-			track_list->tracks_discrete[i].parentId = -1;
-			track_list->tracks_discrete[i].childId = -1;
-			track_list->tracks_discrete[i].eventCount = track_base->m_eventTracks[0].m_tracks[i]->m_numEvents;
-			track_list->tracks_discrete[i].eventId = track_base->m_eventTracks[0].m_tracks[i]->m_eventId;
-
-			strcpy(track_list->tracks_discrete[i].trackName, track_base->m_eventTracks[0].m_tracks[i]->m_trackName);
-			//track_list->tracks_discrete[i].trackName = track_base->m_eventTracks[0].m_tracks[i]->m_trackName;
-
-			track_list->tracks_discrete[i].startTime = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_startTime;
-			track_list->tracks_discrete[i].duration = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_duration;
-			track_list->tracks_discrete[i].value = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_userData;
-			track_list->tracks_discrete[i].is_discrete = true;
-		}
-
-		track_list->count_discreteSub = track_list->getSubTrackcount_discrete();
-		track_list->tracks_discreteSub = new MorphemeEventTrack[track_list->count_discreteSub];
-
-		for (int i = 0; i < track_count; i++)
-		{
-			for (size_t j = 1; j < track_list->tracks_discrete[i].eventCount; j++)
-			{
-				if (index_subBlend < track_list->count_discreteSub)
-				{
-					track_list->tracks_discreteSub[index_subBlend].parentId = i;
-					track_list->tracks_discreteSub[index_subBlend].childId = j;
-					track_list->tracks_discreteSub[index_subBlend].eventCount = 1;
-					track_list->tracks_discreteSub[index_subBlend].eventId = track_list->tracks_discrete[i].eventId;
-					strcpy(track_list->tracks_discreteSub[index_subBlend].trackName, track_base->m_eventTracks[0].m_tracks[i]->m_trackName);
-					//track_list->tracks_discreteSub[index_subBlend].trackName = track_list->tracks_discrete[i].trackName;
-
-					track_list->tracks_discreteSub[index_subBlend].startTime = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_startTime;
-					track_list->tracks_discreteSub[index_subBlend].duration = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_duration;
-					track_list->tracks_discreteSub[index_subBlend].value = track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_userData;
-					track_list->tracks_discreteSub[index_subBlend].is_discrete = true;
-					index_subBlend++;
-				}
-			}		
-		}
-	}
-
-	if (track_base->m_eventTracks[1].m_trackCount > 0)
-	{
-		printf_s("[INFO, MorphemeSystem] This EventTrack has tracks of an unknown type\n");
-
-		track_count = track_base->m_eventTracks[1].m_trackCount;
-
-		track_list->parent = (uint64_t)track_base;
-		track_list->count_unk = track_count;
-		track_list->tracks_unk = new MorphemeEventTrack[track_count];
-
-		for (int i = 0; i < track_count; i++)
-		{
-			track_list->tracks_unk[i].parentId = -1;
-			track_list->tracks_unk[i].childId = -1;
-			track_list->tracks_unk[i].eventCount = track_base->m_eventTracks[1].m_tracks[i]->m_numEvents;
-			track_list->tracks_unk[i].eventId = track_base->m_eventTracks[1].m_tracks[i]->m_eventId;
-
-			strcpy(track_list->tracks_unk[i].trackName, track_base->m_eventTracks[1].m_tracks[i]->m_trackName);
-			//track_list->tracks_unk[i].trackName = track_base->m_eventTracks[1].m_tracks[i]->m_trackName;
-
-			track_list->tracks_unk[i].startTime = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[0].m_startTime;
-			track_list->tracks_unk[i].duration = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[0].m_duration;
-			track_list->tracks_unk[i].value = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[0].m_userData;
-			track_list->tracks_unk[i].is_discrete = false;
-		}
-
-		track_list->count_unkSub = track_list->getSubTrackcount_unk();
-		track_list->tracks_unkSub = new MorphemeEventTrack[track_list->count_timedSub];
-
-		for (int i = 0; i < track_count; i++)
-		{
-			for (size_t j = 1; j < track_list->tracks_unk[i].eventCount; j++)
-			{
-				if (index_subUnk < track_list->count_unkSub)
-				{
-					track_list->tracks_unkSub[index_subUnk].parentId = i;
-					track_list->tracks_unkSub[index_subUnk].childId = j;
-					track_list->tracks_unkSub[index_subUnk].eventCount = 1;
-					track_list->tracks_unkSub[index_subUnk].eventId = track_list->tracks_timed[i].eventId;
-
-					strcpy(track_list->tracks_unkSub[index_subUnk].trackName, track_list->tracks_timed[i].trackName);
-					//track_list->tracks_unkSub[index_subUnk].trackName = track_list->tracks_timed[i].trackName;
-
-					track_list->tracks_unkSub[index_subUnk].startTime = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[j].m_startTime;
-					track_list->tracks_unkSub[index_subUnk].duration = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[j].m_duration;
-					track_list->tracks_unkSub[index_subUnk].value = track_base->m_eventTracks[1].m_tracks[i]->m_trackData[j].m_userData;
-					track_list->tracks_unkSub[index_subUnk].is_discrete = false;
-					index_subUnk++;
-				}
-			}
-		}
-	}
-
-	if (track_base->m_eventTracks[2].m_trackCount > 0)
-	{
-		track_count = track_base->m_eventTracks[2].m_trackCount;
-
-		track_list->parent = (uint64_t)track_base;
-		track_list->count_timed = track_count;
-		track_list->tracks_timed = new MorphemeEventTrack[track_count];
-
-		for (int i = 0; i < track_count; i++)
-		{
-			track_list->tracks_timed[i].parentId = -1;
-			track_list->tracks_timed[i].childId = -1;
-			track_list->tracks_timed[i].eventCount = track_base->m_eventTracks[2].m_tracks[i]->m_numEvents;
-			track_list->tracks_timed[i].eventId = track_base->m_eventTracks[2].m_tracks[i]->m_eventId;
-
-			strcpy(track_list->tracks_timed[i].trackName, track_base->m_eventTracks[2].m_tracks[i]->m_trackName);
-			//track_list->tracks_timed[i].trackName = track_base->m_eventTracks[2].m_tracks[i]->m_trackName;
-
-			track_list->tracks_timed[i].startTime = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_startTime;
-			track_list->tracks_timed[i].duration = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_duration;
-			track_list->tracks_timed[i].value = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_userData;
-			track_list->tracks_timed[i].is_discrete = false;
-		}
-
-		track_list->count_timedSub = track_list->getSubTrackcount_timed();
-		track_list->tracks_timedSub = new MorphemeEventTrack[track_list->count_timedSub];
-
-		for (int i = 0; i < track_count; i++)
-		{
-			for (size_t j = 1; j < track_list->tracks_timed[i].eventCount; j++)
-			{
-				if (index_subGeneric < track_list->count_timedSub)
-				{
-					track_list->tracks_timedSub[index_subGeneric].parentId = i;
-					track_list->tracks_timedSub[index_subGeneric].childId = j;
-					track_list->tracks_timedSub[index_subGeneric].eventCount = 1;
-					track_list->tracks_timedSub[index_subGeneric].eventId = track_list->tracks_timed[i].eventId;
-
-					strcpy(track_list->tracks_timedSub[index_subGeneric].trackName, track_list->tracks_timed[i].trackName);
-					//track_list->tracks_timedSub[index_subGeneric].trackName = track_list->tracks_timed[i].trackName;
-
-					track_list->tracks_timedSub[index_subGeneric].startTime = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_startTime;
-					track_list->tracks_timedSub[index_subGeneric].duration = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_duration;
-					track_list->tracks_timedSub[index_subGeneric].value = track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_userData;
-					track_list->tracks_timedSub[index_subGeneric].is_discrete = false;
-					index_subGeneric++;
-				}
-			}
-		}
-	}
-
-	return track_count;
-}
-
-void Morpheme::ClearTrackList(MorphemeEventTrackList* track_list)
-{
-	track_list->parent = 0;
-	track_list->count_discrete = 0;
-	track_list->count_timed = 0;
-	delete[] track_list->tracks_discrete;
-	delete[] track_list->tracks_timed;
-	delete[] track_list->tracks_discreteSub;
-	delete[] track_list->tracks_timedSub;
-}
-
-void Morpheme::SaveEventTracks(MorphemeEventTrackList* track_list)
-{
-	sEventTrackData* track_base;
-	uint64_t track_data;
-	uint64_t* list;
-	int index_subBlend = 0;
-	int index_subGeneric = 0;
-
-	if (!track_list)
-	{
-		MessageBoxA(NULL, "EventTrack save task failed. Input is nullptr", "MorphemeNetworkInspector", MB_ICONERROR);
-		return;
-	}
-
-	if (track_list->parent)
-	{
-		track_base = (sEventTrackData*)track_list->parent;
-
-		if (track_list->count_discrete > 0)
-		{
-			Debug::debuggerMessage(Debug::LVL_DEBUG, "Saving Discrete Event Tracks\n");
-
-			for (int i = 0; i < track_list->count_discrete; i++)
-			{
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "%s:\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackName);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tnumEvents: %d -> %d\n", track_base->m_eventTracks[0].m_tracks[i]->m_numEvents, track_list->tracks_discrete[i].eventCount);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\teventId: %d -> %d\n", track_base->m_eventTracks[0].m_tracks[i]->m_eventId, track_list->tracks_discrete[i].eventId);
-
-				track_base->m_eventTracks[0].m_tracks[i]->m_numEvents = track_list->tracks_discrete[i].eventCount;
-				track_base->m_eventTracks[0].m_tracks[i]->m_eventId = track_list->tracks_discrete[i].eventId;
-
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[0]: %.3f -> %.3f\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_startTime, track_list->tracks_discrete[i].startTime);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[0]: %.3f -> %.3f\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_duration, track_list->tracks_discrete[i].duration);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[0]: %d -> %d\n", track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_userData, track_list->tracks_discrete[i].value);
-
-				track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_startTime = track_list->tracks_discrete[i].startTime;
-				track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_duration = track_list->tracks_discrete[i].duration;
-				track_base->m_eventTracks[0].m_tracks[i]->m_trackData[0].m_userData = track_list->tracks_discrete[i].value;
-
-				for (size_t j = 1; j < track_list->tracks_discrete[i].eventCount; j++)
-				{
-					if (index_subBlend < track_list->count_discreteSub)
-					{
-						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_startTime, track_list->tracks_discreteSub[index_subBlend].startTime);
-						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_duration, track_list->tracks_discreteSub[index_subBlend].duration);
-						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[%d]: %d -> %d\n", j, track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_userData, track_list->tracks_discreteSub[index_subBlend].value);
-
-						track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_startTime = track_list->tracks_discreteSub[index_subBlend].startTime;
-						track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_duration = track_list->tracks_discreteSub[index_subBlend].duration;
-						track_base->m_eventTracks[0].m_tracks[i]->m_trackData[j].m_userData = track_list->tracks_discreteSub[index_subBlend].value;
-						index_subBlend++;
-					}
-				}
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\n");
-			}
-		}
-
-		if (track_list->count_timed > 0)
-		{	
-			Debug::debuggerMessage(Debug::LVL_DEBUG, "Saving Timed Event Tracks\n");
-
-			for (int i = 0; i < track_list->count_timed; i++)
-			{
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "%s:\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackName);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tnumEvents: %d -> %d\n", track_base->m_eventTracks[2].m_tracks[i]->m_numEvents, track_list->tracks_timed[i].eventCount);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\teventId: %d -> %d\n", track_base->m_eventTracks[2].m_tracks[i]->m_eventId, track_list->tracks_timed[i].eventId);
-
-				track_base->m_eventTracks[2].m_tracks[i]->m_numEvents = track_list->tracks_timed[i].eventCount;
-				track_base->m_eventTracks[2].m_tracks[i]->m_eventId = track_list->tracks_timed[i].eventId;
-
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[0]: %.3f -> %.3f\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_startTime, track_list->tracks_timed[i].startTime);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[0]: %.3f -> %.3f\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_duration, track_list->tracks_timed[i].duration);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[0]: %d -> %d\n", track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_userData, track_list->tracks_timed[i].value);
-
-				track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_startTime = track_list->tracks_timed[i].startTime;
-				track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_duration = track_list->tracks_timed[i].duration;
-				track_base->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_userData = track_list->tracks_timed[i].value;
-
-				for (size_t j = 1; j < track_list->tracks_timed[i].eventCount; j++)
-				{
-					if (index_subGeneric < track_list->count_timedSub)
-					{
-						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tstartTime[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_startTime, track_list->tracks_timedSub[index_subBlend].startTime);
-						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tduration[%d]: %.3f -> %.3f\n", j, track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_duration, track_list->tracks_timedSub[index_subBlend].duration);
-						Debug::debuggerMessage(Debug::LVL_DEBUG, "\tuserData[%d]: %d -> %d\n", j, track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_userData, track_list->tracks_timedSub[index_subBlend].value);
-
-						track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_startTime = track_list->tracks_timedSub[index_subGeneric].startTime;
-						track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_duration = track_list->tracks_timedSub[index_subGeneric].duration;
-						track_base->m_eventTracks[2].m_tracks[i]->m_trackData[j].m_userData = track_list->tracks_timedSub[index_subGeneric].value;
-						index_subGeneric++;
-					}
-				}
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "\n");
-			}
-		}
-	}
-}
-
 const char* Morpheme::getStringFromStringTable(StringTable* string_table, int id)
 {
 	//printf_s("String Table: %llx\n", string_table);
@@ -479,7 +203,7 @@ void Morpheme::printBoneList(uint64_t character_ctrl)
 	{
 		for (size_t i = 0; i < bone_count; i++)
 		{
-			bone_data = morpheme_skeleton + (byte)i * 0x10;
+			bone_data = morpheme_skeleton + (BYTE)i * 0x10;
 
 			short bone_id = *(int*)(bone_data + 0x4);
 			char* bone_name = new char[255];
@@ -509,7 +233,7 @@ void Morpheme::loadBoneData(uint64_t character_ctrl, sBoneData buffer[])
 
 		for (size_t i = 0; i < bone_count; i++)
 		{
-			morpheme_skeleton = *(uint64_t*)(mdl_skeleton + 0x20) + (byte)i * 0x10;
+			morpheme_skeleton = *(uint64_t*)(mdl_skeleton + 0x20) + (BYTE)i * 0x10;
 
 			buffer[i].unk00 = *(short*)(morpheme_skeleton);
 			buffer[i].unk02 = *(short*)(morpheme_skeleton + 0x2);
@@ -606,7 +330,7 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkAllNodesType(uint64_t charac
 	Network* network = getNetwork(character_ctrl);
 	std::vector<Morpheme::NodeDef*> nodes;
 
-	Debug::debuggerMessage(Debug::LVL_DEBUG, "CharacterCtrl: %llX, Network: %llX\n", character_ctrl, network);
+	Debug::DebuggerMessage(Debug::LVL_DEBUG, "CharacterCtrl: %llX, Network: %llX\n", character_ctrl, network);
 
 	if (!network)
 		return nodes;
@@ -635,7 +359,7 @@ const char* Morpheme::getAnimNameFromAnimNode(NodeDef* node)
 {
 	if (node->m_nodeTypeID != NodeType::NodeType_NodeAnimSyncEvents)
 	{
-		Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an Animation node\n", node->m_nodeID);
+		Debug::DebuggerMessage(Debug::LVL_ERROR, "Node %d is not an Animation node\n", node->m_nodeID);
 		return NULL;
 	}
 
@@ -862,7 +586,7 @@ bool Morpheme::doesNodeExist(Network* network, short node_id)
 			return true;
 	}
 	
-	Debug::debuggerMessage(Debug::LVL_INFO, "Node %d is not present in the current Network\n", node_id);
+	Debug::DebuggerMessage(Debug::LVL_INFO, "Node %d is not present in the current Network\n", node_id);
 	return false;
 }
 
@@ -903,7 +627,7 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 
 			if (node_def && node_def->m_nodeTypeID != NodeType_NodeAnimSyncEvents)
 			{
-				Debug::debuggerMessage(Debug::LVL_ERROR, "Node %d is not an animation node\n", node_def->m_nodeID);
+				Debug::DebuggerMessage(Debug::LVL_ERROR, "Node %d is not an animation node\n", node_def->m_nodeID);
 				return 0;
 			}
 
@@ -928,7 +652,7 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 					if (current_bin_entry->m_semantic == ATTRIB_SEMANTIC_FRACTION_POS)
 					{
 						current_time = (float)current_bin_entry->m_attribDataHandle->field7_0x18;
-						//Debug::debuggerMessage(Debug::LVL_DEBUG, "UpdateTimePos = (%.3f, %.3f, %.3f, %.3f)\n", *(float*)&current_bin_entry->m_attribDataHandle->m_activeStateID, current_bin_entry->m_attribDataHandle->field6_0x14, current_bin_entry->m_attribDataHandle->field7_0x18, *(float*)&current_bin_entry->m_attribDataHandle->field11_0x1c);
+						//Debug::DebuggerMessage(Debug::LVL_DEBUG, "UpdateTimePos = (%.3f, %.3f, %.3f, %.3f)\n", *(float*)&current_bin_entry->m_attribDataHandle->m_activeStateID, current_bin_entry->m_attribDataHandle->field6_0x14, current_bin_entry->m_attribDataHandle->field7_0x18, *(float*)&current_bin_entry->m_attribDataHandle->field11_0x1c);
 						break;
 					}
 				}

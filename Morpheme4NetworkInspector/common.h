@@ -2,7 +2,10 @@
 #define PI 3.14159265358979323846
 
 #include "MorphemeNetworkInspector.h"
-#include "Timeline.h"
+#include "TimeActEditor/TimeActEditor.h"
+#include "EventTrackEditor/EventTrackEditor.h"
+
+class TaeTemplate;
 
 extern HMODULE ModuleAddr;
 extern uint64_t GameManagerImp;
@@ -13,10 +16,9 @@ extern int prev_game_state;
 
 extern bool create_network_inspector;
 extern MorphemeNetworkInspectorGUI network_inspector;
-extern MorphemeEventTrackList track_list;
 extern EventTrackEditor event_track_editor;
-extern TimeActTrackList tae_track_list;
-extern EventTrackEditor time_act_track_editor;
+extern TimeActEditor time_act_track_editor;
+extern TaeTemplate g_taeTemplate;
 
 extern float viewMatrix[16];
 extern float height, width;

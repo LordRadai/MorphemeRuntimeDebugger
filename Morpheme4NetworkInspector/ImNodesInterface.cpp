@@ -153,7 +153,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 
 		if (node->m_numControlParamAndOpNodeIDs > 0)
 		{
-			for (byte i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
+			for (BYTE i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
 			{
 				if (node->m_controlParamAndOpNodeIDs[i] != -1)
 				{
@@ -533,7 +533,7 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 
 	if (node->m_numControlParamAndOpNodeIDs > 0)
 	{
-		for (byte i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
+		for (BYTE i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
 		{
 			if (node->m_controlParamAndOpNodeIDs[i] != -1)
 			{
@@ -596,7 +596,7 @@ void ImNodesInterface::createSmoothDampNode(Morpheme::NodeDef* node)
 
 	if (node->m_numControlParamAndOpNodeIDs > 0)
 	{
-		for (byte i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
+		for (BYTE i = 0; i < node->m_numControlParamAndOpNodeIDs; i++)
 		{
 			if (node->m_controlParamAndOpNodeIDs[i] != -1)
 			{

@@ -11,7 +11,7 @@ bool Math::worldToScreen(Vector3 position, ScreenPoint* sp)
 
 	if (clipCoordsW < 0.1f)
 	{
-		Debug::debuggerMessage(Debug::LVL_DEBUG, "Point (%.3f, %.3f, %.3f) out of sight\n", position.x, position.y, position.z);
+		Debug::DebuggerMessage(Debug::LVL_DEBUG, "Point (%.3f, %.3f, %.3f) out of sight\n", position.x, position.y, position.z);
 		return false;
 	}
 

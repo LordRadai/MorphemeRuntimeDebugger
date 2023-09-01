@@ -94,7 +94,7 @@
 //
 //   If you don't define these, they are set to permissive types and
 //   moderate sizes. The undo system does no memory allocations, so
-//   it grows STB_TexteditState by the worst-case storage which is (in bytes):
+//   it grows STB_TexteditState by the worst-case storage which is (in BYTEs):
 //
 //        [4 + 3 * sizeof(STB_TEXTEDIT_POSITIONTYPE)] * STB_TEXTEDIT_UNDOSTATECOUNT
 //      +          sizeof(STB_TEXTEDIT_CHARTYPE)      * STB_TEXTEDIT_UNDOCHARCOUNT

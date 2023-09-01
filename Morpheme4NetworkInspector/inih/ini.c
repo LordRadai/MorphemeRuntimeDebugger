@@ -81,7 +81,7 @@ static char* find_chars_or_comment(const char* s, const char* chars)
     return (char*)s;
 }
 
-/* Similar to strncpy, but ensures dest (size bytes) is
+/* Similar to strncpy, but ensures dest (size BYTEs) is
    NUL-terminated, and doesn't pad with NULs. */
 static char* strncpy0(char* dest, const char* src, size_t size)
 {

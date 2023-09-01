@@ -167,7 +167,7 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
     if (maxAddr > (ULONG_PTR)pOrigin + MAX_MEMORY_RANGE)
         maxAddr = (ULONG_PTR)pOrigin + MAX_MEMORY_RANGE;
 
-    // Make room for MEMORY_BLOCK_SIZE bytes.
+    // Make room for MEMORY_BLOCK_SIZE BYTEs.
     maxAddr -= MEMORY_BLOCK_SIZE - 1;
 #endif
 

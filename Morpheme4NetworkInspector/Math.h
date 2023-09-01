@@ -216,7 +216,7 @@ namespace Math
 {
     bool worldToScreen(Vector3 position, ScreenPoint* sp);
 
-	float frameToTime(int frame, int frameRate);
+	float frameToTime(int frame, int frameRate = 60);
 
-	int timeToFrame(float time, int frameRate);
+	int timeToFrame(float time, int frameRate = 60);
 }

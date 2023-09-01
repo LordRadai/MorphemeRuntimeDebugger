@@ -167,13 +167,13 @@ void Renderer::DrawBone(Matrix4 start, Matrix4 end, int thickness, RGBA* color)
 	start_pos = start.operator*(start_pos);
 	end_pos = end.operator*(end_pos);
 
-	Debug::debuggerMessage(Debug::LVL_DEBUG, "Start: (%.3f, %.3f, %.3f)\n", start_pos.x, start_pos.y, start_pos.z);
-	Debug::debuggerMessage(Debug::LVL_DEBUG, "End: (%.3f, %.3f, %.3f)\n", end_pos.x, end_pos.y, end_pos.z);
+	Debug::DebuggerMessage(Debug::LVL_DEBUG, "Start: (%.3f, %.3f, %.3f)\n", start_pos.x, start_pos.y, start_pos.z);
+	Debug::DebuggerMessage(Debug::LVL_DEBUG, "End: (%.3f, %.3f, %.3f)\n", end_pos.x, end_pos.y, end_pos.z);
 
 	if (Math::worldToScreen(start_pos, &start_sp) && Math::worldToScreen(end_pos, &end_sp))
 	{
-		Debug::debuggerMessage(Debug::LVL_DEBUG, "SP Start: (%d, %d)\n", start_sp.x, start_sp.y);
-		Debug::debuggerMessage(Debug::LVL_DEBUG, "SP End: (%d, %d)\n", end_sp.x, end_sp.y);
+		Debug::DebuggerMessage(Debug::LVL_DEBUG, "SP Start: (%d, %d)\n", start_sp.x, start_sp.y);
+		Debug::DebuggerMessage(Debug::LVL_DEBUG, "SP End: (%d, %d)\n", end_sp.x, end_sp.y);
 
 		Renderer::DrawCircleFilled(start_sp.x, start_sp.y, 2, color, 200);
 		Renderer::DrawLine(start_sp.x, start_sp.y, end_sp.x, end_sp.y, color, thickness);

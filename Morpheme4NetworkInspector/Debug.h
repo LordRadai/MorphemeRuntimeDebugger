@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <string>
+#include <debugapi.h>
 
 namespace Debug
 {
@@ -12,5 +13,7 @@ namespace Debug
 		LVL_ERROR = 1400000001,
 	};
 
-	void debuggerMessage(MsgLevel level, const char* fmt, ...);
+	void DebuggerMessage(MsgLevel level, const char* fmt, ...);
+	void Panic(const char* src_module, const char* fmt, ...);
+	void Alert(MsgLevel level, const char* src_module, const char* fmt, ...);
 }

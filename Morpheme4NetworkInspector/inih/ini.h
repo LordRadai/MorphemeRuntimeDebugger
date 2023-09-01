@@ -131,13 +131,13 @@ INI_API int ini_parse_string(const char* string, ini_handler handler, void* user
 #endif
 
 /* Nonzero to allow heap line buffer to grow via realloc(), zero for a
-   fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
+   fixed-size buffer of INI_MAX_LINE BYTEs. Only applies if INI_USE_STACK is
    zero. */
 #ifndef INI_ALLOW_REALLOC
 #define INI_ALLOW_REALLOC 0
 #endif
 
-/* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
+/* Initial size in BYTEs for heap line buffer. Only applies if INI_USE_STACK
    is zero. */
 #ifndef INI_INITIAL_ALLOC
 #define INI_INITIAL_ALLOC 200

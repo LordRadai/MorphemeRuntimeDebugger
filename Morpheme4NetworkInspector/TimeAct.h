@@ -1,6 +1,39 @@
 #pragma once
-#include "Timeline.h"
-#include <windows.h>
+#include <fstream>
+#include <Windows.h>
+#include <nlohmann/json.hpp>
+
+using namespace std;
+using json = nlohmann::json;
+
+struct Argument
+{
+    std::string m_name;
+    std::string m_type;
+
+    CHAR m_s8;
+    UCHAR m_u8;
+    SHORT m_s16;
+    USHORT m_u16;
+    INT m_s32;
+    UINT m_u32;
+    FLOAT m_f32;
+    INT64 m_s64;
+    UINT64 m_u64;
+};
+
+class TimeActEventData
+{
+public:
+    int m_size;
+    std::vector<Argument> m_args;
+
+    TimeActEventData() {}
+    void GetData(BYTE* mem, int group_id, int event_id);
+    void SaveData(BYTE* mem);
+    std::string GetArgumentsAsString();
+    void ImGuiEdit();
+};
 
 struct sTaeGroupContent {
     int tae_id;
@@ -26,10 +59,10 @@ struct sTaeData {
 
 struct sTaeFile {
     char magic[4];
-    byte big_endian;
-    byte field2_0x5;
-    byte field3_0x6;
-    byte field4_0x7;
+    BYTE big_endian;
+    BYTE field2_0x5;
+    BYTE field3_0x6;
+    BYTE field4_0x7;
     int version;
     int file_size;
     char* tae_file_flags;
@@ -62,7 +95,7 @@ struct sTaeEventData
 {
     int value;
     int padding;
-    uint64_t args;
+    BYTE* args;
 };
 
 struct sTaeBuffer {
@@ -89,12 +122,4 @@ namespace TimeAct
     uint64_t getTimeActFile_snd(uint64_t character_ctrl);
 
     sEventGroup* getEventGroup(sTaeData* tae_data, int index);
-    int loadTimeActTrack(sTaeData* tae_data, TimeActTrackList* tae_list);
-    void clearTrackList(TimeActTrackList* track_list);
-    void saveTimeActTrack(TimeActTrackList* tae_list);
-
-    const char* getGroupName(int group_id);
-    void getTaeEventName(char buf[], int group_id, int tae_id);
-    TimeActDef getTimeActDef(int group_id, int tae_id);
-    int getTaeArgCount(int tae_id);
 }

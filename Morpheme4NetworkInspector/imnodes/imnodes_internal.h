@@ -432,7 +432,7 @@ static inline void ObjectPoolReset(ImObjectPool<T>& objects)
 {
     if (!objects.InUse.empty())
     {
-        memset(objects.InUse.Data, 0, objects.InUse.size_in_bytes());
+        memset(objects.InUse.Data, 0, objects.InUse.size_in_BYTEs());
     }
 }
 

@@ -2,7 +2,7 @@
 #include "Debug.h"
 #include "common.h"
 
-enum CharacterType : byte
+enum CharacterType : BYTE
 {
 	PLAYER = 0,
 	ENEMY = 1,
@@ -62,7 +62,7 @@ void MorphemeInterface::drawSkeleton(uint64_t character_ctrl)
 	case DEMO:
 		break;
 	default:
-		Debug::debuggerMessage(Debug::LVL_ERROR, "Unknown Character Type %d\n", character_type);
+		Debug::DebuggerMessage(Debug::LVL_ERROR, "Unknown Character Type %d\n", character_type);
 		return;
 	}
 
@@ -74,9 +74,9 @@ void MorphemeInterface::drawSkeleton(uint64_t character_ctrl)
 	{
 		for (size_t i = 0; i < 11; i++)
 		{
-			if (*(uint64_t*)(character_rigid_body + 0x80 + (byte)i * 0x80))
+			if (*(uint64_t*)(character_rigid_body + 0x80 + (BYTE)i * 0x80))
 			{
-				hkp_rigid_body = *(uint64_t*)(character_rigid_body + 0x80 + (byte)i * 0x80);
+				hkp_rigid_body = *(uint64_t*)(character_rigid_body + 0x80 + (BYTE)i * 0x80);
 				float* bone_matrix = *(float**)(hkp_rigid_body + 0x30);
 				//bone_pos = *(Matrix4*)(hkp_rigid_body + 0x30);
 				bone_pos = Matrix4();
@@ -101,11 +101,11 @@ void MorphemeInterface::drawSkeleton(uint64_t character_ctrl)
 				bone_pos.m[2][3] = bone_matrix[14];
 				bone_pos.m[3][3] = bone_matrix[15];
 
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "Bone %d\n", i);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[0][0], bone_pos.m[0][1], bone_pos.m[0][2], bone_pos.m[0][3]);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[1][0], bone_pos.m[1][1], bone_pos.m[1][2], bone_pos.m[1][3]);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[2][0], bone_pos.m[2][1], bone_pos.m[2][2], bone_pos.m[2][3]);
-				Debug::debuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[3][0], bone_pos.m[3][1], bone_pos.m[3][2], bone_pos.m[3][3]);
+				Debug::DebuggerMessage(Debug::LVL_DEBUG, "Bone %d\n", i);
+				Debug::DebuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[0][0], bone_pos.m[0][1], bone_pos.m[0][2], bone_pos.m[0][3]);
+				Debug::DebuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[1][0], bone_pos.m[1][1], bone_pos.m[1][2], bone_pos.m[1][3]);
+				Debug::DebuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[2][0], bone_pos.m[2][1], bone_pos.m[2][2], bone_pos.m[2][3]);
+				Debug::DebuggerMessage(Debug::LVL_DEBUG, "Bone Pos: (%.3f, %.3f, %.3f, %.3f)\n", bone_pos.m[3][0], bone_pos.m[3][1], bone_pos.m[3][2], bone_pos.m[3][3]);
 
 				Renderer::DrawBone(bone_pos, bone_pos, 1, &bone_col);
 			}
@@ -124,9 +124,9 @@ void MorphemeInterface::drawSkeleton(uint64_t character_ctrl)
 
 				for (size_t i = 0; i < rigid_bodies_count; i++)
 				{
-					if (*(uint64_t*)(rigid_bodies + (byte)i * 0x8) && i != rigid_bodies_count)
+					if (*(uint64_t*)(rigid_bodies + (BYTE)i * 0x8) && i != rigid_bodies_count)
 					{
-						hkp_rigid_body = *(uint64_t*)(rigid_bodies + (byte)i * 0x8);
+						hkp_rigid_body = *(uint64_t*)(rigid_bodies + (BYTE)i * 0x8);
 						bone_pos = *(Matrix4*)(hkp_rigid_body + 0x30);
 
 						Renderer::DrawBone(bone_pos, bone_pos, 1, &bone_col);

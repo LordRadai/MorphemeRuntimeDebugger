@@ -1,6 +1,6 @@
 #include "includes.h"
 #include "common.h"
-#include "Timeline.h"
+#include "TaeTemplate/TaeTemplate.h"
 
 HINSTANCE hinst_dll = 0;
 std::thread begin_thread;
@@ -39,11 +39,11 @@ LRESULT WINAPI WndProc_Alt(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 bool create_network_inspector = false;
 MorphemeNetworkInspectorGUI network_inspector;
 
-MorphemeEventTrackList track_list;
 EventTrackEditor event_track_editor;
 
-TimeActTrackList tae_track_list;
-EventTrackEditor time_act_track_editor;
+TimeActEditor time_act_track_editor;
+
+TaeTemplate g_taeTemplate;
 
 void initImGui(HWND hwnd)
 {
@@ -135,6 +135,9 @@ bool MainLoop(uint64_t qModuleHandle)
                 return 1;
             }
 
+            ifstream file(".//MorphemeNetworkInspector//res//def//timeact.json");
+            g_taeTemplate = TaeTemplate(file);
+
             // Show the window
             ::ShowWindow(hwnd, SW_SHOWDEFAULT);
             ::UpdateWindow(hwnd);
@@ -177,7 +180,7 @@ bool MainLoop(uint64_t qModuleHandle)
 
                 if (game_state != prev_game_state)
                 {
-                    Debug::debuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d.\n", prev_game_state, game_state);
+                    Debug::DebuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d.\n", prev_game_state, game_state);
                     prev_game_state = game_state;
                 }
 

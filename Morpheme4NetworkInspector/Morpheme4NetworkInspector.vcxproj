@@ -160,12 +160,14 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Env;C:\Env\nlohmann;C:\Env\icu-windows\include\unicode;C:\Env\icu-windows\include;C:\Env\vcpkg-2023.08.09\vcpkg-2023.08.09\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies); d3d11.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -213,6 +215,7 @@
   <ItemGroup>
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="EventTrackEditor\EventTrackEditor.cpp" />
     <ClCompile Include="FRPG2.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -238,12 +241,15 @@
     <ClCompile Include="MorphemeInterface.cpp" />
     <ClCompile Include="MorphemeNetworkInspector.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="TaeTemplate\TaeTemplate.cpp" />
     <ClCompile Include="TimeAct.cpp" />
-    <ClCompile Include="Timeline.cpp" />
+    <ClCompile Include="TimeActEditor\TimeActEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="EventTrackEditor\EventTrackEditor.h" />
     <ClInclude Include="FRPG2.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -274,8 +280,10 @@
     <ClInclude Include="MorphemeInterface.h" />
     <ClInclude Include="MorphemeNetworkInspector.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="TaeTemplate\TaeTemplate.h" />
     <ClInclude Include="TimeAct.h" />
-    <ClInclude Include="Timeline.h" />
+    <ClInclude Include="TimeActEditor\TimeActEditor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
