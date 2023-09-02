@@ -996,8 +996,8 @@ void AppGUI::ProcessVariables()
 			{
 				uint64_t nsaFile = (uint64_t)node_data->m_animData;
 
-				int trackLenght = *(float*)(nsaFile + 0x84);
-				int animLenght = *(float*)(nsaFile + 0x88);
+				float trackLenght = *(float*)(nsaFile + 0x84);
+				float animLenght = *(float*)(nsaFile + 0x88);
 
 				m_networkData.anim_events.anim_len = animLenght;
 				m_networkData.anim_events.mult = 1;
