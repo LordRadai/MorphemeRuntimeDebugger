@@ -132,4 +132,5 @@ public:
 	bool m_loadTracks;
 	bool m_clearTracks;
 	bool m_saveTracks;
+	int m_selectedIndex;
 };

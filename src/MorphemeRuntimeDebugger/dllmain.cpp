@@ -1,6 +1,8 @@
 #include "includes.h"
 #include "common.h"
 #include "TaeTemplate/TaeTemplate.h"
+#define APPNAME_W L"MorphemeRuntimeDebugger v1.0.0"
+#define APPNAME_A "MorphemeRuntimeDebugger v1.0.0"
 
 HINSTANCE hinst_dll = 0;
 std::thread begin_thread;
@@ -14,8 +16,8 @@ HMODULE g_moduleAddr;
 uint64_t g_gameManagerImp;
 uint64_t g_networkManager;
 uint64_t g_katanaMainApp;
-int game_state;
-int prev_game_state = 0;
+int g_gameState;
+int g_prevGameState = 0;
 
 oSendMessage sendMessage;
 oTaeLookup taeLookup;
@@ -33,8 +35,8 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc_Alt(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-bool create_network_inspector = false;
-AppGUI network_inspector;
+bool g_openMorphemeDebugger = false;
+AppGUI g_morphemeDebugger;
 
 EventTrackEditor g_eventTrackEditor;
 
@@ -63,7 +65,7 @@ void initImGui(HWND hwnd)
 
     io.Fonts->AddFontDefault();
 
-    network_inspector.GUIStyle();
+    g_morphemeDebugger.GUIStyle();
 }
 
 int keyPressed(int key) {
@@ -91,8 +93,7 @@ bool Begin(uint64_t qModuleHandle) {
         return false;
     }
 
-//#ifdef _DEBUG
-    //MessageBoxA(NULL, "Software running in Debug mode", "Morpheme Network Inspector", MB_ICONINFORMATION);
+#ifdef _DEBUG
 
     AllocConsole();
 
@@ -104,7 +105,7 @@ bool Begin(uint64_t qModuleHandle) {
     std::clog.clear();
     std::cerr.clear();
     std::cin.clear();
-//#endif
+#endif
 
     return true;
 };
@@ -113,18 +114,18 @@ bool MainLoop(uint64_t qModuleHandle)
 {
     do
     {
-        if ((GetAsyncKeyState(VK_INSERT) & 1) && !create_network_inspector)
-            create_network_inspector = true;
+        if ((GetAsyncKeyState(VK_INSERT) & 1) && !g_openMorphemeDebugger)
+            g_openMorphemeDebugger = true;
         
-        if (create_network_inspector)
+        if (g_openMorphemeDebugger)
         {
-            create_network_inspector = false;
+            g_openMorphemeDebugger = false;
             FRPG2::assignFunctionAddr();
 
             //ImGui_ImplWin32_EnableDpiAwareness();
-            WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc_Alt, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+            WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc_Alt, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, APPNAME_W, NULL };
             ::RegisterClassExW(&wc);
-            HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"MorphemeRuntime Debugger", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+            HWND hwnd = ::CreateWindowW(wc.lpszClassName, APPNAME_W, WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
             // Initialize Direct3D
             if (!CreateDeviceD3D(hwnd))
@@ -160,15 +161,15 @@ bool MainLoop(uint64_t qModuleHandle)
                     g_gameManagerImp = *(uint64_t*)((uint64_t)g_moduleAddr + 0x16148F0);
                     g_networkManager = *(uint64_t*)((uint64_t)g_moduleAddr + 0x1616CF8);
                     g_katanaMainApp = *(uint64_t*)((uint64_t)g_moduleAddr + 0x16751F8);
+
+                    if (g_gameManagerImp)
+                        g_gameState = *(int*)(g_gameManagerImp + 0x24AC);
                 }
 
-                if (g_gameManagerImp)
-                    game_state = *(int*)(g_gameManagerImp + 0x24AC);
-
-                if (game_state != prev_game_state)
+                if (g_gameState != g_prevGameState)
                 {
-                    Debug::DebuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d.\n", prev_game_state, game_state);
-                    prev_game_state = game_state;
+                    Debug::DebuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d.\n", g_prevGameState, g_gameState);
+                    g_prevGameState = g_gameState;
                 }
 
                 MSG msg;
@@ -187,7 +188,7 @@ bool MainLoop(uint64_t qModuleHandle)
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
 
-                network_inspector.RenderGUI("Morpheme Network Inspector");
+                g_morphemeDebugger.RenderGUI(APPNAME_A);
 
                 ImGui::Render();
                 const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };

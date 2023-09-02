@@ -7,14 +7,12 @@
 
 AppGUI::AppGUI()
 {
-	bool style_editor = false;
-	bool show_demo_window = false;
+	this->m_selectedIndex = -1;
 }
 
 AppGUI::~AppGUI()
 {
-	bool style_editor = false;
-	bool show_demo_window = false;
+	this->m_selectedIndex = -1;
 }
 
 void AppGUI::GUIStyle()
@@ -170,12 +168,13 @@ void AppGUI::RenderGUI(const char* title)
 
 	ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y));
 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
-	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	static const ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
 	ImGuiID dockSpace = ImGui::GetID("MainWindowDockspace");
 	ImGui::DockSpace(dockSpace, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
+	/*
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("Options"))
@@ -196,6 +195,7 @@ void AppGUI::RenderGUI(const char* title)
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();
+	*/
 
 	ImGui::Begin("Network");
 	{
@@ -321,27 +321,37 @@ void AppGUI::RenderGUI(const char* title)
 			static ImGuiTextFilter filter;
 			ImGui::Text("Filter:");
 			filter.Draw("##asset searchbar", 340.f);
+
 			//Assets Window
 			ImGui::BeginChild("Assets");
 			{
+				if (m_networkData.anim_events.anim_nodes.size() == 0)
+					m_selectedIndex = -1;
+
 				for (size_t i = 0; i < m_networkData.anim_events.anim_nodes.size(); i++)
 				{
 					const char* anim_name = Morpheme::getAnimNameFromAnimNode(m_networkData.anim_events.anim_nodes[i]);
+					bool selected = (m_selectedIndex == i);
 
 					if (filter.PassFilter(anim_name))
 					{
 						ImGui::PushID(i);
-						//if (ImGui::Button("Load Tracks")) { event_track_node = (ImU64)nodes[i]; m_loadTracks = true; }
-						if (ImGui::Selectable(anim_name))
+						ImGui::Selectable(anim_name, &selected);
+
+						if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
 						{
-							m_networkData.anim_events.asset_name = anim_name;
-							m_networkData.anim_events.event_track_node = (ImU64)m_networkData.anim_events.anim_nodes[i];
-							m_loadTracks = true;
+							m_selectedIndex = i;
+
+							if (ImGui::IsMouseDoubleClicked(0))
+							{
+								m_networkData.anim_events.asset_name = anim_name;
+								m_networkData.anim_events.event_track_node = (ImU64)m_networkData.anim_events.anim_nodes[i];
+								m_loadTracks = true;
+							}
 						}
 						ImGui::PopID();
 					}
 				}
-
 			}
 			ImGui::EndChild();
 
@@ -648,7 +658,7 @@ void AppGUI::RenderGUI(const char* title)
 	ImGui::End();
 
 	ImGui::SetNextWindowSize(ImVec2(200, 500));
-	ImGui::Begin("EventTrack");
+	ImGui::Begin("AnimNode");
 	{
 		static bool expanded = true;
 		static char categoryInfo[100], valueInfo[255];
@@ -960,6 +970,7 @@ void AppGUI::ProcessVariables()
 {
 	if (m_loadTracks && m_networkData.anim_events.event_track_node)
 	{
+		m_selectedIndex = -1;
 		m_loadTracks = false;
 		m_clearTracks = false;
 
@@ -1073,6 +1084,7 @@ void AppGUI::ProcessVariables()
 
 	if (m_clearTracks)
 	{
+		m_selectedIndex = -1;
 		m_clearTracks = false;
 
 		g_eventTrackEditor.Clear();
@@ -1094,10 +1106,10 @@ void AppGUI::ProcessVariables()
 			g_timeActEditorSnd.m_tracks[i].SaveTimeActTrack();
 	}
 
-	if (game_state != 30)
+	if (g_gameState != 30)
 	{
-		if (game_state != prev_game_state)
-			Debug::DebuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d. Performing Network Cleanup\n", prev_game_state, game_state);
+		if (g_gameState != g_prevGameState)
+			Debug::DebuggerMessage(Debug::LVL_INFO, "Game State changed: %d -> %d. Performing Network Cleanup\n", g_prevGameState, g_gameState);
 
 		target_character = NULL;
 		NetworkCleanup();
@@ -1105,7 +1117,7 @@ void AppGUI::ProcessVariables()
 
 	if (target_character && (*(int*)(target_character + 0x8) != 1) && (*(int*)(target_character + 0x8) != 2))
 	{
-		Debug::DebuggerMessage(Debug::LVL_ERROR, "Target Character is not a member of CharacterCtrl. Performing Network Cleanup.\n", game_state);
+		Debug::DebuggerMessage(Debug::LVL_ERROR, "Target Character is not a member of CharacterCtrl. Performing Network Cleanup.\n", g_gameState);
 
 		target_character = NULL;
 		NetworkCleanup();

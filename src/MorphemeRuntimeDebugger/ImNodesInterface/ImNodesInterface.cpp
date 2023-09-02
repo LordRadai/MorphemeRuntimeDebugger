@@ -31,7 +31,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 	if (node->m_nodeID == -1)
 		return;
 
-	bool is_container = is_container = Morpheme::isNodeContainer(network_inspector.network, node->m_nodeID);;
+	bool is_container = is_container = Morpheme::isNodeContainer(g_morphemeDebugger.network, node->m_nodeID);;
 	int push_amount = 0;
 
 	ImNodes::PushColorStyle(ImNodesCol_TitleBar, 0xFF7A3A00);
@@ -46,14 +46,14 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 
 	push_amount += 8;
 
-	if (Morpheme::isNodeActive(network_inspector.network, node->m_nodeID))
+	if (Morpheme::isNodeActive(g_morphemeDebugger.network, node->m_nodeID))
 	{
 		push_amount += 1;
 		ImNodes::PushColorStyle(ImNodesCol_NodeOutline, 0xFF0000FF);
 	}
 
 	if (ImNodes::IsNodeSelected(node->m_nodeID))
-		network_inspector.m_networkData.imnodes_data.selected_node = node;
+		g_morphemeDebugger.m_networkData.imnodes_data.selected_node = node;
 
 	switch (node->m_nodeTypeID)
 	{
@@ -85,9 +85,9 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 		int input_id = node->m_nodeID * 1000000 + 10;
 		int link_id = node->m_nodeID * 10000000;
 		char title[255];
-		const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+		const char* node_name = Morpheme::getNodeName(g_morphemeDebugger.target_character, node->m_nodeID);
 
-		sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+		sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(g_morphemeDebugger.network, node->m_nodeID), node->m_nodeID);
 		if (node_name[0])
 			strcpy(title, node_name);
 
@@ -143,7 +143,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 				{
 					if (node->m_childNodeIDs[i] != -1)
 					{
-						createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[i]));
+						createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_childNodeIDs[i]));
 						ImNodes::Link(link_id, getNodeOutputPinId(node->m_childNodeIDs[i]), source_id + i);
 						link_id++;
 					}
@@ -157,7 +157,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 			{
 				if (node->m_controlParamAndOpNodeIDs[i] != -1)
 				{
-					createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_controlParamAndOpNodeIDs[i]));
+					createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_controlParamAndOpNodeIDs[i]));
 					ImNodes::Link(link_id, getNodeOutputPinId(node->m_controlParamAndOpNodeIDs[i]), input_id + i);
 					link_id++;
 				}
@@ -165,7 +165,7 @@ void ImNodesInterface::createMorphemeNode(Morpheme::NodeDef* node)
 		}
 
 		/*
-		if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+		if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 		{
 			ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 			link_id++;
@@ -195,13 +195,13 @@ void ImNodesInterface::createStateMachineNode(Morpheme::NodeDef* node)
 	ImNodes::PushColorStyle(ImNodesCol_PinHovered, 0x000000FF);
 
 	char title[255];
-	const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+	const char* node_name = Morpheme::getNodeName(g_morphemeDebugger.target_character, node->m_nodeID);
 	int output_id = node->m_nodeID * 100000;
 	int source_id = node->m_nodeID * 100000 + 1;
 	int input_id = node->m_nodeID * 1000000 + 10;
 	int link_id = node->m_nodeID * 10000000;
 
-	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(g_morphemeDebugger.network, node->m_nodeID), node->m_nodeID);
 	if (node_name[0])
 		strcpy(title, node_name);
 
@@ -224,7 +224,7 @@ void ImNodesInterface::createStateMachineNode(Morpheme::NodeDef* node)
 	ImNodes::EndNode();
 
 	/*
-	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+	if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 	{
 		ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 		link_id++;
@@ -237,8 +237,8 @@ void ImNodesInterface::createStateMachineNode(Morpheme::NodeDef* node)
 	{
 		if (ImGui::IsMouseDoubleClicked(0))
 		{
-			network_inspector.m_networkData.imnodes_data.node_to_inspect = node->m_nodeID;
-			network_inspector.m_networkData.imnodes_data.is_inspect = true;
+			g_morphemeDebugger.m_networkData.imnodes_data.node_to_inspect = node->m_nodeID;
+			g_morphemeDebugger.m_networkData.imnodes_data.is_inspect = true;
 		}
 	}
 }
@@ -258,9 +258,9 @@ void ImNodesInterface::createTransitNode(Morpheme::NodeDef* node)
 		int input_id = node->m_nodeID * 1000000 + 10;
 		int link_id = node->m_nodeID * 10000000;
 		char title[255];
-		const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+		const char* node_name = Morpheme::getNodeName(g_morphemeDebugger.target_character, node->m_nodeID);
 
-		sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+		sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(g_morphemeDebugger.network, node->m_nodeID), node->m_nodeID);
 		if (node_name[0])
 			strcpy(title, node_name);
 
@@ -283,14 +283,14 @@ void ImNodesInterface::createTransitNode(Morpheme::NodeDef* node)
 
 		ImNodes::EndNode();*/
 
-		//createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[0]));
-		//createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[1]));
+		//createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_childNodeIDs[0]));
+		//createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_childNodeIDs[1]));
 
 		ImNodes::LinkNodes(node->m_nodeID, node->m_childNodeIDs[0], node->m_childNodeIDs[1]);
 		//ImNodes::Link(link_id + 1, output_id, getNodeSourcePinId(node->m_childNodeIDs[1], 0));
 
 		/*
-		if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+		if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 		{
 			ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 			link_id++;
@@ -316,9 +316,9 @@ void ImNodesInterface::createAnimSyncEventNode(Morpheme::NodeDef* node)
 
 	float track_len = *(float*)(nsaFile + 0x84);
 	float anim_len = *(float*)(nsaFile + 0x88);
-	float current_time = MathHelper::FrameToTime(Morpheme::getCurrentAnimFrame(network_inspector.network, node->m_nodeID), 60);
+	float current_time = MathHelper::FrameToTime(Morpheme::getCurrentAnimFrame(g_morphemeDebugger.network, node->m_nodeID), 60);
 
-	if (network_inspector.m_networkConfig.eventTrackConfig_scaleToAnim)
+	if (g_morphemeDebugger.m_networkConfig.eventTrackConfig_scaleToAnim)
 		end_time = anim_len / track_len;
 
 	sprintf_s(title, "%s_%d", Morpheme::getAnimNameFromAnimNode(node), node->m_nodeID);
@@ -354,13 +354,13 @@ void ImNodesInterface::createAnimSyncEventNode(Morpheme::NodeDef* node)
 	{
 		if (ImGui::IsMouseDoubleClicked(0))
 		{
-			network_inspector.m_networkData.anim_events.event_track_node = (ImU64)node;
-			network_inspector.m_loadTracks = true;
+			g_morphemeDebugger.m_networkData.anim_events.event_track_node = (ImU64)node;
+			g_morphemeDebugger.m_loadTracks = true;
 		}
 	}
 
 	/*
-	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+	if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 	{
 		ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 		link_id++;
@@ -385,13 +385,13 @@ void ImNodesInterface::createCPNode(Morpheme::NodeDef* node)
 	int input_id = node->m_nodeID * 1000000 + 10;
 	int link_id = node->m_nodeID * 10000000;
 	char title[255];
-	const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+	const char* node_name = Morpheme::getNodeName(g_morphemeDebugger.target_character, node->m_nodeID);
 
-	Morpheme::NodeBin* node_bin = Morpheme::getNetworkNodeBin(network_inspector.network, node->m_nodeID);
+	Morpheme::NodeBin* node_bin = Morpheme::getNetworkNodeBin(g_morphemeDebugger.network, node->m_nodeID);
 	DWORD* value = node_bin->m_controlParamContainer->m_controlParamData->m_value;
 	int cp_type = node_bin->m_controlParamContainer->m_controlParamData->m_dataType;
 
-	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(g_morphemeDebugger.network, node->m_nodeID), node->m_nodeID);
 	if (node_name[0])
 		strcpy(title, node_name);
 
@@ -453,7 +453,7 @@ void ImNodesInterface::createCPNode(Morpheme::NodeDef* node)
 		ImNodes::PopColorStyle();
 
 	/*
-	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+	if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 	{
 		ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 		link_id++;
@@ -468,9 +468,9 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 	int link_id = node->m_nodeID * 10000000;
 
 	char title[255];
-	const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+	const char* node_name = Morpheme::getNodeName(g_morphemeDebugger.target_character, node->m_nodeID);
 
-	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(g_morphemeDebugger.network, node->m_nodeID), node->m_nodeID);
 	if (node_name[0])
 		strcpy(title, node_name);
 
@@ -524,7 +524,7 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 		{
 			if (node->m_childNodeIDs[i] != -1)
 			{
-				createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_childNodeIDs[i]));
+				createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_childNodeIDs[i]));
 				ImNodes::Link(link_id, getNodeOutputPinId(node->m_childNodeIDs[i]), source_id + i);
 				link_id++;
 			}
@@ -537,7 +537,7 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 		{
 			if (node->m_controlParamAndOpNodeIDs[i] != -1)
 			{
-				createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_controlParamAndOpNodeIDs[i]));
+				createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_controlParamAndOpNodeIDs[i]));
 				ImNodes::Link(link_id, getNodeOutputPinId(node->m_controlParamAndOpNodeIDs[i]), input_id + i);
 				link_id++;
 			}
@@ -545,7 +545,7 @@ void ImNodesInterface::createBlend2Node(Morpheme::NodeDef* node)
 	}
 
 	/*
-	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+	if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 	{
 		ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 		link_id++;
@@ -570,9 +570,9 @@ void ImNodesInterface::createSmoothDampNode(Morpheme::NodeDef* node)
 	int input_id = node->m_nodeID * 1000000 + 10;
 	int link_id = node->m_nodeID * 10000000;
 	char title[255];
-	const char* node_name = Morpheme::getNodeName(network_inspector.target_character, node->m_nodeID);
+	const char* node_name = Morpheme::getNodeName(g_morphemeDebugger.target_character, node->m_nodeID);
 
-	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(network_inspector.network, node->m_nodeID), node->m_nodeID);
+	sprintf_s(title, "%s_%d", Morpheme::getNodeTypeName_Alt(g_morphemeDebugger.network, node->m_nodeID), node->m_nodeID);
 	if (node_name[0])
 		strcpy(title, node_name);
 
@@ -600,7 +600,7 @@ void ImNodesInterface::createSmoothDampNode(Morpheme::NodeDef* node)
 		{
 			if (node->m_controlParamAndOpNodeIDs[i] != -1)
 			{
-				createMorphemeNode(Morpheme::getNetworkNode(network_inspector.network, node->m_controlParamAndOpNodeIDs[i]));
+				createMorphemeNode(Morpheme::getNetworkNode(g_morphemeDebugger.network, node->m_controlParamAndOpNodeIDs[i]));
 				ImNodes::Link(link_id, getNodeOutputPinId(node->m_controlParamAndOpNodeIDs[i]), input_id + i);
 				link_id++;
 			}
@@ -611,7 +611,7 @@ void ImNodesInterface::createSmoothDampNode(Morpheme::NodeDef* node)
 		ImNodes::PopColorStyle();
 
 	/*
-	if (Morpheme::isNodeConnectedToOutput(network_inspector.network, node->m_nodeID))
+	if (Morpheme::isNodeConnectedToOutput(g_morphemeDebugger.network, node->m_nodeID))
 	{
 		ImNodes::Link(link_id, output_id, OUTPUT_ATTRIB_ID);
 		link_id++;

@@ -120,7 +120,7 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkAllNodesType(uint64_t charac
 
 	for (size_t i = 0; i < network->m_networkDef->m_numNodes; i++)
 	{
-		if (node_type == NodeType::NodeType_NodeAnimSyncEvents && network_inspector.m_networkConfig.filter_events)
+		if (node_type == NodeType::NodeType_NodeAnimSyncEvents && g_morphemeDebugger.m_networkConfig.filter_events)
 		{
 			if (network->m_networkDef->m_nodes[i]->m_nodeTypeID == node_type)
 			{
@@ -160,9 +160,9 @@ std::vector<Morpheme::NodeDef*> Morpheme::getNetworkControlParameterNodes(uint64
 {
 	std::vector<Morpheme::NodeDef*> cp_nodes;
 
-	for (size_t i = 0; i < network_inspector.network->m_networkDef->m_numNodes; i++)
-		if (network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterFloat || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterInt || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterVector3 || network_inspector.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterBool)
-			cp_nodes.push_back(network_inspector.network->m_networkDef->m_nodes[i]);
+	for (size_t i = 0; i < g_morphemeDebugger.network->m_networkDef->m_numNodes; i++)
+		if (g_morphemeDebugger.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterFloat || g_morphemeDebugger.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterInt || g_morphemeDebugger.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterVector3 || g_morphemeDebugger.network->m_networkDef->m_nodes[i]->m_nodeTypeID == NodeType::NodeType_ControlParameterBool)
+			cp_nodes.push_back(g_morphemeDebugger.network->m_networkDef->m_nodes[i]);
 
 	return cp_nodes;
 }
@@ -440,7 +440,7 @@ int Morpheme::getCurrentAnimFrame(Morpheme::Network* network, short node_id)
 					}
 				}
 
-				if (network_inspector.m_networkConfig.eventTrackConfig_scaleToAnim)
+				if (g_morphemeDebugger.m_networkConfig.eventTrackConfig_scaleToAnim)
 					mult = anim_len / track_len;
 
 				current_time *= mult;

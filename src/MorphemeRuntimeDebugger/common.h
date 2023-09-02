@@ -11,11 +11,11 @@ extern HMODULE g_moduleAddr;
 extern uint64_t g_gameManagerImp;
 extern uint64_t g_networkManager;
 extern uint64_t g_katanaMainApp;
-extern int game_state;
-extern int prev_game_state;
+extern int g_gameState;
+extern int g_prevGameState;
 
-extern bool create_network_inspector;
-extern AppGUI network_inspector;
+extern bool g_openMorphemeDebugger;
+extern AppGUI g_morphemeDebugger;
 extern EventTrackEditor g_eventTrackEditor;
 extern TimeActEditor g_timeActEditorPl;
 extern TimeActEditor g_timeActEditorSfx;
