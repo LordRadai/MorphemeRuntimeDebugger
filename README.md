@@ -8,6 +8,7 @@ A tool to see how Morpheme runs when the game is open. Works only for SOTFS Ver 
 # Basic Usage
 * While the game is open, press the INSERT key to open the debugger window.
   
-# Asset window
-* The Asset window on the left contains animation nodes. It will filter all the animations that don't have an event track by default.
+# Resources window
+* The Resources window on the left contains animation nodes. It will filter all the animations that don't have an event track by default.
 * You can select an asset and double click it to load EventTracks and related TimeAct in the AnimNode window.
+![Immagine 2023-09-02 191418](https://github.com/LordRadai/MorphemeRuntimeDebugger/assets/22768664/9e69b8da-9fa3-404a-bf8d-d559609c86f5)
