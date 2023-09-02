@@ -1576,7 +1576,7 @@ namespace ImSequencer
                 if (baseIndex && px > (canvas_pos.x + legendWidth))
                 {
                     char tmps[512];
-                    ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%.3f", MathHelper::FrameToTime(i));
+                    ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%.3f", MathHelper::FrameToTime(i, 30));
                     draw_list->AddText(ImVec2((float)(px + 6), canvas_pos.y), 0xFFFFFFFF, tmps);
                 }
                 };
@@ -1778,7 +1778,7 @@ namespace ImSequencer
 
                 ImGui::InputFloat("End", &addEvent.end_time, 1.f / 60.f);
 
-                *currentFrame = MathHelper::TimeToFrame(addEvent.start_time);
+                *currentFrame = MathHelper::TimeToFrame(addEvent.start_time, 30);
 
                 ImGui::InputInt("Event ID", &addEvent.event_data->value);
 
@@ -1797,7 +1797,7 @@ namespace ImSequencer
             if (!reload)
             {
                 if (*currentFrame > 0 && !popupOpened)
-                    addEvent.start_time = MathHelper::FrameToTime(*currentFrame);
+                    addEvent.start_time = MathHelper::FrameToTime(*currentFrame, 30);
 
                 // clipping rect so items bars are not visible in the legend on the left when scrolled
 
@@ -2090,7 +2090,7 @@ namespace ImSequencer
                         draw_list->PopClipRect();
                         draw_list->PopClipRect();
 
-                        ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%.3f", MathHelper::FrameToTime(*currentFrame));
+                        ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%.3f", MathHelper::FrameToTime(*currentFrame, 30));
                         draw_list->AddText(ImVec2(cursorOffset, canvas_pos.y), 0xFFFFFFFF, tmps);
 
                         draw_list->PushClipRect(childFramePos, childFramePos + childFrameSize, true);

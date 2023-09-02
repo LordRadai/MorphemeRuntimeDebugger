@@ -19,7 +19,7 @@ TimeActEditor::TimeActTrack::TimeActTrack(sEventGroup* src)
 
 	for (size_t i = 0; i < src->group_count; i++)
 	{
-		this->m_event.push_back(Event{ MathHelper::TimeToFrame(src->tae_data[i]->start_time, 60), MathHelper::TimeToFrame(src->tae_data[i]->end_time - src->tae_data[i]->start_time, 60), (int)src->tae_data[i]->event_data->value,  new TimeActEventData });
+		this->m_event.push_back(Event{ MathHelper::TimeToFrame(src->tae_data[i]->start_time, 30), MathHelper::TimeToFrame(src->tae_data[i]->end_time - src->tae_data[i]->start_time, 30), (int)src->tae_data[i]->event_data->value,  new TimeActEventData });
 		this->m_event.back().m_args->GetData(src->tae_data[i]->event_data->args, *src->group_id, src->tae_data[i]->event_data->value);
 	}
 }
@@ -31,8 +31,8 @@ void TimeActEditor::TimeActTrack::SaveTimeActTrack()
 
 	for (size_t i = 0; i < this->m_count; i++)
 	{
-		this->m_source->tae_data[i]->start_time = MathHelper::FrameToTime(this->m_event[i].m_frameStart, 60);
-		this->m_source->tae_data[i]->end_time = MathHelper::FrameToTime(this->m_event[i].m_frameStart + this->m_event[i].m_duration, 60);
+		this->m_source->tae_data[i]->start_time = MathHelper::FrameToTime(this->m_event[i].m_frameStart, 30);
+		this->m_source->tae_data[i]->end_time = MathHelper::FrameToTime(this->m_event[i].m_frameStart + this->m_event[i].m_duration, 30);
 		this->m_source->tae_data[i]->event_data->value = this->m_event[i].m_value;
 
 		this->m_event[i].m_args->SaveData(this->m_source->tae_data[i]->event_data->args);

@@ -122,4 +122,6 @@ namespace TimeAct
     uint64_t getTimeActFile_snd(uint64_t character_ctrl);
 
     sEventGroup* getEventGroup(sTaeData* tae_data, int index);
+
+    float calculateTaePosition(float eventStart, float eventDuration, float eventCurrentPos, float timeActDuration);
 }

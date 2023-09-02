@@ -268,3 +268,13 @@ sEventGroup* TimeAct::getEventGroup(sTaeData* tae_data, int index)
 {
 	return &tae_data->event_group[index];
 }
+
+float TimeAct::calculateTaePosition(float eventStart, float eventDuration, float eventCurrentPos, float timeActDuration)
+{
+	if (eventCurrentPos < eventStart)
+		return 0;
+
+	float playSpeed = timeActDuration / eventDuration;
+
+	return playSpeed * (eventCurrentPos - eventStart);
+}

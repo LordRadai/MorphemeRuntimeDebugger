@@ -711,13 +711,32 @@ void AppGUI::RenderGUI(const char* title)
 			if (anim_sync_node)
 				currentFrame = Morpheme::getCurrentAnimFrame(network, anim_sync_node->m_nodeID);
 
-			currentFrame_tae = currentFrame + MathHelper::TimeToFrame(*(float*)(node_data->m_animData + 0x80), 60);
+			bool found = false;
+			float eventTrackActionTimeActStart = 0;
+			float eventTrackActionTimeActDuration = 0;
 
-			Debug::DebuggerMessage(Debug::LVL_DEBUG, "Current Time (EventTrack): %.3f\n", MathHelper::FrameToTime(currentFrame, 60));
-			Debug::DebuggerMessage(Debug::LVL_DEBUG, "Current Time (TAE): %.3f\n", MathHelper::FrameToTime(currentFrame_tae, 60));
+			for (int i = 0; i < g_eventTrackEditor.m_eventTracks.size(); i++)
+			{
+				if (g_eventTrackEditor.m_eventTracks[i].m_eventId == 1000)
+				{
+					eventTrackActionTimeActStart = MathHelper::FrameToTime(g_eventTrackEditor.m_eventTracks[i].m_event[0].m_frameStart);
+					eventTrackActionTimeActDuration = MathHelper::FrameToTime(g_eventTrackEditor.m_eventTracks[i].m_event[0].m_duration);
+
+					found = true;
+					break;
+				}
+			}
+
+			if (found)
+			{
+				float currentTaePos = TimeAct::calculateTaePosition(eventTrackActionTimeActStart, eventTrackActionTimeActDuration, MathHelper::FrameToTime(currentFrame), MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30));
+				currentFrame_tae = MathHelper::TimeToFrame(currentTaePos, 30);
+			}
+			else
+				currentFrame_tae = 0;
 		}
 
-		if (g_eventTrackEditor.GetTrackCount())
+		if (g_eventTrackEditor.GetTrackCount() == 0)
 		{
 			selectedEntry = -1;
 			selectedEvent = -1;
@@ -752,7 +771,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (ImGui::BeginTabItem("Pl"))
 				{
 					ImGui::BeginChild("tae sequencer");
-					ImSequencer::Sequencer(&g_timeActEditorPl, &currentFrame, &selectedEntry_taePl, &selectedEvent_taePl, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+					ImSequencer::Sequencer(&g_timeActEditorPl, &currentFrame_tae, &selectedEntry_taePl, &selectedEvent_taePl, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 					ImGui::EndChild();
 
 					ImGui::EndTabItem();
@@ -760,7 +779,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (ImGui::BeginTabItem("Sfx"))
 				{
 					ImGui::BeginChild("tae sequencer");
-					ImSequencer::Sequencer(&g_timeActEditorSfx, &currentFrame, &selectedEntry_taeSfx, &selectedEvent_taeSfx, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+					ImSequencer::Sequencer(&g_timeActEditorSfx, &currentFrame_tae, &selectedEntry_taeSfx, &selectedEvent_taeSfx, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 					ImGui::EndChild();
 
 					ImGui::EndTabItem();
@@ -768,7 +787,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (ImGui::BeginTabItem("Snd"))
 				{
 					ImGui::BeginChild("tae sequencer");
-					ImSequencer::Sequencer(&g_timeActEditorSnd, &currentFrame, &selectedEntry_taeSnd, &selectedEvent_taeSnd, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+					ImSequencer::Sequencer(&g_timeActEditorSnd, &currentFrame_tae, &selectedEntry_taeSnd, &selectedEvent_taeSnd, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 					ImGui::EndChild();
 
 					ImGui::EndTabItem();
@@ -785,7 +804,7 @@ void AppGUI::RenderGUI(const char* title)
 		{
 			if (ImGui::BeginTabItem("EventTrack"))
 			{
-				if (selectedEntry != -1 && selectedEvent)
+				if (selectedEntry != -1 && selectedEvent != -1)
 				{
 					EventTrackEditor::EventTrack& track = g_eventTrackEditor.m_eventTracks[selectedEntry];
 					float startTime = MathHelper::FrameToTime(track.m_event[selectedEvent].m_frameStart, 60);
@@ -1033,20 +1052,20 @@ void AppGUI::ProcessVariables()
 					MessageBoxA(NULL, "Animation does not have any EventTrack associated with it", "Morpheme Network Inspector", MB_ICONINFORMATION);
 
 				g_timeActEditorPl.m_frameMin;
-				g_timeActEditorPl.m_frameMax = MathHelper::TimeToFrame(trackLenght, 60);
+				g_timeActEditorPl.m_frameMax = MathHelper::TimeToFrame(trackLenght, 30);
 
 				g_timeActEditorSfx.m_frameMin;
-				g_timeActEditorSfx.m_frameMax = MathHelper::TimeToFrame(trackLenght, 60);
+				g_timeActEditorSfx.m_frameMax = MathHelper::TimeToFrame(trackLenght, 30);
 
 				g_timeActEditorSnd.m_frameMin;
-				g_timeActEditorSnd.m_frameMax = MathHelper::TimeToFrame(trackLenght, 60);
+				g_timeActEditorSnd.m_frameMax = MathHelper::TimeToFrame(trackLenght, 30);
 
 				if (m_networkConfig.eventTrackConfig_scaleToAnim)
 				{
 					m_networkData.anim_events.mult = animLenght / trackLenght;
-					g_timeActEditorPl.m_frameMax = MathHelper::TimeToFrame(animLenght, 60);
-					g_timeActEditorSfx.m_frameMax = MathHelper::TimeToFrame(animLenght, 60);
-					g_timeActEditorSnd.m_frameMax = MathHelper::TimeToFrame(animLenght, 60);
+					g_timeActEditorPl.m_frameMax = MathHelper::TimeToFrame(animLenght, 30);
+					g_timeActEditorSfx.m_frameMax = MathHelper::TimeToFrame(animLenght, 30);
+					g_timeActEditorSnd.m_frameMax = MathHelper::TimeToFrame(animLenght, 30);
 				}
 
 				if (event_track_count > 0)
