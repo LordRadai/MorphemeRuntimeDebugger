@@ -813,8 +813,8 @@ void AppGUI::RenderGUI(const char* title)
 					if (selectedEntryTae != -1 && selectedEventTae != -1)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorPl.m_tracks[selectedEntryTae];
-						float startTime = MathHelper::FrameToTime(track.m_event[selectedEntryTae].m_frameStart, 60);
-						float duration = MathHelper::FrameToTime(track.m_event[selectedEntryTae].m_duration, 60);
+						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
+						float duration = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60);
 
 						ImGui::Text(g_timeActEditorPl.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -859,8 +859,8 @@ void AppGUI::RenderGUI(const char* title)
 					if (selectedEntryTae != -1 && selectedEventTae != -1)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorSfx.m_tracks[selectedEntryTae];
-						float startTime = MathHelper::FrameToTime(track.m_event[selectedEntryTae].m_frameStart, 60);
-						float duration = MathHelper::FrameToTime(track.m_event[selectedEntryTae].m_duration, 60);
+						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
+						float duration = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60);
 
 						ImGui::Text(g_timeActEditorSfx.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -905,8 +905,8 @@ void AppGUI::RenderGUI(const char* title)
 					if (selectedEntryTae != -1 && selectedEventTae != -1)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorSnd.m_tracks[selectedEntryTae];
-						float startTime = MathHelper::FrameToTime(track.m_event[selectedEntryTae].m_frameStart, 60);
-						float duration = MathHelper::FrameToTime(track.m_event[selectedEntryTae].m_duration, 60);
+						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
+						float duration = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60);
 
 						ImGui::Text(g_timeActEditorSnd.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
