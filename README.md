@@ -15,3 +15,4 @@ A tool to see how Morpheme runs when the game is open. Works only for SOTFS Ver 
 * It can edit frame times and values of existing tracks, but can't add new ones.
 * It can show active nodes in a network.
 * It lets you send Morpheme Messages to play animations, as well as adjust ControlParameters manually.
+* It lets you disable the in game AI.
