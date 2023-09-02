@@ -665,7 +665,7 @@ void AppGUI::RenderGUI(const char* title)
 	}
 	ImGui::End();
 
-	ImGui::SetNextWindowSize(ImVec2(200, 500));
+	ImGui::SetNextWindowSize(ImVec2(200, 500), ImGuiCond_Appearing);
 	ImGui::Begin("AnimNode");
 	{
 		static bool expanded = true;
