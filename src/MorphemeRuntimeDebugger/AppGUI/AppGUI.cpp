@@ -63,9 +63,9 @@ void AppGUI::GUIStyle()
 	colors[ImGuiCol_Separator] = ImVec4(0.47f, 0.47f, 0.47f, 0.39f);
 	colors[ImGuiCol_SeparatorHovered] = ImVec4(0.51f, 0.51f, 0.51f, 0.39f);
 	colors[ImGuiCol_SeparatorActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
-	colors[ImGuiCol_ResizeGrip] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
-	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+	colors[ImGuiCol_ResizeGrip] = ImVec4(0.f, 0.f, 0.f, 0.f);
+	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.f, 0.f, 0.f, 0.f);
+	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.f, 0.f, 0.f, 0.f);
 	colors[ImGuiCol_Tab] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 	colors[ImGuiCol_TabHovered] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
 	colors[ImGuiCol_TabActive] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
@@ -328,7 +328,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (m_networkData.anim_events.anim_nodes.size() == 0)
 					m_selectedIndex = -1;
 
-				for (size_t i = 0; i < m_networkData.anim_events.anim_nodes.size(); i++)
+				for (int i = 0; i < m_networkData.anim_events.anim_nodes.size(); i++)
 				{
 					const char* anim_name = Morpheme::getAnimNameFromAnimNode(m_networkData.anim_events.anim_nodes[i]);
 					bool selected = (m_selectedIndex == i);
@@ -582,53 +582,58 @@ void AppGUI::RenderGUI(const char* title)
 			ImGuiID dockSpace = ImGui::GetID("PreviewWindowDockspace");
 			ImGui::DockSpace(dockSpace, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
-			ImGui::Begin("Control Parameters");
-			if (ImGui::CollapsingHeader("Ungrouped"))
+			ImGui::BeginTabBar("preview");
+
+			if (ImGui::BeginTabItem("Control Parameters"))
 			{
-				for (size_t i = 0; i < m_networkData.control_params.cp_nodes.size(); i++)
+				if (ImGui::CollapsingHeader("Ungrouped"))
 				{
-					char input_id[255];
-
-					sprintf_s(input_id, "input %d", i);
-
-					ImGui::Text(m_networkData.control_params.cp_names[i]);
-					DWORD* value = m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value;
-
-					switch (m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_dataType)
+					for (size_t i = 0; i < m_networkData.control_params.cp_nodes.size(); i++)
 					{
-					case 0:
-						ImGui::PushID(input_id);
-						ImGui::DragByte("", (char*)(value), 0, 0, 1,"%d");
-						ImGui::PopID();
-						break;
-					case 2:
-						ImGui::PushID(input_id);
-						ImGui::DragInt("", (int*)(value), 0, -10000, 10000, "%d");
-						ImGui::PopID();
-						break;
-					case 3:
-						ImGui::PushID(input_id);
-						ImGui::DragFloat("", (float*)(value), 0, -10000, 10000, "%.3f");
-						ImGui::PopID();
-						break;
-					case 4:
-						ImGui::PushID(input_id);
-						ImGui::DragFloat("X", (float*)&m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[0], 0, -10000, 1000, "%.3f");
-						ImGui::DragFloat("Y", (float*)&m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[1], 0, -10000, 1000, "%.3f");
-						ImGui::DragFloat("Z", (float*)&m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[2], 0, -10000, 1000, "%.3f");
-						ImGui::PopID();
-						break;
-					default:
-						char buf[50];
-						sprintf_s(buf, "Unknown CP type %d (%d)\n", m_networkData.control_params.cp_nodes[i]->m_nodeTypeID, m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_dataType);
-						ImGui::Text(buf);
-						break;
+						char input_id[255];
+
+						sprintf_s(input_id, "input %d", i);
+
+						ImGui::Text(m_networkData.control_params.cp_names[i]);
+						DWORD* value = m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value;
+
+						switch (m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_dataType)
+						{
+						case 0:
+							ImGui::PushID(input_id);
+							ImGui::DragByte("", (char*)(value), 0, 0, 1, "%d");
+							ImGui::PopID();
+							break;
+						case 2:
+							ImGui::PushID(input_id);
+							ImGui::DragInt("", (int*)(value), 0, -10000, 10000, "%d");
+							ImGui::PopID();
+							break;
+						case 3:
+							ImGui::PushID(input_id);
+							ImGui::DragFloat("", (float*)(value), 0, -10000, 10000, "%.3f");
+							ImGui::PopID();
+							break;
+						case 4:
+							ImGui::PushID(input_id);
+							ImGui::DragFloat("X", (float*)&m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[0], 0, -10000, 1000, "%.3f");
+							ImGui::DragFloat("Y", (float*)&m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[1], 0, -10000, 1000, "%.3f");
+							ImGui::DragFloat("Z", (float*)&m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_value[2], 0, -10000, 1000, "%.3f");
+							ImGui::PopID();
+							break;
+						default:
+							char buf[50];
+							sprintf_s(buf, "Unknown CP type %d (%d)\n", m_networkData.control_params.cp_nodes[i]->m_nodeTypeID, m_networkData.control_params.cp_bins[i]->m_controlParamContainer->m_controlParamData->m_dataType);
+							ImGui::Text(buf);
+							break;
+						}
 					}
 				}
-			}
-			ImGui::End();
 
-			ImGui::Begin("Messages");
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Messages"))
 			{
 				for (size_t i = 0; i < m_networkData.messages.message_names.size(); i++)
 				{
@@ -648,8 +653,10 @@ void AppGUI::RenderGUI(const char* title)
 
 					ImGui::PopStyleColor(1);
 				}
+
+				ImGui::EndTabItem();
 			}
-			ImGui::End();
+			ImGui::EndTabBar();
 
 			ImGui::EndTabItem();
 		}
@@ -970,7 +977,6 @@ void AppGUI::ProcessVariables()
 {
 	if (m_loadTracks && m_networkData.anim_events.event_track_node)
 	{
-		m_selectedIndex = -1;
 		m_loadTracks = false;
 		m_clearTracks = false;
 

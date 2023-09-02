@@ -4,6 +4,7 @@
 #include "AppGUI/AppGUI.h"
 #include "TimeActEditor/TimeActEditor.h"
 #include "EventTrackEditor/EventTrackEditor.h"
+#include <vector>
 
 class TaeTemplate;
 
