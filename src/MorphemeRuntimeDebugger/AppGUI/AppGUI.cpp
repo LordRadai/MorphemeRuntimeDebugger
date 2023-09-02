@@ -719,8 +719,8 @@ void AppGUI::RenderGUI(const char* title)
 			{
 				if (g_eventTrackEditor.m_eventTracks[i].m_eventId == 1000)
 				{
-					eventTrackActionTimeActStart = MathHelper::FrameToTime(g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_startTime);
-					eventTrackActionTimeActDuration = MathHelper::FrameToTime(g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_duration);
+					eventTrackActionTimeActStart = g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_startTime;
+					eventTrackActionTimeActDuration = g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_duration;
 
 					found = true;
 					break;
