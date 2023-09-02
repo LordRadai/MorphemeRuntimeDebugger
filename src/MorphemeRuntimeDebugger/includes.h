@@ -21,6 +21,7 @@
 
 #include "Debug/Debug.h"
 #include "FRPG2/FRPG2.h"
+#include "FRPG2/FRPG2Hook.h"
 #include "AppGUI/AppGUI.h"
 #include "common.h"
 

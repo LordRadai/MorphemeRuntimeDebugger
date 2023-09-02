@@ -168,22 +168,27 @@ void AppGUI::RenderGUI(const char* title)
 
 	ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y));
 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
-	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	static const ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
 	ImGuiID dockSpace = ImGui::GetID("MainWindowDockspace");
 	ImGui::DockSpace(dockSpace, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
-	/*
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("Options"))
 		{
-			if (ImGui::MenuItem("Scale Track Lenght", NULL, &m_networkConfig.eventTrackConfig_scaleToAnim)) { m_networkConfig.eventTrackConfig_scaleToAnim != m_networkConfig.eventTrackConfig_scaleToAnim; }
+			if (m_gameDebugFlags.m_disableAi && g_gameState == 30)
+			{
+				if (ImGui::MenuItem("Disable AI", NULL, m_gameDebugFlags.m_disableAi)) { *m_gameDebugFlags.m_disableAi != *m_gameDebugFlags.m_disableAi; }
+			}
+
+			if (ImGui::MenuItem("Disable CP Updates", NULL, &m_gameDebugFlags.m_disableCPUpdates)) { m_gameDebugFlags.m_disableCPUpdates != m_gameDebugFlags.m_disableCPUpdates; }
 
 			ImGui::EndMenu();
 		}
 
+		/*
 		if (ImGui::BeginMenu("Edit"))
 		{
 			if (ImGui::MenuItem("Style Editor", NULL, &style_editor)) { style_editor != style_editor; }
@@ -191,11 +196,11 @@ void AppGUI::RenderGUI(const char* title)
 
 			ImGui::EndMenu();
 		}
+		*/
 
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();
-	*/
 
 	ImGui::Begin("Network");
 	{
@@ -578,10 +583,6 @@ void AppGUI::RenderGUI(const char* title)
 
 		if (ImGui::BeginTabItem("Preview"))
 		{
-			static const ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
-			ImGuiID dockSpace = ImGui::GetID("PreviewWindowDockspace");
-			ImGui::DockSpace(dockSpace, ImVec2(0.0f, 0.0f), dockspaceFlags);
-
 			ImGui::BeginTabBar("preview");
 
 			if (ImGui::BeginTabItem("Control Parameters"))

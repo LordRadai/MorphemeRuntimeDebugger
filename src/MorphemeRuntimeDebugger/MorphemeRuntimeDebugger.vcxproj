@@ -156,7 +156,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_LOGGER;_DEBUG;WINDOWS;_USRDLL;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;_LOGGER;_DEBUG;WINDOWS;_USRDLL;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
@@ -221,6 +221,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="EventTrackEditor\EventTrackEditor.cpp" />
     <ClCompile Include="FRPG2\FRPG2.cpp" />
+    <ClCompile Include="FRPG2\FRPG2Hook.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -253,6 +254,7 @@
     <ClInclude Include="Debug\Debug.h" />
     <ClInclude Include="EventTrackEditor\EventTrackEditor.h" />
     <ClInclude Include="FRPG2\FRPG2.h" />
+    <ClInclude Include="FRPG2\FRPG2Hook.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx11.h" />

@@ -46,6 +46,12 @@ TimeActEditor g_timeActEditorSnd;
 
 TaeTemplate g_taeTemplate;
 
+oUpdateCPInt pUpdateCpInt = nullptr;
+oUpdateCPInt pUpdateCpIntTarget;
+
+oUpdateCPFloat pUpdateCpFloat = nullptr;
+oUpdateCPFloat pUpdateCpFloatTarget;
+
 void initImGui(HWND hwnd)
 {
     IMGUI_CHECKVERSION();
@@ -82,6 +88,14 @@ bool Begin(uint64_t qModuleHandle) {
     strcat_s(dllpath, "\\dinput8.dll");
     hinst_dll = LoadLibraryA(dllpath);
 
+    MH_STATUS status = MH_Initialize();
+    if (status != MH_OK)
+    {
+        std::string sStatus = MH_StatusToString(status);
+        printf_s("Minhook init failed.");
+        return false;
+    }
+
     if (!hinst_dll) {
         MessageBoxA(NULL, "Failed to load original DLL", "Error", MB_ICONERROR);
         return false;
@@ -93,8 +107,7 @@ bool Begin(uint64_t qModuleHandle) {
         return false;
     }
 
-#ifdef _DEBUG
-
+#ifdef _CONSOLE
     AllocConsole();
 
     FILE* fDummy;
@@ -106,6 +119,8 @@ bool Begin(uint64_t qModuleHandle) {
     std::cerr.clear();
     std::cin.clear();
 #endif
+
+    FRPG2Hook::InitHooks();
 
     return true;
 };
@@ -163,7 +178,16 @@ bool MainLoop(uint64_t qModuleHandle)
                     g_katanaMainApp = *(uint64_t*)((uint64_t)g_moduleAddr + 0x16751F8);
 
                     if (g_gameManagerImp)
+                    {
                         g_gameState = *(int*)(g_gameManagerImp + 0x24AC);
+
+                        if (g_gameState == 30)
+                        {
+                            UINT64 aiManager = *(UINT64*)(g_gameManagerImp + 0x28);
+
+                            g_morphemeDebugger.m_gameDebugFlags.m_disableAi = (bool*)(aiManager + 0x18);
+                        }
+                    }
                 }
 
                 if (g_gameState != g_prevGameState)

@@ -123,6 +123,12 @@ public:
 		bool is_save = false;
 	};
 
+	struct GameDebug
+	{
+		bool* m_disableAi;
+		bool m_disableCPUpdates;
+	} m_gameDebugFlags;
+
 	View m_view;
 	GetNetworkTask m_networkTasks;
 	NetworkData m_networkData;
