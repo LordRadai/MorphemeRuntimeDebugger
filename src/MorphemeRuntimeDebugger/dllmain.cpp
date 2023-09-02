@@ -168,7 +168,6 @@ bool MainLoop(uint64_t qModuleHandle)
                 if ((GetAsyncKeyState(VK_INSERT) & 1))
                 {
                     SetForegroundWindow(hwnd);
-                    MessageBoxA(hwnd, "Morpheme Network Inspector already running", "Network Inspector", MB_ICONINFORMATION);
                 }
 
                 if (g_moduleAddr)
