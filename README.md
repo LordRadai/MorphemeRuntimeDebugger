@@ -10,8 +10,8 @@ A tool to see how Morpheme runs when the game is open. Works only for SOTFS Ver 
 
 ![Immagine 2023-09-02 191543](https://github.com/LordRadai/MorphemeRuntimeDebugger/assets/22768664/00151c51-b0bf-4f44-8e2c-dfaee1db8357)
 
-# Resources window
-* The Resources window on the left contains animation nodes. It will filter all the animations that don't have an event track by default.
-* You can select an asset and double click it to load EventTracks and related TimeAct in the AnimNode window.
-
-![Immagine 2023-09-02 191418](https://github.com/LordRadai/MorphemeRuntimeDebugger/assets/22768664/9e69b8da-9fa3-404a-bf8d-d559609c86f5)
+# What it can and cannot do
+* It can detect the current frame time of a playing animation node. If you load the tracks of an animation node and it starts playing, it will move the cursor. Note that there can be multiple nodes that share a single animation. There is no cheap way to detect this unfortunately.
+* It can edit frame times and values of existing tracks, but can't add new ones.
+* It can show active nodes in a network.
+* It lets you send Morpheme Messages to play animations, as well as adjust ControlParameters manually.
