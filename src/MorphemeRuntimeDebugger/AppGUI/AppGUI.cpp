@@ -265,11 +265,13 @@ void AppGUI::RenderGUI(const char* title)
 					if (node_name != "")
 						sprintf(label, "%s", node_name);
 
+					ImGui::PushID(m_networkData.imnodes_data.parent_id);
 					if (ImGui::Button(label))
 					{
 						m_networkData.imnodes_data.node_to_inspect = m_networkData.imnodes_data.node_def->m_parentNodeID;
 						m_networkData.imnodes_data.is_inspect = true;
 					}
+					ImGui::PopID();
 				}
 			}
 
