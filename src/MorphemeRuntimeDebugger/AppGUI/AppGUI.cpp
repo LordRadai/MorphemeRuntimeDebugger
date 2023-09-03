@@ -863,8 +863,8 @@ void AppGUI::RenderGUI(const char* title)
 					if (selectedEntryTae != -1 && selectedEventTae != -1)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorPl.m_tracks[selectedEntryTae];
-						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
-						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60) + startTime;
+						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 30);
+						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 30) + startTime;
 
 						ImGui::Text(g_timeActEditorPl.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -890,8 +890,8 @@ void AppGUI::RenderGUI(const char* title)
 							ImGui::PopTextWrapPos();
 						}
 
-						ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("Start Time", &startTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -909,8 +909,8 @@ void AppGUI::RenderGUI(const char* title)
 					if (selectedEntryTae != -1 && selectedEventTae != -1)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorSfx.m_tracks[selectedEntryTae];
-						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
-						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60) + startTime;
+						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 30);
+						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 30) + startTime;
 
 						ImGui::Text(g_timeActEditorSfx.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -936,8 +936,8 @@ void AppGUI::RenderGUI(const char* title)
 							ImGui::PopTextWrapPos();
 						}
 
-						ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("Start Time", &startTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -955,8 +955,8 @@ void AppGUI::RenderGUI(const char* title)
 					if (selectedEntryTae != -1 && selectedEventTae != -1)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorSnd.m_tracks[selectedEntryTae];
-						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
-						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60) + startTime;
+						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 30);
+						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 30) + startTime;
 
 						ImGui::Text(g_timeActEditorSnd.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -982,8 +982,8 @@ void AppGUI::RenderGUI(const char* title)
 							ImGui::PopTextWrapPos();
 						}
 
-						ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("Start Time", &startTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -1072,12 +1072,7 @@ void AppGUI::ProcessVariables()
 				g_timeActEditorSnd.m_frameMax = MathHelper::TimeToFrame(trackLenght, 30);
 
 				if (m_networkConfig.eventTrackConfig_scaleToAnim)
-				{
 					m_networkData.anim_events.mult = animLenght / trackLenght;
-					g_timeActEditorPl.m_frameMax = MathHelper::TimeToFrame(animLenght, 30);
-					g_timeActEditorSfx.m_frameMax = MathHelper::TimeToFrame(animLenght, 30);
-					g_timeActEditorSnd.m_frameMax = MathHelper::TimeToFrame(animLenght, 30);
-				}
 
 				if (event_track_count > 0)
 				{
@@ -1098,6 +1093,14 @@ void AppGUI::ProcessVariables()
 						sTaeData* taePl = taeLookup(TimeAct::getTimeActFile_pl(target_character), tae_id);
 						sTaeData* taeSfx = taeLookup(TimeAct::getTimeActFile_sfx(target_character), tae_id);
 						sTaeData* taeSnd = taeLookup(TimeAct::getTimeActFile_snd(target_character), tae_id);
+
+						UINT64 tmpPl = *(UINT64*)(taePl->anim_file + 0x8);
+						UINT64 tmpSfx = *(UINT64*)(taePl->anim_file + 0x8);
+						UINT64 tmpSnd = *(UINT64*)(taePl->anim_file + 0x8);
+
+						g_timeActEditorPl.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpPl + 0xC)) / (float)(*(byte*)(tmpPl + 0x9)), 30);
+						g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(byte*)(tmpSfx + 0x9)), 30);
+						g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(byte*)(tmpSnd + 0x9)), 30);
 
 						for (int i = 0; i < taePl->event_group_count; i++)
 							g_timeActEditorPl.m_tracks.push_back(TimeActEditor::TimeActTrack(&taePl->event_group[i]));

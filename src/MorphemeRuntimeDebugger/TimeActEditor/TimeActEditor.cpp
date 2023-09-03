@@ -102,6 +102,8 @@ std::string TimeActEditor::GetEventLabel(int idx, int event_idx, bool arguments)
 
 void TimeActEditor::Clear()
 {
+	this->m_frameMax = 0;
+	this->m_frameMin = 0;
 	this->m_source = nullptr;
 	this->m_tracks.clear();
 }
