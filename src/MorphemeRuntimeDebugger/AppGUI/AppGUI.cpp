@@ -210,6 +210,8 @@ void AppGUI::RenderGUI(const char* title)
 
 		if (ImGui::Button("Player"))
 		{
+			target_character = NULL;
+
 			NetworkCleanup();
 			target_character = FRPG2::getPlayerCtrl();
 		}
@@ -217,6 +219,8 @@ void AppGUI::RenderGUI(const char* title)
 		ImGui::SameLine();
 		if (ImGui::Button("Locked Target"))
 		{
+			target_character = NULL;
+
 			NetworkCleanup();
 			target_character = FRPG2::getLockedTargetCharacterCtrl();
 		}
@@ -674,6 +678,7 @@ void AppGUI::RenderGUI(const char* title)
 		static int selectedEvent = -1;
 		static int firstFrame = 0;
 		static int currentFrame = -1;
+		static float zoomLevel = 5.f;
 
 		static int selectedEntry_taePl = -1;
 		static int selectedEvent_taePl = -1;
@@ -684,6 +689,7 @@ void AppGUI::RenderGUI(const char* title)
 
 		static int firstFrame_tae = 0;
 		static int currentFrame_tae = -1;
+		static float zoomLevel_tae = 10.f;
 
 		ImGui::PushItemWidth(200);
 		ImGui::InputPtr("Node Pointer", &m_networkData.anim_events.event_track_node, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue);
@@ -719,8 +725,8 @@ void AppGUI::RenderGUI(const char* title)
 			{
 				if (g_eventTrackEditor.m_eventTracks[i].m_eventId == 1000)
 				{
-					eventTrackActionTimeActStart = g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_startTime;
-					eventTrackActionTimeActDuration = g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_duration;
+					eventTrackActionTimeActStart = g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_startTime * m_networkData.anim_events.mult;
+					eventTrackActionTimeActDuration = g_eventTrackEditor.m_eventTracks[i].m_source->m_trackData[0].m_duration * m_networkData.anim_events.mult;
 
 					found = true;
 					break;
@@ -759,11 +765,13 @@ void AppGUI::RenderGUI(const char* title)
 			if (ImGui::BeginTabItem("Event Track"))
 			{
 				ImGui::BeginChild("sequencer");
-				ImSequencer::Sequencer(&g_eventTrackEditor, &currentFrame, &selectedEntry, &selectedEvent, &expanded, true, &firstFrame, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+				ImSequencer::Sequencer(&g_eventTrackEditor, &currentFrame, &selectedEntry, &selectedEvent, &expanded, true, &firstFrame, &zoomLevel, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 				ImGui::EndChild();
 
 				ImGui::EndTabItem();
 			}
+
+			zoomLevel_tae = 2 * zoomLevel;
 
 			if (ImGui::BeginTabItem("TimeAct"))
 			{
@@ -771,7 +779,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (ImGui::BeginTabItem("Pl"))
 				{
 					ImGui::BeginChild("tae sequencer");
-					ImSequencer::Sequencer(&g_timeActEditorPl, &currentFrame_tae, &selectedEntry_taePl, &selectedEvent_taePl, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+					ImSequencer::Sequencer(&g_timeActEditorPl, &currentFrame_tae, &selectedEntry_taePl, &selectedEvent_taePl, &expanded, true, &firstFrame_tae, &zoomLevel_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 					ImGui::EndChild();
 
 					ImGui::EndTabItem();
@@ -779,7 +787,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (ImGui::BeginTabItem("Sfx"))
 				{
 					ImGui::BeginChild("tae sequencer");
-					ImSequencer::Sequencer(&g_timeActEditorSfx, &currentFrame_tae, &selectedEntry_taeSfx, &selectedEvent_taeSfx, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+					ImSequencer::Sequencer(&g_timeActEditorSfx, &currentFrame_tae, &selectedEntry_taeSfx, &selectedEvent_taeSfx, &expanded, true, &firstFrame_tae, &zoomLevel_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 					ImGui::EndChild();
 
 					ImGui::EndTabItem();
@@ -787,7 +795,7 @@ void AppGUI::RenderGUI(const char* title)
 				if (ImGui::BeginTabItem("Snd"))
 				{
 					ImGui::BeginChild("tae sequencer");
-					ImSequencer::Sequencer(&g_timeActEditorSnd, &currentFrame_tae, &selectedEntry_taeSnd, &selectedEvent_taeSnd, &expanded, true, &firstFrame_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
+					ImSequencer::Sequencer(&g_timeActEditorSnd, &currentFrame_tae, &selectedEntry_taeSnd, &selectedEvent_taeSnd, &expanded, true, &firstFrame_tae, &zoomLevel_tae, ImSequencer::EDITOR_EVENT_EDIT_STARTEND | ImSequencer::EDITOR_MARK_ACTIVE_EVENTS);
 					ImGui::EndChild();
 
 					ImGui::EndTabItem();
@@ -796,6 +804,9 @@ void AppGUI::RenderGUI(const char* title)
 
 				ImGui::EndTabItem();
 			}
+
+			zoomLevel = zoomLevel_tae * 0.5f;
+
 			ImGui::EndTabBar();
 		}
 
@@ -808,7 +819,7 @@ void AppGUI::RenderGUI(const char* title)
 				{
 					EventTrackEditor::EventTrack& track = g_eventTrackEditor.m_eventTracks[selectedEntry];
 					float startTime = MathHelper::FrameToTime(track.m_event[selectedEvent].m_frameStart, 60);
-					float duration = MathHelper::FrameToTime(track.m_event[selectedEvent].m_duration, 60);
+					float endTime = MathHelper::FrameToTime(track.m_event[selectedEvent].m_duration, 60) + startTime;
 
 					ImGui::Text("%s", track.m_name);
 					ImGui::PushItemWidth(100);
@@ -835,7 +846,7 @@ void AppGUI::RenderGUI(const char* title)
 					}
 
 					ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-					ImGui::DragFloat("End Time", &duration, 1 / 60, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+					ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 					ImGui::PopItemWidth();
 				}
 				ImGui::EndTabItem();
@@ -853,7 +864,7 @@ void AppGUI::RenderGUI(const char* title)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorPl.m_tracks[selectedEntryTae];
 						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
-						float duration = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60);
+						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60) + startTime;
 
 						ImGui::Text(g_timeActEditorPl.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -880,7 +891,7 @@ void AppGUI::RenderGUI(const char* title)
 						}
 
 						ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &duration, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -899,7 +910,7 @@ void AppGUI::RenderGUI(const char* title)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorSfx.m_tracks[selectedEntryTae];
 						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
-						float duration = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60);
+						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60) + startTime;
 
 						ImGui::Text(g_timeActEditorSfx.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -926,7 +937,7 @@ void AppGUI::RenderGUI(const char* title)
 						}
 
 						ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &duration, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -945,7 +956,7 @@ void AppGUI::RenderGUI(const char* title)
 					{
 						TimeActEditor::TimeActTrack& track = g_timeActEditorSnd.m_tracks[selectedEntryTae];
 						float startTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_frameStart, 60);
-						float duration = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60);
+						float endTime = MathHelper::FrameToTime(track.m_event[selectedEventTae].m_duration, 60) + startTime;
 
 						ImGui::Text(g_timeActEditorSnd.GetEventLabel(selectedEntryTae, selectedEventTae, false).c_str());
 						ImGui::PushItemWidth(100);
@@ -972,7 +983,7 @@ void AppGUI::RenderGUI(const char* title)
 						}
 
 						ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &duration, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -1049,7 +1060,7 @@ void AppGUI::ProcessVariables()
 					int id = 0;
 				}
 				else
-					MessageBoxA(NULL, "Animation does not have any EventTrack associated with it", "Morpheme Network Inspector", MB_ICONINFORMATION);
+					Debug::Alert(Debug::LVL_INFO, "MorphemeRuntimeDebugger", "Animation does not have any EventTrack associated with it");
 
 				g_timeActEditorPl.m_frameMin;
 				g_timeActEditorPl.m_frameMax = MathHelper::TimeToFrame(trackLenght, 30);
@@ -1100,12 +1111,12 @@ void AppGUI::ProcessVariables()
 
 				}
 				else
-					MessageBoxA(NULL, "Animation does not have any TimeAct entry associated with it", "Morpheme Network Inspector", MB_ICONINFORMATION);
+					Debug::Alert(Debug::LVL_INFO, "AppGUI.cpp", "Animation does not have any TimeAct entry associated with it");
 			}
 
 		}
 		else
-			MessageBoxA(NULL, "Provided node is not of the right type\n", "Morpheme Network Inspector", MB_ICONERROR);
+			Debug::Alert(Debug::LVL_ERROR, "AppGUI.cpp", "Node %d is not of the right type", anim_sync_node->m_nodeID);
 	}
 
 	if (m_clearTracks)
@@ -1172,7 +1183,7 @@ void AppGUI::ProcessVariables()
 
 		network = Morpheme::getNetwork(target_character);
 		if (network == NULL)
-			MessageBoxA(NULL, "Network not found\n", "Morpheme Network Inspector", MB_ICONINFORMATION);
+			Debug::Alert(Debug::LVL_WARN, "AppGUI.cpp", "Network not found\n");
 	}
 
 	if (network)
@@ -1197,7 +1208,7 @@ void AppGUI::ProcessVariables()
 			m_networkData.anim_events.anim_nodes = Morpheme::getNetworkAllNodesType(target_character, NodeType_NodeAnimSyncEvents);
 
 			if (m_networkData.anim_events.anim_nodes.size() == 0)
-				MessageBoxA(NULL, "There are no Animation nodes", "Morpheme Network Inspector", MB_ICONINFORMATION);
+				Debug::Alert(Debug::LVL_INFO, "AppGUI.cpp", "There are no AnimSyncEvent nodes\n");
 
 			m_networkData.anim_events.anim_tae.pl_tae = TimeAct::getTimeActFile_pl(target_character);
 			m_networkData.anim_events.anim_tae.sfx_tae = TimeAct::getTimeActFile_sfx(target_character);
@@ -1266,7 +1277,7 @@ void AppGUI::ProcessVariables()
 			if (Morpheme::doesNodeExist(network, m_networkData.imnodes_data.node_to_inspect))
 				m_networkData.imnodes_data.node_def = Morpheme::getNetworkNode(network, m_networkData.imnodes_data.node_to_inspect);
 			else
-				MessageBoxA(NULL, "The specified node is not present in this network", "MorphemeNetworkInspector", MB_ICONINFORMATION);
+				Debug::Alert(Debug::LVL_INFO, "MorphemeRuntimeDebugger", "Node %d is not present in this Network", m_networkData.imnodes_data.node_to_inspect);
 		}
 	}
 }
@@ -1278,6 +1289,7 @@ void AppGUI::Dockspace(ImGuiID dockSpace)
 void AppGUI::NetworkCleanup()
 {
 	m_clearNetwork = true;
+
 	network = NULL;
 
 	m_networkTasks.get_nodes = false;
@@ -1289,6 +1301,8 @@ void AppGUI::NetworkCleanup()
 	m_networkData.nodes.clear();
 
 	m_networkData.anim_events.anim_nodes.clear();
+	m_networkData.anim_events.event_track_node = NULL;
+	m_networkData.anim_events.asset_name = "";
 
 	m_networkData.control_params.cp_nodes.clear();
 	m_networkData.control_params.cp_bins.clear();
@@ -1305,6 +1319,8 @@ void AppGUI::NetworkCleanup()
 	m_networkData.imnodes_data.node_to_inspect = 0;
 	m_networkData.imnodes_data.node_def = NULL;
 
+	m_clearTracks = true;
+
 	ImNodesEditorContext& editor = ImNodes::EditorContextGet();
 	ImNodes::ObjectPoolReset(editor.Nodes);
 	ImNodes::ObjectPoolReset(editor.Pins);
@@ -1317,4 +1333,6 @@ void AppGUI::NetworkCleanup()
 	GImNodes->DeletedLinkIdx.Reset();
 	GImNodes->SnapLinkIdx.Reset();
 	GImNodes->NodeLinkIdx.Reset();
+
+	this->ProcessVariables();
 }

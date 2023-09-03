@@ -347,7 +347,7 @@ const char* Morpheme::getNodeTypeName(Morpheme::Network* network, short node_id)
 
 	if (node_type.ParseError() < 0)
 	{
-		MessageBoxA(NULL, "Failed to load NodeType.ini", "MorphemeNetworkInspector", MB_ICONERROR);
+		Debug::Alert(Debug::LVL_WARN, "Morpheme.cpp", "Failed to load NodeType.ini");
 
 		return "";
 	}
@@ -384,11 +384,11 @@ uint32_t Morpheme::getTimeActId(Morpheme::NodeDef* node_def)
 			if (node_data->m_eventTrackData->m_eventTracks[2].m_tracks[i]->m_eventId == 1000)
 				return node_data->m_eventTrackData->m_eventTracks[2].m_tracks[i]->m_trackData[0].m_userData;
 		}	
-		MessageBoxA(NULL, "Animation has no TAE associated to it", "MorphemeNetworkInspector", MB_ICONINFORMATION);
+		Debug::Alert(Debug::LVL_INFO, "Morpheme.cpp", "Animation has no TAE associated to it");
 		return 0;
 	}
 	
-	MessageBoxA(NULL, "Node is not an animation node", "MorphemeNetworkInspector", MB_ICONERROR);
+	Debug::Alert(Debug::LVL_INFO, "Morpheme.cpp", "Node %d is not an animation node", node_def->m_nodeID);
 	return 0;
 }
 
