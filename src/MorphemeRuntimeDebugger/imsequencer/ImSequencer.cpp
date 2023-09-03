@@ -1728,6 +1728,9 @@ namespace ImSequencer
 
                 ImGui::InputFloat("Start", &addEvent.start_time, 1.f / 60.f);
 
+                if (addEvent.end_time < addEvent.start_time)
+                    addEvent.end_time = addEvent.start_time;
+
                 ImGui::InputFloat("End", &addEvent.end_time, 1.f / 60.f);
 
                 *currentFrame = MathHelper::TimeToFrame(addEvent.start_time, 30);
