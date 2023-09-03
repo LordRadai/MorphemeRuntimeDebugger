@@ -1098,9 +1098,9 @@ void AppGUI::ProcessVariables()
 						UINT64 tmpSfx = *(UINT64*)(taePl->anim_file + 0x8);
 						UINT64 tmpSnd = *(UINT64*)(taePl->anim_file + 0x8);
 
-						g_timeActEditorPl.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpPl + 0xC)) / (float)(*(byte*)(tmpPl + 0x9)), 30);
-						g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(byte*)(tmpSfx + 0x9)), 30);
-						g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(byte*)(tmpSnd + 0x9)), 30);
+						g_timeActEditorPl.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpPl + 0xC)) / (float)(*(BYTE*)(tmpPl + 0x9)), 30);
+						g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(BYTE*)(tmpSfx + 0x9)), 30);
+						g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(BYTE*)(tmpSnd + 0x9)), 30);
 
 						for (int i = 0; i < taePl->event_group_count; i++)
 							g_timeActEditorPl.m_tracks.push_back(TimeActEditor::TimeActTrack(&taePl->event_group[i]));
