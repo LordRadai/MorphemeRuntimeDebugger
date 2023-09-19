@@ -69,7 +69,7 @@ void initImGui(HWND hwnd)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(pDevice, pContext);
 
-    io.Fonts->AddFontDefault();
+    //io.Fonts->AddFontDefault();
 
     g_morphemeDebugger.GUIStyle();
 }
@@ -150,6 +150,8 @@ bool MainLoop(uint64_t qModuleHandle)
                 return 1;
             }
 
+            initImGui(hwnd);
+
             ifstream file(".//MorphemeRuntimeDebugger//res//def//timeact.json");
             g_taeTemplate = TaeTemplate(file);
 
@@ -157,8 +159,6 @@ bool MainLoop(uint64_t qModuleHandle)
             ::ShowWindow(hwnd, SW_SHOWDEFAULT);
             ::UpdateWindow(hwnd);
             SetForegroundWindow(hwnd);
-
-            initImGui(hwnd);
 
             ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -213,6 +213,7 @@ bool MainLoop(uint64_t qModuleHandle)
 
                 g_morphemeDebugger.RenderGUI(APPNAME_A);
 
+                ImGui::EndFrame();
                 ImGui::Render();
                 const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
                 pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);

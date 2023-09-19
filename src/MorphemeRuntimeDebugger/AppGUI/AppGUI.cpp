@@ -695,15 +695,15 @@ void AppGUI::RenderGUI(const char* title)
 		ImGui::InputPtr("Node Pointer", &m_networkData.anim_events.event_track_node, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue);
 		ImGui::PopItemWidth();
 
-		if (ImGui::Button("Load Tracks"))
+		if (ImGui::Button("Load"))
 			m_loadTracks = true;
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear Tracks") && g_eventTrackEditor.GetTrackCount())
+		if (ImGui::Button("Clear") && g_eventTrackEditor.GetTrackCount())
 			m_clearTracks = true;
 
 		ImGui::SameLine();
-		if (ImGui::Button("Save Tracks") && g_eventTrackEditor.GetTrackCount())
+		if (ImGui::Button("Save") && g_eventTrackEditor.GetTrackCount())
 			m_saveTracks = true;
 
 		if (g_eventTrackEditor.GetTrackCount())
@@ -845,8 +845,8 @@ void AppGUI::RenderGUI(const char* title)
 						ImGui::PopTextWrapPos();
 					}
 
-					ImGui::DragFloat("Start Time", &startTime, 1 / 60, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
-					ImGui::DragFloat("End Time", &endTime, 1 / 60, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+					ImGui::DragFloat("Start Time", &startTime, 0, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
+					ImGui::DragFloat("End Time", &endTime, 0, 0, MathHelper::FrameToTime(g_eventTrackEditor.m_frameMax, 60), "%.3f", ImGuiSliderFlags_ReadOnly);
 					ImGui::PopItemWidth();
 				}
 				ImGui::EndTabItem();
@@ -890,8 +890,8 @@ void AppGUI::RenderGUI(const char* title)
 							ImGui::PopTextWrapPos();
 						}
 
-						ImGui::DragFloat("Start Time", &startTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &endTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("Start Time", &startTime, 0, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 0, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -936,8 +936,8 @@ void AppGUI::RenderGUI(const char* title)
 							ImGui::PopTextWrapPos();
 						}
 
-						ImGui::DragFloat("Start Time", &startTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &endTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("Start Time", &startTime, 0, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 0, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -982,8 +982,8 @@ void AppGUI::RenderGUI(const char* title)
 							ImGui::PopTextWrapPos();
 						}
 
-						ImGui::DragFloat("Start Time", &startTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
-						ImGui::DragFloat("End Time", &endTime, 1 / 30, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("Start Time", &startTime, 0, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
+						ImGui::DragFloat("End Time", &endTime, 0, 0, MathHelper::FrameToTime(g_timeActEditorPl.m_frameMax, 30), "%.3f", ImGuiSliderFlags_ReadOnly);
 
 						track.m_event[selectedEventTae].m_args->ImGuiEdit();
 
@@ -1094,22 +1094,25 @@ void AppGUI::ProcessVariables()
 						sTaeData* taeSfx = taeLookup(TimeAct::getTimeActFile_sfx(target_character), tae_id);
 						sTaeData* taeSnd = taeLookup(TimeAct::getTimeActFile_snd(target_character), tae_id);
 
-						UINT64 tmpPl = *(UINT64*)(taePl->anim_file + 0x8);
-						UINT64 tmpSfx = *(UINT64*)(taePl->anim_file + 0x8);
-						UINT64 tmpSnd = *(UINT64*)(taePl->anim_file + 0x8);
+						if (taePl && taeSfx && taeSnd)
+						{
+							UINT64 tmpPl = *(UINT64*)(taePl->anim_file + 0x8);
+							UINT64 tmpSfx = *(UINT64*)(taePl->anim_file + 0x8);
+							UINT64 tmpSnd = *(UINT64*)(taePl->anim_file + 0x8);
 
-						g_timeActEditorPl.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpPl + 0xC)) / (float)(*(BYTE*)(tmpPl + 0x9)), 30);
-						g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(BYTE*)(tmpSfx + 0x9)), 30);
-						g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(BYTE*)(tmpSnd + 0x9)), 30);
+							g_timeActEditorPl.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpPl + 0xC)) / (float)(*(BYTE*)(tmpPl + 0x9)), 30);
+							g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(BYTE*)(tmpSfx + 0x9)), 30);
+							g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(BYTE*)(tmpSnd + 0x9)), 30);
 
-						for (int i = 0; i < taePl->event_group_count; i++)
-							g_timeActEditorPl.m_tracks.push_back(TimeActEditor::TimeActTrack(&taePl->event_group[i]));
+							for (int i = 0; i < taePl->event_group_count; i++)
+								g_timeActEditorPl.m_tracks.push_back(TimeActEditor::TimeActTrack(&taePl->event_group[i]));
 
-						for (int i = 0; i < taeSfx->event_group_count; i++)
-							g_timeActEditorSfx.m_tracks.push_back(TimeActEditor::TimeActTrack(&taeSfx->event_group[i]));
+							for (int i = 0; i < taeSfx->event_group_count; i++)
+								g_timeActEditorSfx.m_tracks.push_back(TimeActEditor::TimeActTrack(&taeSfx->event_group[i]));
 
-						for (int i = 0; i < taeSnd->event_group_count; i++)
-							g_timeActEditorSnd.m_tracks.push_back(TimeActEditor::TimeActTrack(&taeSnd->event_group[i]));
+							for (int i = 0; i < taeSnd->event_group_count; i++)
+								g_timeActEditorSnd.m_tracks.push_back(TimeActEditor::TimeActTrack(&taeSnd->event_group[i]));
+						}					
 					}
 
 				}
@@ -1336,6 +1339,4 @@ void AppGUI::NetworkCleanup()
 	GImNodes->DeletedLinkIdx.Reset();
 	GImNodes->SnapLinkIdx.Reset();
 	GImNodes->NodeLinkIdx.Reset();
-
-	this->ProcessVariables();
 }

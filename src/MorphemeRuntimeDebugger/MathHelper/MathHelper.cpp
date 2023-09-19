@@ -11,8 +11,8 @@ int MathHelper::TimeToFrame(float time, int frameRate)
 {
 	float frame = (time * frameRate);
 
-	if (std::round(frame) == 0 && frame > 0)
+	if (std::roundf(frame) == 0 && frame > 0)
 		return 1;
 
-	return frame;
+	return std::roundf(frame);
 }

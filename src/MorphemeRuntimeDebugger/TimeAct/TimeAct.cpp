@@ -276,5 +276,7 @@ float TimeAct::calculateTaePosition(float eventStart, float eventDuration, float
 
 	float playSpeed = timeActDuration / eventDuration;
 
-	return playSpeed * (eventCurrentPos - eventStart);
+	int currentFrame = playSpeed * (eventCurrentPos - eventStart) * 30 + 0.5;
+
+	return (float)currentFrame / 30.f;
 }
