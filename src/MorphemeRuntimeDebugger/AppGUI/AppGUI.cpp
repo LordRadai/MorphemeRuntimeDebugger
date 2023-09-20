@@ -1094,27 +1094,34 @@ void AppGUI::ProcessVariables()
 						sTaeData* taeSfx = taeLookup(TimeAct::getTimeActFile_sfx(target_character), tae_id);
 						sTaeData* taeSnd = taeLookup(TimeAct::getTimeActFile_snd(target_character), tae_id);
 
-						if (taePl && taeSfx && taeSnd)
+						if (taePl)
 						{
 							UINT64 tmpPl = *(UINT64*)(taePl->anim_file + 0x8);
-							UINT64 tmpSfx = *(UINT64*)(taePl->anim_file + 0x8);
-							UINT64 tmpSnd = *(UINT64*)(taePl->anim_file + 0x8);
-
 							g_timeActEditorPl.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpPl + 0xC)) / (float)(*(BYTE*)(tmpPl + 0x9)), 30);
-							g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(BYTE*)(tmpSfx + 0x9)), 30);
-							g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(BYTE*)(tmpSnd + 0x9)), 30);
 
 							for (int i = 0; i < taePl->event_group_count; i++)
 								g_timeActEditorPl.m_tracks.push_back(TimeActEditor::TimeActTrack(&taePl->event_group[i]));
+						}
+
+						if (taeSfx)
+						{
+							UINT64 tmpSfx = *(UINT64*)(taePl->anim_file + 0x8);
+							g_timeActEditorSfx.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSfx + 0xC)) / (float)(*(BYTE*)(tmpSfx + 0x9)), 30);
 
 							for (int i = 0; i < taeSfx->event_group_count; i++)
 								g_timeActEditorSfx.m_tracks.push_back(TimeActEditor::TimeActTrack(&taeSfx->event_group[i]));
+						}
+
+						if (taeSnd)
+						{
+							UINT64 tmpSnd = *(UINT64*)(taePl->anim_file + 0x8);
+
+							g_timeActEditorSnd.m_frameMax = (float)MathHelper::TimeToFrame((*(int*)(tmpSnd + 0xC)) / (float)(*(BYTE*)(tmpSnd + 0x9)), 30);
 
 							for (int i = 0; i < taeSnd->event_group_count; i++)
 								g_timeActEditorSnd.m_tracks.push_back(TimeActEditor::TimeActTrack(&taeSnd->event_group[i]));
-						}					
+						}
 					}
-
 				}
 				else
 					Debug::Alert(Debug::LVL_INFO, "AppGUI.cpp", "Animation does not have any TimeAct entry associated with it");

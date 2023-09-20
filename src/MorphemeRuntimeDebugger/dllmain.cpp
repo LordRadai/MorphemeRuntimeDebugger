@@ -1,8 +1,8 @@
 #include "includes.h"
 #include "common.h"
 #include "TaeTemplate/TaeTemplate.h"
-#define APPNAME_W L"MorphemeRuntimeDebugger v1.0.23"
-#define APPNAME_A "MorphemeRuntimeDebugger v1.0.23"
+#define APPNAME_W L"MorphemeRuntimeDebugger v1.0.24"
+#define APPNAME_A "MorphemeRuntimeDebugger v1.0.24"
 
 HINSTANCE hinst_dll = 0;
 std::thread begin_thread;
